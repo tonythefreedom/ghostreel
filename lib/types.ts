@@ -18,6 +18,7 @@ export const Ghost = z.object({
   niche: z.string().default(""), // "K-beauty for the US"
   market: z.string().default("US"),
   languages: z.array(Lang).min(1).default(["en"]),
+  ko: z.object({ bio: z.string(), niche: z.string() }).partial().optional(), // the same words for a Korean page
 });
 export type Ghost = z.infer<typeof Ghost>;
 
@@ -45,6 +46,12 @@ export const TrendCard = z.object({
   whatHappens: z.string().optional(),
   lengthS: z.number().optional(),
   page: z.string().url().optional(), // the Shorti page for this video
+  // The format's lineage as Shorti counts it (Ted, 10-24: «계보도»): its number, how many videos carry it, how far it
+  // has spread and how long it has run, in the reading's language. A format is a lineage, not a template.
+  lineage: z
+    .object({ number: z.string().optional(), videos: z.number().int().optional(), stage: z.string().optional(), ride: z.string().optional() })
+    .optional(),
+  season: z.string().optional(), // a seasonal read the card came from, e.g. "halloween"
 });
 export type TrendCard = z.infer<typeof TrendCard>;
 
@@ -183,10 +190,31 @@ export type Intent = z.infer<typeof Intent>;
 export type TastePick = z.infer<typeof TastePick>;
 
 // ── Brief → render → check → queue ───────────────────────────────────────────
+// Ted, 10-24: «브리프가 한글도 같이 만들어져야할듯». The brief is written once in the ghost's language (what it
+// performs) and once in Korean for the owner to read; an edited field drops its Korean until the next version.
+export const BriefLineKo = z.object({ say: z.string().max(240), do: z.string().max(240) });
 export const BriefLine = z.object({
   t: z.number().min(0).max(60), // seconds from start
   say: z.string().max(200), // what the ghost says (market language)
   do: z.string().max(200), // what the ghost does on screen
+  ko: BriefLineKo.optional(), // the same beat in Korean, for the owner
+});
+export const BriefKo = z.object({
+  hook: z.string().max(200).default(""),
+  outfit: z.string().max(200).default(""),
+  scene: z.string().max(240).default(""),
+  caption: z.string().max(360).default(""),
+});
+// Who wrote a version: GhostReel's own model, or the person's own Claude over GhostReel's MCP server.
+export const BriefAuthor = z.enum(["ghostreel", "claude", "owner"]);
+// An earlier version, kept so the loop shows what each pass changed.
+export const BriefVersion = z.object({
+  version: z.number().int().min(1),
+  by: BriefAuthor,
+  at: z.string(),
+  change: z.string().max(240).default(""),
+  hook: z.string().max(160),
+  lines: z.array(z.object({ t: z.number(), say: z.string().max(200) })).max(6),
 });
 export const Brief = z.object({
   id: z.string(),
@@ -205,8 +233,22 @@ export const Brief = z.object({
   intent: Intent.default("adapt"),
   status: z.enum(["draft", "approved"]),
   createdAt: z.string(),
+  owner: z.number().int().optional(), // the CineSynth account that wrote it; its picks, its channel, its MCP tools
+  ko: BriefKo.optional(),
+  // The loop (Ted, 10-24: «read 되고나서 결과물을 다시 write»): each pass is a version; the owner's note asks the next
+  // one what to change, and the person's Claude reads it over MCP, writes the next version back, and says what changed.
+  version: z.number().int().min(1).default(1),
+  by: BriefAuthor.default("ghostreel"),
+  change: z.string().max(240).default(""),
+  note: z.string().max(400).default(""),
+  history: z.array(BriefVersion).max(6).default([]),
+  updatedAt: z.string().optional(),
 });
+export type BriefLineKo = z.infer<typeof BriefLineKo>;
 export type BriefLine = z.infer<typeof BriefLine>;
+export type BriefKo = z.infer<typeof BriefKo>;
+export type BriefAuthor = z.infer<typeof BriefAuthor>;
+export type BriefVersion = z.infer<typeof BriefVersion>;
 export type Brief = z.infer<typeof Brief>;
 
 // A clip rendered outside the live path (an owner-run CineSynth session) and placed in public/prerender/.

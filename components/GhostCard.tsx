@@ -1,8 +1,11 @@
+"use client";
 // Lane B. One virtual human to pick: its picture (the signed-in account's CineSynth character when it has one, else
 // the ghost's own CineSynth keyframe, else its monogram) with the AI label, its name, niche and languages, and whether
 // CineSynth has its character ready to perform.
 import { AiLabel } from "@/components/ui";
+import { useLang } from "@/components/Lang";
 import type { Ghost } from "@/lib/types";
+import { nicheIn } from "@/lib/words";
 
 export type CastState = "ready" | "incomplete" | "missing" | "unknown";
 
@@ -14,6 +17,7 @@ export function GhostCard({ ghost, picture, cast = "unknown", castWord, selected
   selected: boolean;
   onSelect: () => void;
 }) {
+  const lang = useLang();
   const src = picture ?? ghost.portraitUrl;
   return (
     <button
@@ -43,7 +47,7 @@ export function GhostCard({ ghost, picture, cast = "unknown", castWord, selected
         <span className="text-[15px] font-[720]">{ghost.name}</span>
         <span className="font-mono text-[11px] text-text-3">{ghost.languages.map((l) => l.toUpperCase()).join("·")}</span>
       </span>
-      <span className="px-0.5 text-[12px] leading-snug text-text-dim">{ghost.niche}</span>
+      <span className="px-0.5 text-[12px] leading-snug text-text-dim">{nicheIn(ghost, lang)}</span>
       {castWord ? (
         <span className={`px-0.5 text-[11px] font-[640] ${cast === "ready" ? "text-ghost" : cast === "unknown" ? "text-text-3" : "text-warn"}`}>
           {cast === "ready" ? "✓ " : ""}{castWord}

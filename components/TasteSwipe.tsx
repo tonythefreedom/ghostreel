@@ -3,7 +3,7 @@
 // Z undoes. A keep asks in a sheet what to keep; the end lists what was kept and writes the brief from one.
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { KeepPart, TastePick, TrendCard as Card, VideoReading } from "@/lib/types";
-import { t, type UiLang } from "@/lib/words";
+import { fill, t, type UiLang } from "@/lib/words";
 import { Button, Empty, Verb } from "./ui";
 import { BriefStarter } from "./BriefStarter";
 import { UnlockForm } from "./UnlockForm";
@@ -11,7 +11,7 @@ import { Deck, type Leaving } from "./taste/Deck";
 import { KeepSheet } from "./taste/KeepSheet";
 import { useLang } from "@/components/Lang";
 
-const ROUND = 8; // fewer, truer: a round is eight shorts
+const ROUND = 20; // this week's radar, hits and season (Ted, 10-24: «8개밖에 안뜨는데 … 좀 더»)
 
 export function TasteSwipe({ cards: all, readings = {}, ghostId, creatorId, lang: langProp }: { cards: Card[]; readings?: Record<string, VideoReading>; ghostId: string; creatorId?: string; lang?: UiLang }) {
   const ctxLang = useLang();
@@ -36,7 +36,7 @@ export function TasteSwipe({ cards: all, readings = {}, ghostId, creatorId, lang
       .catch(() => {});
   }, [ghostId, cards]);
 
-  // Only the owner writes picks; anyone else is asked for the passcode once, then the latest picks are saved.
+  // Picks are the signed-in account's own; anyone else is asked to sign in once, then the latest picks are saved.
   const persist = useCallback(
     async (next: TastePick[]) => {
       try {
@@ -145,19 +145,23 @@ export function TasteSwipe({ cards: all, readings = {}, ghostId, creatorId, lang
             <span className="font-mono text-[15px] text-text" aria-live="polite">
               {Math.min(top + 1, cards.length)} / {cards.length}
             </span>
-            <span>
-              {t("kept", lang)} <span className="font-mono text-ghost">{kept.length}</span>
-            </span>
+            {kept.length ? null : (
+              <span>
+                {t("kept", lang)} <span className="font-mono text-ghost">{kept.length}</span>
+              </span>
+            )}
             <span className="flex-1" />
             {picks.length ? (
               <Button kind="quiet" onClick={undo}>
                 {t("undo", lang)}
               </Button>
             ) : null}
+            {/* The way on, in plain sight once one short is kept (Ted, 10-24: a grey "Done" was easy to miss). */}
             {kept.length ? (
-              <Button kind="quiet" onClick={() => setFinished(true)}>
-                {t("done", lang)}
-              </Button>
+              <button type="button" onClick={() => setFinished(true)}
+                className="flex h-10 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full bg-ghost/15 px-3.5 text-[13px] font-[720] text-ghost ring-1 ring-inset ring-ghost/50 transition-colors duration-[125ms] hover:bg-ghost/25">
+                ✓ {fill(t("writeFromKept", lang), { n: kept.length })} <span aria-hidden>→</span>
+              </button>
             ) : null}
           </div>
           <Deck cards={cards.slice(top, top + 3)} readings={readings} leaving={leaving} onDecide={decide} onGone={() => setLeaving(null)} label={t("deck", lang)} lang={lang} />

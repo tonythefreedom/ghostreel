@@ -7,6 +7,7 @@ import { BriefEditor } from "@/components/BriefEditor";
 import { CameraPreset } from "@/components/CameraPreset";
 import { Player } from "@/components/ui";
 import { hitCues } from "@/lib/cues";
+import { tasteKey } from "@/lib/creator";
 import { withFace } from "@/lib/ghostFace";
 import { getLang } from "@/lib/lang";
 import { getGhost } from "@/lib/newtype";
@@ -14,7 +15,7 @@ import { pickClip } from "@/lib/newtype/prerender";
 import { startDriver } from "@/lib/newtype/runner";
 import { cameraSetups, hitCard, reading } from "@/lib/shorti";
 import { store } from "@/lib/store";
-import type { Brief, RenderJob, TastePick } from "@/lib/types";
+import { Brief as BriefSchema, type RenderJob, type TastePick } from "@/lib/types";
 import { t } from "@/lib/words";
 
 export const dynamic = "force-dynamic";
@@ -22,13 +23,14 @@ export const dynamic = "force-dynamic";
 export default async function BriefPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   if (!z.string().uuid().safeParse(id).success) notFound();
-  const brief = await store.get<Brief>(`brief:${id}`);
-  if (!brief) notFound();
+  const stored = BriefSchema.safeParse(await store.get(`brief:${id}`)); // fills the loop's fields on older briefs
+  if (!stored.success) notFound();
+  const brief = stored.data;
   const lang = await getLang();
   const [ghost, jobId, picks] = await Promise.all([
     getGhost(brief.ghostId),
     store.get<string>(`renderFor:${brief.id}`),
-    store.get<TastePick[]>(`taste:${brief.ghostId}`),
+    store.get<TastePick[]>(tasteKey(brief.ghostId, brief.owner)),
   ]);
   const job = jobId ? await store.get<RenderJob>(`render:${jobId}`) : null;
   startDriver(); // a live render moves on the server; the page reads it as it stands
@@ -75,7 +77,7 @@ export default async function BriefPage({ params }: { params: Promise<{ id: stri
           source || setups.length ? (
             <div className="flex flex-col gap-10 pt-4">
               {source}
-              <CameraPreset setups={setups} lang={lang} page={card?.page ? `${card.page}?m=4d` : undefined} />
+              <CameraPreset setups={setups} lang={lang} />
             </div>
           ) : null
         }

@@ -19,7 +19,7 @@ export function ReelPlayer({ job, brief, lang: langProp }: { job: RenderJob; bri
         src={job.videoUrl}
         poster={job.posterUrl}
         marks={prerender ? <DemoTag>{lang === "ko" ? "미리 렌더함" : "pre-rendered"}</DemoTag> : undefined}
-        cues={brief && !mismatch ? briefCues(brief) : []}
+        cues={brief && !mismatch ? briefCues(brief, lang) : []}
       />
       {mismatch ? (
         <p className="text-[13px] text-text-3">

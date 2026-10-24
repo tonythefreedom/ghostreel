@@ -226,9 +226,88 @@ export async function withFilm(reading: VideoReadingT, page: string | undefined,
 
 export type ReadLang = "en" | "ko";
 
+// The season the deck leans into this week (10-24: a week before Halloween). Shorti's find reads it keyless.
+export const SEASON = { key: "halloween", query: "halloween", tag: { ko: "할로윈", en: "Halloween" } } as const;
+export const DECK_MAX = 20;
+
+/** Every format Shorti described in an answer, by id: its lineage (number, videos, stage, how long it has run). */
+export function toLineages(structured: unknown): Map<string, NonNullable<TrendCardT["lineage"]>> {
+  const s = obj(structured);
+  const out = new Map<string, NonNullable<TrendCardT["lineage"]>>();
+  const lists = [s.formats, s.formats_many_are_shooting, s.rising_abroad_not_in_korea, obj(s.this_week).formats];
+  for (const raw of lists.flatMap(arr)) {
+    const f = obj(raw);
+    const id = str(f.format_id);
+    if (!id) continue;
+    out.set(id, { number: str(f.number), videos: num(f.videos), stage: str(obj(f.stage).words), ride: str(f.ride) });
+  }
+  for (const raw of arr(s.today)) {
+    const f = obj(obj(raw).format);
+    const id = str(f.format_id);
+    if (id && !out.has(id) && num(f.videos)) out.set(id, { videos: num(f.videos) });
+  }
+  return out;
+}
+
+/** A find answer's formats as cards: each format's strongest video, with its lineage. */
+export function toFormatCards(structured: unknown, tag?: string, season?: string): TrendCardT[] {
+  return arr(obj(structured).formats).flatMap((raw) => {
+    const f = obj(raw);
+    const ex = obj(f.example);
+    const card = TrendCard.safeParse({
+      videoId: str(ex.video_id),
+      url: str(ex.url),
+      platform: str(ex.platform) ?? "unknown",
+      by: str(ex.by),
+      tag,
+      formatId: str(f.format_id),
+      formatTitle: str(f.title),
+      formatKind: str(f.same),
+      views: num(ex.views),
+      viewsAsOf: str(ex.views_as_of) ?? str(ex.posted),
+      posterUrl: str(ex.poster),
+      whatHappens: str(f.idea),
+      season,
+      lineage: { number: str(f.number), videos: num(f.videos), ride: str(f.ride) },
+    });
+    return card.success ? [card.data] : [];
+  });
+}
+
+/**
+ * This week's deck for a field: the radar (rising abroad), this week's hits, and the season's formats (Halloween),
+ * merged without repeats, the season's first card leading and the rest spread through. Each card carries its format's
+ * lineage when Shorti counted one. Three keyless reads; any one failing leaves the others.
+ */
 export async function readTrending(field: string, lang: ReadLang = "en"): Promise<{ cards: TrendCardT[]; asOf?: string }> {
-  const r = await call("shorti_what_to_shoot", { lens: "radar", field, limit: 8, lang });
-  return { cards: toTrendCards(r.structured), asOf: str(obj(r.structured).as_of) };
+  const category = field === "fashion" ? "fashion" : "beauty";
+  const [radar, week, season] = await Promise.all([
+    call("shorti_what_to_shoot", { lens: "radar", field, limit: 10, lang }).catch(() => null),
+    call("shorti_what_to_shoot", { lens: "week", category, limit: 10, lang }).catch(() => null),
+    call("shorti_find", { query: SEASON.query, category, limit: 6, lang }).catch(() => null),
+  ]);
+  if (!radar && !week) throw new Error("shorti: no deck");
+  const lineages = new Map([...toLineages(season?.structured), ...toLineages(week?.structured), ...toLineages(radar?.structured)]);
+  const seasonal = season ? toFormatCards(season.structured, SEASON.tag[lang], SEASON.key) : [];
+  const rest = [...(radar ? toTrendCards(radar.structured) : []), ...(week ? toTrendCards(week.structured) : [])];
+  const merged: TrendCardT[] = [];
+  const seen = new Set<string>();
+  const add = (c: TrendCardT | undefined) => {
+    if (!c || seen.has(c.url) || seen.has(c.videoId)) return;
+    seen.add(c.url);
+    seen.add(c.videoId);
+    const lineage = c.lineage ?? (c.formatId ? lineages.get(c.formatId) : undefined);
+    merged.push(lineage ? { ...c, lineage: { ...lineages.get(c.formatId ?? ""), ...c.lineage, ...lineage } } : c);
+  };
+  // The season leads, then one season card every third place while they last.
+  add(seasonal[0]);
+  let s = 1;
+  for (const c of rest) {
+    if (merged.length % 3 === 0 && seasonal[s]) add(seasonal[s++]);
+    add(c);
+  }
+  while (seasonal[s]) add(seasonal[s++]);
+  return { cards: merged.slice(0, DECK_MAX), asOf: str(obj(radar?.structured ?? week?.structured).as_of) };
 }
 
 export async function readVideo(url: string, lang: ReadLang = "en") {

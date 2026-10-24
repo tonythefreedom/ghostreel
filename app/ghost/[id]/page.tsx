@@ -1,5 +1,6 @@
 // The ghost's channel: who it is, the reels it has finished, and the week ahead as a tape of briefs. Read straight from
 // the store on every request; nothing here posts anywhere.
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { ChannelHead } from "@/components/channel/ChannelHead";
 import { ReelWall, type Reel } from "@/components/channel/ReelWall";
@@ -7,7 +8,10 @@ import { WeekTape } from "@/components/channel/WeekTape";
 import { byWritten, week } from "@/components/channel/week";
 import { ButtonLink, Empty, Verb, VerbSpacer } from "@/components/ui";
 import { withFace } from "@/lib/ghostFace";
+import { accountBriefsKey, ghostBriefsKey } from "@/lib/creator";
 import { getLang } from "@/lib/lang";
+import { SESSION_COOKIE } from "@/lib/newtype/cinesynth";
+import { viewerAccount } from "@/lib/owner";
 import { getGhost } from "@/lib/newtype";
 import { store } from "@/lib/store";
 import type { Brief, RenderJob } from "@/lib/types";
@@ -26,7 +30,9 @@ export default async function GhostChannel({ params }: { params: Promise<{ id: s
   const ghost = await getGhost(id);
   if (!ghost) notFound();
 
-  const ids = [...new Set(await store.list(`briefs:${ghost.id}`))];
+  // A signed-in account sees its own channel for this ghost; anyone else sees the ghost's public one.
+  const account = await viewerAccount((await cookies()).get(SESSION_COOKIE)?.value);
+  const ids = [...new Set(await store.list(account ? accountBriefsKey(account) : ghostBriefsKey(ghost.id)))];
   const briefs = (await Promise.all(ids.map((b) => store.get<Brief>(`brief:${b}`)))).filter((b): b is Brief => b?.ghostId === ghost.id);
   const jobs = new Map<string, RenderJob>();
   await Promise.all(briefs.map(async (b) => {

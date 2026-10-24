@@ -7,7 +7,10 @@ const rpc = readFileSync(new URL("../lib/ghostmcp/rpc.ts", import.meta.url), "ut
 
 test("llms.txt names every MCP tool the server offers, and only those", () => {
   const offered = [...rpc.matchAll(/name: "(ghostreel_[a-z_]+)"/g)].map((m) => m[1]);
-  assert.deepEqual(offered.sort(), ["ghostreel_brief_context", "ghostreel_brief_submit", "ghostreel_ghosts"]);
+  assert.deepEqual(offered.sort(), [
+    "ghostreel_brief_context", "ghostreel_brief_get", "ghostreel_brief_revise", "ghostreel_brief_submit",
+    "ghostreel_ghosts", "ghostreel_keep", "ghostreel_render", "ghostreel_trending",
+  ]);
   for (const t of offered) assert.match(llms, new RegExp(t));
   const named = new Set([...llms.matchAll(/\b(ghostreel_[a-z_]+)\b/g)].map((m) => m[1]));
   assert.deepEqual([...named].sort(), offered.sort());

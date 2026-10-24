@@ -2,7 +2,7 @@
 // them, or a ghost reel's own beats from its brief. Pure, so tests run it.
 import type { Brief, PencilMark, VideoReading } from "./types.ts";
 
-export type PencilCue = { t: number; title: string; line?: string; tags?: string[]; marks?: PencilMark[] };
+export type PencilCue = { t: number; title: string; quote?: string; line?: string; tags?: string[]; marks?: PencilMark[] };
 
 /** A hit's cues, in its clock's order; none when Shorti read none. */
 export function hitCues(reading: Pick<VideoReading, "cues"> | null | undefined): PencilCue[] {
@@ -18,10 +18,17 @@ export function hitCues(reading: Pick<VideoReading, "cues"> | null | undefined):
     .sort((a, b) => a.t - b.t);
 }
 
-/** A ghost reel's beats: the line it says is the title, what it does is the line under it. */
-export function briefCues(brief: Pick<Brief, "lines"> | null | undefined): PencilCue[] {
+/**
+ * A ghost reel's beats: the line it says is the title, what it does is the line under it. On a Korean page the
+ * Korean is the title and the words the ghost actually speaks follow in quotes.
+ */
+export function briefCues(brief: Pick<Brief, "lines"> | null | undefined, lang: "ko" | "en" = "en"): PencilCue[] {
   return (brief?.lines ?? [])
-    .map((l) => ({ t: l.t, title: l.say || l.do, line: l.say ? l.do : undefined }))
+    .map((l) => {
+      const ko = lang === "ko" && l.ko?.say ? l.ko : null;
+      if (ko) return { t: l.t, title: ko.say, quote: l.say || undefined, line: ko.do || l.do || undefined };
+      return { t: l.t, title: l.say || l.do, line: l.say ? l.do : undefined };
+    })
     .filter((c) => c.title)
     .sort((a, b) => a.t - b.t);
 }

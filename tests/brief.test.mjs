@@ -109,3 +109,24 @@ test("the 4D camera preset reaches the prompt as data, setup by setup, and the r
   assert.equal(setups[0].tiltDeg, -23);
   assert.doesNotMatch(buildBriefPrompt(input).user, /<camera>/, "no preset read, no block");
 });
+
+test("a brief carries its Korean beside the ghost's words; an edited beat drops its Korean", async () => {
+  const { applyEdits, buildBriefPrompt } = await import("../lib/brief.ts");
+  assert.match(buildBriefPrompt(input).system, /"ko" is the same brief in natural Korean/);
+  const draft = finishBrief(input, {
+    durationSec: 10, hook: "Zero to glam", outfit: "knit", scene: "vanity", caption: "c", hashtags: ["x"], twist: "",
+    lines: [{ t: 4, say: "Done.", do: "wave" }, { t: 0, say: "Zero percent.", do: "bare face" }, { t: 8, say: "", do: "" }],
+    ko: { hook: "민낯에서 풀메까지", outfit: "니트", scene: "화장대", caption: "씨", lines: [{ say: "끝.", do: "손 흔들기" }, { say: "0퍼센트.", do: "민낯" }, { say: "", do: "" }] },
+  });
+  assert.deepEqual(draft.lines.map((l) => l.ko?.say), ["0퍼센트.", "끝."], "Korean follows its beat through the sort");
+  assert.equal(draft.ko.hook, "민낯에서 풀메까지");
+  const edited = applyEdits(draft, { lines: [draft.lines[0], { ...draft.lines[1], say: "All done." }], hook: "New" }, false);
+  assert.equal(edited.lines[0].ko.say, "0퍼센트.", "an untouched beat keeps its Korean");
+  assert.equal(edited.lines[1].ko, undefined, "an edited beat drops it");
+  assert.equal(edited.ko.hook, "", "an edited hook drops its Korean");
+  assert.equal(edited.ko.outfit, "니트");
+  assert.equal(edited.by, "owner");
+  const noted = applyEdits(draft, { note: "Shorter." }, false);
+  assert.equal(noted.note, "Shorter.");
+  assert.equal(noted.by, "ghostreel", "a note alone is not an edit");
+});

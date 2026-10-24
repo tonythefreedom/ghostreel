@@ -11,17 +11,17 @@ import { t, type WordKey } from "@/lib/words";
 const PREVIEW = "/prerender/yuna-percent-ready-preview";
 const FRAME = "/prerender/keyframes/default-percent-ready-";
 // The preview's four shots start where ffmpeg's scene detection finds its cuts (0, 2.2, 3.37, 5.3 s); each says one
-// line of its script (public/prerender/manifest.json).
-const BEATS: Array<{ t: number; say: string; line: WordKey }> = [
-  { t: 0, say: "Getting ready — twenty percent.", line: "landingCue1" },
-  { t: 2.2, say: "Serum on: sixty.", line: "landingCue2" },
-  { t: 3.37, say: "One swipe of tint: a hundred.", line: "landingCue3" },
-  { t: 5.3, say: "Done.", line: "landingCue4" },
+// line of its script (public/prerender/manifest.json). Yuna speaks English; a Korean page writes its meaning first.
+const BEATS: Array<{ t: number; say: WordKey; line: WordKey }> = [
+  { t: 0, say: "landingSay1", line: "landingCue1" },
+  { t: 2.2, say: "landingSay2", line: "landingCue2" },
+  { t: 3.37, say: "landingSay3", line: "landingCue3" },
+  { t: 5.3, say: "landingSay4", line: "landingCue4" },
 ];
 
 export default async function Home() {
   const lang = await getLang();
-  const cues = BEATS.map((b) => ({ t: b.t, title: b.say, line: t(b.line, lang) }));
+  const cues = BEATS.map((b) => ({ t: b.t, title: t(b.say, lang), quote: lang === "ko" ? t(b.say, "en") : undefined, line: t(b.line, lang) }));
   return (
     <main className="flex min-h-dvh flex-col pb-10">
       <section className="flex flex-col gap-4 pt-4">
@@ -34,10 +34,13 @@ export default async function Home() {
           <ButtonLink size="xl" href="/onboard" className="flex-1">
             {t("landingGo", lang)}
           </ButtonLink>
-          <ButtonLink kind="quiet" size="xl" href="#how">
-            {t("landingHow", lang)}
+          <ButtonLink kind="secondary" size="xl" href="/connect">
+            ✳ {t("landingClaudeGo", lang)}
           </ButtonLink>
         </div>
+        <a href="#how" className="-mt-1 self-start text-[13px] font-[560] text-text-dim underline-offset-4 hover:text-text hover:underline">
+          {t("landingHow", lang)} ↓
+        </a>
       </section>
 
       <figure className="mt-8 flex flex-col gap-2">
@@ -60,12 +63,13 @@ export default async function Home() {
         <Band n={4} title={t("landingClaudeH", lang)} line={t("landingClaudeLine", lang)}>
           <div aria-hidden className="flex flex-col gap-2 rounded-[var(--radius-card)] bg-surface p-4 font-mono text-[12px] leading-relaxed">
             <span className="text-text-3">&gt; {t("connectAsk1", lang)}</span>
-            <span className="text-accent">● ghostreel_ghosts</span>
-            <span className="text-accent">● ghostreel_brief_context</span>
-            <span className="text-ghost">✓ ghostreel_brief_submit → {t("draft", lang)}</span>
+            <span className="text-accent">● ghostreel_trending</span>
+            <span className="text-accent">● ghostreel_keep</span>
+            <span className="text-accent">● ghostreel_brief_submit → {t("draft", lang)}</span>
+            <span className="text-ghost">✓ ghostreel_render → {t("stepReady", lang)}</span>
           </div>
           <ButtonLink kind="secondary" size="l" href="/connect" className="self-start">
-            {t("navConnect", lang)} →
+            ✳ {t("landingClaudeGo", lang)} →
           </ButtonLink>
         </Band>
       </div>

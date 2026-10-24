@@ -1,8 +1,8 @@
 {
   "characters": [
-    { "id": "yuna", "name": "Yuna", "characterId": "default", "voiceId": "synthetic-yuna", "bio": "Talks and product intros", "niche": "K-beauty for the US", "market": "US", "languages": ["en", "ko"] },
-    { "id": "rina", "name": "Rina", "characterId": "rina", "voiceId": "synthetic-rina", "bio": "Dance shorts", "niche": "Dance trends", "market": "US", "languages": ["en"] },
-    { "id": "jihyun", "name": "Jihyun", "characterId": "jihyun", "voiceId": "synthetic-jihyun", "bio": "Singing", "niche": "Covers and vocal shorts", "market": "US", "languages": ["en", "ko"] },
-    { "id": "miyeon", "name": "Miyeon", "characterId": "miyeon", "voiceId": "synthetic-miyeon", "bio": "Fashion", "niche": "K-fashion styling", "market": "US", "languages": ["en"] }
+    { "id": "yuna", "name": "Yuna", "characterId": "default", "voiceId": "synthetic-yuna", "bio": "Talks and product intros", "niche": "K-beauty for the US", "market": "US", "languages": ["en", "ko"], "ko": { "bio": "토크와 제품 소개", "niche": "미국 시장 K-뷰티" } },
+    { "id": "rina", "name": "Rina", "characterId": "rina", "voiceId": "synthetic-rina", "bio": "Dance shorts", "niche": "Dance trends", "market": "US", "languages": ["en"], "ko": { "bio": "댄스 숏폼", "niche": "댄스 트렌드" } },
+    { "id": "jihyun", "name": "Jihyun", "characterId": "jihyun", "voiceId": "synthetic-jihyun", "bio": "Singing", "niche": "Covers and vocal shorts", "market": "US", "languages": ["en", "ko"], "ko": { "bio": "노래", "niche": "커버·보컬 숏폼" } },
+    { "id": "miyeon", "name": "Miyeon", "characterId": "miyeon", "voiceId": "synthetic-miyeon", "bio": "Fashion", "niche": "K-fashion styling", "market": "US", "languages": ["en"], "ko": { "bio": "패션", "niche": "K-패션 스타일링" } }
   ]
 }

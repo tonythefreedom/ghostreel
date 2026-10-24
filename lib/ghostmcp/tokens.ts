@@ -1,7 +1,8 @@
 // Lane B. Connect tokens for the GhostReel MCP server (Tony's decision, 10-24: a token now, OAuth after the hackathon).
 // A signed-in, CineSynth-approved owner gets `grk_…` once; only its SHA-256 is kept, compared in constant time.
-// Scope is fixed: brief context and draft submit for the owner's own ghosts. Pure over a small key-value interface,
-// so tests run it without a server.
+// Scope is fixed: this week's deck and keeping a short, brief context, draft submit, read-back and revise, and the
+// render of a brief the owner approved, all for the owner's own picks and briefs. Pure over a small key-value
+// interface, so tests run it without a server.
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 
 export interface KV {
@@ -13,7 +14,7 @@ export interface KV {
 
 export const TOKEN_TTL_SEC = 60 * 60 * 24 * 7;
 export const MAX_LIVE_TOKENS = 3;
-export const SCOPE = ["brief.context", "brief.submit"] as const;
+export const SCOPE = ["taste.read", "taste.keep", "brief.context", "brief.submit", "brief.read", "brief.revise", "render"] as const;
 
 export interface TokenRecord {
   hash: string; // sha256 hex of the token; the token itself is never stored

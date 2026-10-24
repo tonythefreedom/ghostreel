@@ -1,5 +1,6 @@
-// Guards for a public URL. Spend (Claude, GPU): owner cookie, per-IP burst, global daily cap (GHOSTREEL_DAILY_CAP,
-// default 40). Rate windows live in lib/limits.ts. Without an owner passcode set, prod spends and writes nothing.
+// Guards for a public URL. Spend (Claude, GPU): who acts (lib/owner.ts), per-IP burst, global daily cap
+// (GHOSTREEL_DAILY_CAP, default 40). Rate windows live in lib/limits.ts. Prod with neither a signed-in approved account
+// nor the passcode owner spends and writes nothing.
 import "server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
@@ -27,24 +28,21 @@ export function isOwner(req: NextRequest): boolean {
   return req.cookies.get(OWNER_COOKIE)?.value === ownerToken(passcode);
 }
 
-/** Owner-only writes that cost nothing (picks, edits, approval): a refusal response, or null. */
-export function requireOwner(req: NextRequest): NextResponse | null {
-  return isOwner(req) ? null : NextResponse.json({ error: "locked", hint: "unlock with the owner passcode" }, { status: 401 });
-}
-
-/** Returns a refusal response, or null when the spend may go ahead. */
+/** Returns a refusal response, or null when the spend may go ahead. Call it after lib/owner.ts `actor` said who acts. */
 export async function guardSpend(req: NextRequest, kind: "brief" | "render"): Promise<NextResponse | null> {
-  const locked = requireOwner(req);
-  if (locked) return locked;
   if (!allowHit(`${kind}:${clientIp(req.headers)}`, 8, 60_000)) {
     return NextResponse.json({ error: "slow_down" }, { status: 429, headers: { "retry-after": "60" } });
   }
-  const day = new Date().toISOString().slice(0, 10);
-  const used = await store.incr(`spend:${day}`, 60 * 60 * 26);
-  if (used > env.dailyCap()) {
+  if (!(await underDailyCap())) {
     return NextResponse.json({ error: "daily_cap", hint: "today's spend cap is used up" }, { status: 429 });
   }
   return null;
+}
+
+/** Counts one spend against today's cap (shared by the site and the MCP server); false once the cap is used up. */
+export async function underDailyCap(): Promise<boolean> {
+  const day = new Date().toISOString().slice(0, 10);
+  return (await store.incr(`spend:${day}`, 60 * 60 * 26)) <= env.dailyCap();
 }
 
 /** 403 unless the request came from one of our own pages (host match; see sameSite). */

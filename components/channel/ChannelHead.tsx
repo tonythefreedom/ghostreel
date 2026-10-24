@@ -2,10 +2,10 @@
 // one), its name, what it makes and for whom, the AI label, and one line on where its reels come from.
 import { AiLabel } from "@/components/ui";
 import type { Ghost } from "@/lib/types";
-import { t, type UiLang } from "@/lib/words";
+import { nicheIn, t, type UiLang } from "@/lib/words";
 
 export function ChannelHead({ ghost, lang }: { ghost: Ghost; lang: UiLang }) {
-  const meta = [ghost.niche, ghost.market, ghost.languages.map((l) => l.toUpperCase()).join(" · ")].filter(Boolean);
+  const meta = [nicheIn(ghost, lang), ghost.market, ghost.languages.map((l) => l.toUpperCase()).join(" · ")].filter(Boolean);
   return (
     <header className="flex flex-col items-start gap-3">
       <span className="grid size-[72px] shrink-0 place-items-center overflow-hidden rounded-full bg-accent-soft ring-2 ring-accent ring-offset-2 ring-offset-bg">

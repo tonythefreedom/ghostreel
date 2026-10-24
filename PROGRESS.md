@@ -2,6 +2,36 @@
 
 Newest first. Each entry: what is true now, what broke, what is next. Keep it short; long output goes in files.
 
+## 2026-10-24 · A — the demo's hardening: sign-in instead of a passcode, one deck each, KO beside every line, the loop and the whole make over MCP
+
+Ted, 10-24: «이사한 패스코드 이런거 걸리적거리면 안되고», «브리프가 한글도 같이», «read 되고나서 결과물을 다시 write»,
+«프로필을 입력했는데 저장이 안되고», «MCP를 통해 클로드 구독토큰으로 영상 만들수있다는 거를 … 심사위원들이 꼭 테스트해볼 수
+있게», «8개밖에 안뜨는데 … 할로윈 … 계보도», «색연필 코칭 … 활성화 디폴트로». Lane B files were changed on Ted's say-so
+(solo, «에이전트없이»): lib/ghostmcp, app/mcp, the render route, UnlockForm, OnboardForm, the creator route, llms.txt.
+- Who acts (lib/owner.ts): an approved CineSynth account is the owner of its own picks, briefs and renders; the
+  passcode is the operator's fallback, folded under the Google button. Ten judges at once never share a deck: picks
+  are `taste:<account>:<ghost>`, briefs carry `owner`, a channel shows the viewer's own. Sign-in answers are cached 30 s.
+- Briefs are written twice: the ghost's language (performed) and Korean (`ko`, read). A Korean page shows each part's
+  Korean under the words performed; an edited beat drops its Korean until the next version. The pencil writes the
+  Korean as the cue title with the spoken line quoted, on reels and on the landing hero.
+- The loop: the owner leaves a note on the brief; `ghostreel_brief_get` reads the brief, note and versions back;
+  `ghostreel_brief_revise` writes version n+1 at the same link with what changed; the open page shows it within 5 s.
+- The whole make over MCP (8 tools): `ghostreel_trending` (this week + Halloween), `ghostreel_keep`, context, submit,
+  get, revise, and `ghostreel_render` (approved briefs only, one job per brief, today's cap; the same lib/render.ts as
+  the site). A judge needs only a Google sign-in and a token; without a profile the roster's ghosts are theirs to use.
+  Approval stays on the site: it is the consent before a render.
+- "Make it with your own Claude" (Claude Code `claude --model opus --effort max '…'`, or Claude Desktop) is in the top
+  bar, the landing, the brief starter, beside the render, and leads /connect.
+- A saved profile comes back on /onboard ("Welcome back": carry on or edit in place); typing survives a reload.
+- The deck: radar + this week's hits + the season's formats, up to 20, each with its lineage (number, videos, stage).
+  The pencil is on by default. "Done" is a green "Brief from N kept →" pill in the deck's status row.
+- The "Open in 4D on Shorti" link is gone; the camera preset drawing stays.
+- Verified locally at 375 px KO/EN: the loop end to end over /mcp with a dev token (note → get → revise → v2 on the
+  open page), a real Haiku 5.5 brief with its Korean (~30 s). Gate: 96 tests, typecheck, build.
+- Not verified: a real Google sign-in on the demo host, a live CineSynth render (Tony's lane, in progress).
+- Tony: `git pull`, `npm run build`, restart `next start`. Picks kept before this are under the old shared key; keep
+  again once signed in.
+
 ## 2026-10-24 · B — "Tune it to this week's trends" no longer sits still for 7–15 s
 - Cause: /taste waits for Shorti's deck and a reading of each of its first eight shorts before it draws anything.
   Measured with a cold cache: 7.1 s in production, 14.6 s locally (plus the dev compile). With a warm cache: 1 s.

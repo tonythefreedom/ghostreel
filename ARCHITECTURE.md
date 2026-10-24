@@ -61,10 +61,11 @@ app/
   taste/page.tsx              the daily game (live Shorti deck, fixture fallback)
   brief/[id]/page.tsx         the brief editor: edit the draft, approve (locks it), render
   ghost/…                     T13
-  api/taste/route.ts          GET/PUT picks (cheap, size-capped)
-  api/unlock/route.ts         owner passcode → httpOnly cookie
+  api/taste/route.ts          GET/PUT picks, per signed-in account (cheap, size-capped)
+  api/unlock/route.ts         the operator's passcode → httpOnly cookie (a Google sign-in needs none: lib/owner.ts)
   api/brief/route.ts          POST: kept short → brief (spend-guarded); PATCH: owner edits / approve; GET ?id=
-  api/render/route.ts         POST: approved brief → one RenderJob (spend-guarded); GET ?brief= polls (Lane B owns)
+  api/render/route.ts         POST: approved brief → one RenderJob (spend-guarded); GET ?brief= polls (rules in lib/render.ts)
+  mcp/route.ts                the person's own Claude: 8 tools (lib/ghostmcp/), trending → keep → brief → loop → render
   api/dev/seed/route.ts       development only (404 in builds): a [dev] brief to exercise the flow without a key
   api/render, …               spend routes: always behind lib/guard.ts
 components/                   TrendCard, TrustLine, TasteSwipe, … (DESIGN.md names)
@@ -95,11 +96,12 @@ tests/                        node --conditions=react-server --test: boundary, m
 
 ```
  person               GhostReel (Next.js on Vercel)                              outside
- swipe keep/skip ──▶ /taste ── shorti.trending(field) ── what_to_shoot(radar) + video(url)×n ──▶ Shorti
+ swipe keep/skip ──▶ /taste ── shorti.trending(field) ── what_to_shoot(radar, week) + find(season) + video×n ──▶ Shorti
                        │         picks ── PUT /api/taste ──▶ store
  approve brief ────▶ /brief ── shorti.reading + formatPlan ──▶ Claude (guarded) ──▶ Brief draft → person edits, approves
                        └────── POST /api/render (guarded) ── newtype.render(brief) ──────────────▶ CineSynth on Nexus
-                               GET /api/render?id= ◀── status, videoUrl (AI label burned in)
+                               GET /api/render?brief= ◀── status, videoUrl (AI label burned in)
+ own Claude ───────▶ /mcp ── the same reads, picks, briefs and render rules, as the token's account; it never approves
  approve post ─────▶ /ghost ── POST /api/queue (state only; nothing is ever posted from GhostReel)
 ```
 
@@ -115,7 +117,7 @@ tests/                        node --conditions=react-server --test: boundary, m
 | `ANTHROPIC_API_KEY` | `lib/claude.ts` via `lib/env.ts` |
 | `NEWTYPE_MCP_URL`, `NEWTYPE_TOKEN` | `lib/newtype/` via `lib/env.ts` (teammate supplies) |
 | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | `lib/store.ts` |
-| `GHOSTREEL_PASSCODE` | `lib/guard.ts`; unset in prod = no spend at all |
+| `GHOSTREEL_PASSCODE` | `lib/guard.ts`: the operator's fallback; an approved Google sign-in acts without it |
 | `GHOSTREEL_DAILY_CAP` | spend calls per day, default 40 |
 | `SHORTI_MCP_URL` | defaults to the public MCP |
 | `GHOSTREEL_OFFLINE=1` | adapters serve fixtures only (CI, stage fallback) |

@@ -3,14 +3,15 @@ import { NextResponse, type NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 import { applyEdits, BriefEdit, BriefLocked, type CreatorBlock } from "@/lib/brief";
-import { creatorKey } from "@/lib/creator";
+import { accountBriefsKey, creatorKey, ghostBriefsKey, tasteKey } from "@/lib/creator";
 import { summarize } from "@/lib/creatorStyle";
-import { guardSpend, requireOwner } from "@/lib/guard";
+import { guardSpend } from "@/lib/guard";
+import { actor, mayActOn, notYours, signInFirst } from "@/lib/owner";
 import { BriefRefused, ModelKeyMissing, modelReady, writeBrief } from "@/lib/claude";
 import { getGhost } from "@/lib/newtype";
 import { cameraSetups, formatPlan, reading, recipeEdit } from "@/lib/shorti";
 import { store } from "@/lib/store";
-import { Intent, type Brief, type Creator, type TastePick } from "@/lib/types";
+import { Brief as BriefSchema, Intent, type Brief, type Creator, type TastePick } from "@/lib/types";
 
 export const maxDuration = 60;
 
@@ -24,10 +25,11 @@ const Body = z.object({
 
 // The creator's own words and the style Shorti read from their shorts (keyless, cached). Only a creator who chose this
 // ghost counts; anything missing just leaves the block out.
-async function creatorBlock(id: string | undefined, ghostId: string): Promise<CreatorBlock | undefined> {
+async function creatorBlock(id: string | undefined, ghostId: string, accountId: number | null): Promise<CreatorBlock | undefined> {
   if (!id) return undefined;
   const c = await store.get<Creator>(creatorKey(id));
   if (!c || c.ghostId !== ghostId) return undefined;
+  if (accountId !== null && c.account?.id !== accountId) return undefined; // only the signed-in account's own profile
   const style = c.works.length
     ? summarize(await Promise.all(c.works.map(async (url) => ({ url, reading: await reading(url, url), recipe: await recipeEdit(url) }))))
     : null;
@@ -44,9 +46,11 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) return NextResponse.json({ error: "bad_body" }, { status: 400 });
   const { ghostId, videoId, intent, spot, creatorId } = parsed.data;
 
+  const who = await actor(req);
+  if (!who) return signInFirst();
   const ghost = await getGhost(ghostId);
   if (!ghost) return NextResponse.json({ error: "no_ghost" }, { status: 404 });
-  const picks = (await store.get<TastePick[]>(`taste:${ghostId}`)) ?? [];
+  const picks = (await store.get<TastePick[]>(tasteKey(ghostId, who.accountId))) ?? [];
   const pick = picks.find((p) => p.videoId === videoId && p.kept);
   if (!pick) return NextResponse.json({ error: "not_kept", hint: "keep the short in /taste first" }, { status: 409 });
 
@@ -58,7 +62,7 @@ export async function POST(req: NextRequest) {
     pick.url ? reading(videoId, pick.url) : Promise.resolve(null),
     pick.url ? recipeEdit(pick.url) : Promise.resolve(null),
     pick.formatId ? formatPlan(pick.formatId) : Promise.resolve(null),
-    creatorBlock(creatorId, ghostId),
+    creatorBlock(creatorId, ghostId, who.accountId),
     pick.url ? cameraSetups(pick.url) : Promise.resolve([]),
   ]);
   if (!read && !plan) return NextResponse.json({ error: "no_reading", hint: "Shorti had nothing on this short" }, { status: 424 });
@@ -79,9 +83,11 @@ export async function POST(req: NextRequest) {
       creator,
       camera,
     });
-    await store.set(`brief:${brief.id}`, brief, 60 * 60 * 24 * 7);
-    await store.push(`briefs:${ghostId}`, brief.id, 50, 60 * 60 * 24 * 7);
-    return NextResponse.json({ brief, ms, model });
+    const mine = { ...brief, owner: who.accountId ?? undefined };
+    await store.set(`brief:${mine.id}`, mine, 60 * 60 * 24 * 7);
+    await store.push(ghostBriefsKey(ghostId), mine.id, 50, 60 * 60 * 24 * 7);
+    if (who.accountId) await store.push(accountBriefsKey(who.accountId), mine.id, 50, 60 * 60 * 24 * 7);
+    return NextResponse.json({ brief: mine, ms, model });
   } catch (e) {
     if (e instanceof ModelKeyMissing) return NextResponse.json({ error: "model_key_missing" }, { status: 503 });
     if (e instanceof z.ZodError) return NextResponse.json({ error: "brief_unusable", hint: "the draft had too few usable beats; try again" }, { status: 422 });
@@ -97,8 +103,8 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   const id = z.string().uuid().safeParse(req.nextUrl.searchParams.get("id"));
   if (!id.success) return NextResponse.json({ error: "bad_id" }, { status: 400 });
-  const brief = await store.get<Brief>(`brief:${id.data}`);
-  return brief ? NextResponse.json({ brief }) : NextResponse.json({ error: "not_found" }, { status: 404 });
+  const brief = BriefSchema.safeParse(await store.get(`brief:${id.data}`));
+  return brief.success ? NextResponse.json({ brief: brief.data }) : NextResponse.json({ error: "not_found" }, { status: 404 });
 }
 
 const Patch = z.object({ id: z.string().uuid(), edits: BriefEdit.default({}), approve: z.boolean().default(false) });
@@ -106,10 +112,12 @@ const Patch = z.object({ id: z.string().uuid(), edits: BriefEdit.default({}), ap
 export async function PATCH(req: NextRequest) {
   const parsed = Patch.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "bad_body", issues: parsed.error.issues.slice(0, 3) }, { status: 400 });
-  const locked = requireOwner(req);
-  if (locked) return locked;
-  const brief = await store.get<Brief>(`brief:${parsed.data.id}`);
-  if (!brief) return NextResponse.json({ error: "not_found" }, { status: 404 });
+  const who = await actor(req);
+  if (!who) return signInFirst();
+  const stored = BriefSchema.safeParse(await store.get(`brief:${parsed.data.id}`));
+  if (!stored.success) return NextResponse.json({ error: "not_found" }, { status: 404 });
+  const brief = stored.data;
+  if (!mayActOn(who, brief)) return notYours();
   try {
     const next = applyEdits(brief, parsed.data.edits, parsed.data.approve);
     await store.set(`brief:${next.id}`, next, 60 * 60 * 24 * 7);

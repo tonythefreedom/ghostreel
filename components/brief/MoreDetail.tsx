@@ -32,6 +32,9 @@ export function MoreDetail({ brief, editable, onEdit, lang }: { brief: Brief; ed
             ) : (
               <p className="text-[15px] text-text-dim">{brief[key]}</p>
             )}
+            {lang === "ko" && brief.ko?.[key] ? (
+              <span className="text-[13px] leading-snug text-text-3"><span className="mr-1.5 font-[640] text-pencil">{t("koMeaning", lang)}</span>{brief.ko[key]}</span>
+            ) : null}
           </label>
         ))}
         <label className="flex flex-col gap-1.5">

@@ -1,14 +1,14 @@
 "use client";
 // After the game: the kept shorts as one choice. The chosen one picks how close the ghost stays (keep / adapt / twist)
 // and the docked verb writes its brief: one red verb a screen, however many were kept. A locked deploy asks for the
-// owner passcode once, then retries.
-import Link from "next/link";
+// Google sign-in once, then retries; the person's own Claude can write it instead.
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import type { Intent, KeepPart } from "@/lib/types";
-import { t, type UiLang } from "@/lib/words";
+import { fill, t, type UiLang } from "@/lib/words";
 import { Button, Verb } from "./ui";
 import { Segmented } from "./taste/Segmented";
+import { ClaudeMake } from "./ClaudeMake";
 import { UnlockForm } from "./UnlockForm";
 import { useLang } from "@/components/Lang";
 
@@ -137,11 +137,10 @@ export function BriefStarter({ ghostId, creatorId, items, lang: langProp, back }
                       ✕ {t(failed.endsWith(":model_key_missing") ? "noModelKey" : "briefFailed", lang)}
                     </p>
                   ) : null}
-                  {/* The other way to write it: the person's own Claude, through GhostReel's MCP server. */}
-                  <p className="text-[12px] leading-snug text-text-3">
-                    {t("orClaude", lang)}{" "}
-                    <Link href="/connect" className="font-[640] text-text-dim underline decoration-accent/60 underline-offset-2 hover:text-text">{t("navConnect", lang)} →</Link>
-                  </p>
+                  {/* The other way to write it: the person's own Claude on their own plan, through GhostReel's MCP server. */}
+                  <ClaudeMake kind="write" compact ask={fill(t("cmAskWrite", lang), {
+                    ghost: ghostId.charAt(0).toUpperCase() + ghostId.slice(1), ghostId, videoId: item.videoId, intent: intent[item.videoId] ?? "adapt",
+                  })} />
                 </>
               ) : null}
             </div>

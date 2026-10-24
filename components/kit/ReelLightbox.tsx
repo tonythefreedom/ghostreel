@@ -6,14 +6,16 @@
 import { useEffect, useRef, useState } from "react";
 import { briefCues } from "@/lib/cues";
 import { prerenderMatches, type Brief, type RenderJob } from "@/lib/types";
-import { useT } from "@/components/Lang";
+import { useLang, useT } from "@/components/Lang";
 import { DemoTag } from "../TrustLine";
 import { Player } from "../ui";
 
 type Props = { job: RenderJob | null; brief?: Brief; onClose: () => void; shareUrl?: string; lang?: "ko" | "en" };
 
-export function ReelLightbox({ job, brief, onClose, shareUrl }: Props) {
+export function ReelLightbox({ job, brief, onClose, shareUrl, lang }: Props) {
   const t = useT();
+  const ctxLang = useLang();
+  const pageLang = lang ?? ctxLang;
   const dialog = useRef<HTMLDialogElement>(null);
   const [copied, setCopied] = useState(false);
 
@@ -59,7 +61,7 @@ export function ReelLightbox({ job, brief, onClose, shareUrl }: Props) {
             label={brief?.hook}
             marks={prerender ? <DemoTag>{t("prerendered")}</DemoTag> : undefined}
             // The brief's beats are drawn only over a reel rendered from this very brief.
-            cues={matches ? briefCues(brief) : []}
+            cues={matches ? briefCues(brief, pageLang) : []}
           />
         </div>
         <div className="grid grid-cols-2 gap-2">

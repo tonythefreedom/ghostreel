@@ -6,6 +6,7 @@ import { ButtonLink, Verb, VerbSpacer } from "@/components/ui";
 import { getLang } from "@/lib/lang";
 import { z } from "zod";
 import { StoryboardFrame } from "@/components/StoryboardFrame";
+import { tasteKey } from "@/lib/creator";
 import { getGhost } from "@/lib/newtype";
 import { LineSuggestions, suggestionsFor } from "@/lib/lineSuggestions";
 import { cameraSetups, FIELDS, formatPlan, hitCard, recipeEdit, trending } from "@/lib/shorti";
@@ -23,7 +24,7 @@ const lineSuggestions = LineSuggestions.parse(lineData);
 
 // The post the brief was written from: the owner's kept pick first, else this week's deck.
 async function sourceUrl(brief: Brief): Promise<string | null> {
-  const picks = (await store.get<TastePick[]>(`taste:${brief.ghostId}`)) ?? [];
+  const picks = (await store.get<TastePick[]>(tasteKey(brief.ghostId, brief.owner))) ?? [];
   const kept = picks.find((p) => p.videoId === brief.sourceVideoId && p.url)?.url;
   if (kept) return kept;
   for (const field of FIELDS) {
@@ -87,7 +88,7 @@ export default async function StoryboardPage({ params }: { params: Promise<{ id:
         ))}
       </ol>
 
-      <CameraPreset setups={setups} lang={lang} page={card?.page ? `${card.page}?m=4d` : undefined} />
+      <CameraPreset setups={setups} lang={lang} />
 
       <VerbSpacer />
       <Verb>

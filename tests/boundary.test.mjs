@@ -83,10 +83,10 @@ test("fixtures hold only reduced public fields and stay small", () => {
     "videoId", "url", "platform", "by", "tag", "formatId", "formatTitle", "formatKind", "views", "viewsAsOf", "posterUrl",
     "hook", "whatHappens", "lengthS", "page", "turn", "beats", "at", "do", "checklist", "needs", "props",
     "line", "open", "label", "what", "how",
-    "id", "name", "characterId", "portraitUrl", "voiceId", "bio", "niche", "market", "languages",
+    "id", "name", "characterId", "portraitUrl", "voiceId", "bio", "niche", "market", "languages", "ko",
     "briefId", "provider", "status", "videoUrl", "startedAt", "finishedAt", "jobs", "characters",
     "recipes", "lengthMs", "bpm", "hookFacts", "cues", "cue", "share", "makeItYours", "free",
-    "clipUrl", "t", "look", "cuts", "marks", "shape", "box", "pts",
+    "clipUrl", "t", "look", "cuts", "marks", "shape", "box", "pts", "lineage", "number", "videos", "stage", "ride", "season",
   ]);
   const fixtures = files.filter((f) => f.startsWith("fixtures/") && f.endsWith(".json"));
   for (const f of fixtures) {

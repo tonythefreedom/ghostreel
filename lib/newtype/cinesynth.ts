@@ -3,6 +3,7 @@
 // CineSynth session token and keeps that token only in an httpOnly cookie. Every later CineSynth call, the result
 // downloads included, carries it as a Bearer token. Nothing here is a GhostReel secret.
 import "server-only";
+import { createHash } from "node:crypto";
 import { z } from "zod";
 import { env } from "../env.ts";
 import { OWNER_COOKIE, ownerToken } from "../guard.ts";
@@ -50,14 +51,25 @@ export async function signInWithGoogle(credential: string): Promise<{ token: str
   return { token: body.token, account: body.user };
 }
 
+// Every owner-only write asks who is signed in (a swipe saves picks), so an answer is kept for half a minute.
+const seen = new Map<string, { account: CinesynthAccount | null; until: number }>();
+const SEEN_MS = 30_000;
+
 /** The signed-in CineSynth user, or null when the token is missing, expired, pending or suspended. */
 export async function currentAccount(token: string | undefined): Promise<CinesynthAccount | null> {
   if (!token) return null;
+  const key = createHash("sha256").update(token).digest("hex");
+  const hit = seen.get(key);
+  if (hit && hit.until > Date.now()) return hit.account;
+  let account: CinesynthAccount | null = null;
   try {
-    return CinesynthAccount.parse(z.object({ user: z.unknown() }).parse(await call("/api/auth/me", { token })).user);
+    account = CinesynthAccount.parse(z.object({ user: z.unknown() }).parse(await call("/api/auth/me", { token })).user);
   } catch {
-    return null;
+    account = null;
   }
+  if (seen.size > 500) seen.clear();
+  seen.set(key, { account, until: Date.now() + SEEN_MS });
+  return account;
 }
 
 /**

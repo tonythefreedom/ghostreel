@@ -7,7 +7,7 @@ import { getLang } from "@/lib/lang";
 import { getGhost } from "@/lib/newtype";
 import { FIELDS, reading, trending, type Field } from "@/lib/shorti";
 import type { VideoReading } from "@/lib/types";
-import { shortDate, t } from "@/lib/words";
+import { nicheIn, shortDate, t } from "@/lib/words";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +20,7 @@ export default async function TastePage({ searchParams }: { searchParams: Promis
   const { data, provenance } = await trending(field, lang);
   const creatorId = /^[0-9a-f-]{36}$/i.test(sp.creator ?? "") ? sp.creator : undefined; // the route checks it is real
   // Shorti's reading of each card, in the page's language: the coaching pencil writes its cues on the playing hit.
-  const read = await Promise.all(data.cards.slice(0, 8).map(async (c) => [c.videoId, await reading(c.videoId, c.url, lang)] as const));
+  const read = await Promise.all(data.cards.slice(0, 20).map(async (c) => [c.videoId, await reading(c.videoId, c.url, lang)] as const));
   const readings: Record<string, VideoReading> = Object.fromEntries(read.filter((r): r is readonly [string, VideoReading] => r[1] !== null));
   const href = (f: Field) => `/taste?${new URLSearchParams({ ghost: ghost.id, field: f, ...(creatorId ? { creator: creatorId } : {}) })}`;
 
@@ -35,7 +35,7 @@ export default async function TastePage({ searchParams }: { searchParams: Promis
             </span>
             <span className="truncate">
               {ghost.name}
-              {ghost.niche ? ` · ${ghost.niche}` : ""}
+              {ghost.niche ? ` · ${nicheIn(ghost, lang)}` : ""}
             </span>
           </Link>
           <nav aria-label={t("fieldLabel", lang)} className="flex shrink-0 gap-1">

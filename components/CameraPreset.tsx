@@ -18,19 +18,12 @@ const KO: Record<string, string> = {
 };
 const word = (v: string, lang: UiLang) => (lang === "ko" ? KO[v] ?? v : v);
 
-export function CameraPreset({ setups, lang, page }: { setups: CameraSetup[]; lang: UiLang; page?: string }) {
+export function CameraPreset({ setups, lang }: { setups: CameraSetup[]; lang: UiLang }) {
   const read = setups.filter((s) => s.heightM !== undefined && s.distM !== undefined).slice(0, 3);
   if (!read.length) return null;
   return (
     <section aria-labelledby="preset" className="flex flex-col gap-3">
-      <div className="flex items-baseline justify-between gap-3">
-        <h2 id="preset" className="text-[18px] font-[720] tracking-[-0.01em]">{t("presetTitle", lang)}</h2>
-        {page ? (
-          <a href={page} target="_blank" rel="noreferrer" className="shrink-0 text-[13px] font-[560] text-text-dim underline-offset-4 hover:text-text hover:underline">
-            {t("presetOpen4d", lang)} ↗
-          </a>
-        ) : null}
-      </div>
+      <h2 id="preset" className="text-[18px] font-[720] tracking-[-0.01em]">{t("presetTitle", lang)}</h2>
       <p className="text-[13px] leading-snug text-text-3">{t("presetLine", lang)}</p>
       <ol className="flex flex-col gap-2">
         {read.map((s, i) => (

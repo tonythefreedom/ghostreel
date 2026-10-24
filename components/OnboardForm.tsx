@@ -1,6 +1,7 @@
 "use client";
 // Lane B (T8). The creator registers their own background and past work, and picks the virtual human who performs,
-// one screen per step.
+// one screen per step. A signed-in account with a saved profile comes back to it (Ted, 10-24: «프로필을 입력했는데 저장이
+// 안되고 계속 새로 입력해야하네»): carry on, or edit it in place. What is typed before saving survives a reload.
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { GhostCard, type CastState } from "@/components/GhostCard";
@@ -8,8 +9,8 @@ import { GoogleSignIn } from "@/components/GoogleSignIn";
 import { useT } from "@/components/Lang";
 import { FunnelProgress } from "@/components/kit";
 import { NEW_CHARACTER_URL } from "@/lib/newtype/links";
-import { Button, Chip, ChipRow, Verb, VerbSpacer } from "@/components/ui";
-import type { CinesynthAccount, Ghost, Lang } from "@/lib/types";
+import { Button, ButtonLink, Chip, ChipRow, Verb, VerbSpacer } from "@/components/ui";
+import type { CinesynthAccount, Creator, Ghost, Lang } from "@/lib/types";
 
 const STEPS = 4; // account · about me · what I made · who performs: one question per screen (kit FunnelProgress)
 const MARKETS = ["US", "KR", "JP", "Global"] as const;
@@ -21,21 +22,62 @@ const title = "text-[22px] font-[720] tracking-[-0.01em]";
 const urls = (text: string) =>
   text.split(/\s+/).map((s) => s.trim()).filter((s) => /^https?:\/\/\S+$/.test(s));
 
-export function OnboardForm({ ghosts, initialAccount, notice }: { ghosts: Ghost[]; initialAccount: CinesynthAccount | null; notice?: ReactNode }) {
+const DRAFT_KEY = "gr_onboard_draft";
+type Draft = { name: string; bio: string; niche: string; market: string; languages: Lang[]; works: string; plan: string; script: string; ghostId: string };
+
+export function OnboardForm({ ghosts, initialAccount, saved = null, notice }: {
+  ghosts: Ghost[];
+  initialAccount: CinesynthAccount | null;
+  /** the signed-in account's latest saved profile */
+  saved?: Creator | null;
+  notice?: ReactNode;
+}) {
   const t = useT();
   const router = useRouter();
-  const [name, setName] = useState("");
-  const [bio, setBio] = useState("");
-  const [niche, setNiche] = useState("");
-  const [market, setMarket] = useState<(typeof MARKETS)[number]>("US");
-  const [languages, setLanguages] = useState<Lang[]>(["en"]);
-  const [works, setWorks] = useState("");
-  const [plan, setPlan] = useState("");
-  const [script, setScript] = useState("");
-  const [ghostId, setGhostId] = useState(ghosts[0]?.id ?? "");
+  const [name, setName] = useState(saved?.name ?? "");
+  const [bio, setBio] = useState(saved?.bio ?? "");
+  const [niche, setNiche] = useState(saved?.niche ?? "");
+  const [market, setMarket] = useState<(typeof MARKETS)[number]>(
+    (MARKETS as readonly string[]).includes(saved?.market ?? "") ? (saved!.market as (typeof MARKETS)[number]) : "US",
+  );
+  const [languages, setLanguages] = useState<Lang[]>(saved?.languages ?? ["en"]);
+  const [works, setWorks] = useState(saved?.works.join("\n") ?? "");
+  const [plan, setPlan] = useState(saved?.plan ?? "");
+  const [script, setScript] = useState(saved?.script ?? "");
+  const [ghostId, setGhostId] = useState(saved?.ghostId ?? ghosts[0]?.id ?? "");
   const [account, setAccount] = useState<CinesynthAccount | null>(initialAccount);
   const signedIn = useCallback((a: CinesynthAccount) => setAccount(a), []);
   const [step, setStep] = useState(initialAccount?.status === "approved" ? 2 : 1);
+  const [welcome, setWelcome] = useState(Boolean(saved && initialAccount?.status === "approved"));
+  const [resumed, setResumed] = useState(false);
+
+  // Typing survives a reload or a sign-in round trip until it is saved (this browser only).
+  useEffect(() => {
+    if (saved) return;
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      const d = raw ? (JSON.parse(raw) as Partial<Draft>) : null;
+      if (!d || !(d.name || d.niche || d.bio || d.works || d.plan || d.script)) return;
+      setName(d.name ?? ""); setBio(d.bio ?? ""); setNiche(d.niche ?? ""); setWorks(d.works ?? ""); setPlan(d.plan ?? ""); setScript(d.script ?? "");
+      if (d.market && (MARKETS as readonly string[]).includes(d.market)) setMarket(d.market as (typeof MARKETS)[number]);
+      if (d.languages?.length) setLanguages(d.languages);
+      if (d.ghostId && ghosts.some((g) => g.id === d.ghostId)) setGhostId(d.ghostId);
+      setResumed(true);
+    } catch {
+      // no storage in this browser: nothing to bring back
+    }
+  }, [saved, ghosts]);
+  useEffect(() => {
+    if (welcome) return;
+    const id = setTimeout(() => {
+      try {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify({ name, bio, niche, market, languages, works, plan, script, ghostId } satisfies Draft));
+      } catch {
+        // storage refused: the form still works, it just won't come back after a reload
+      }
+    }, 400);
+    return () => clearTimeout(id);
+  }, [welcome, name, bio, niche, market, languages, works, plan, script, ghostId]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -76,7 +118,7 @@ export function OnboardForm({ ghosts, initialAccount, notice }: { ghosts: Ghost[
       const res = await fetch("/api/creator", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ name, bio, niche, market, languages, ghostId, works: links, plan, script }),
+        body: JSON.stringify({ id: saved?.id, name, bio, niche, market, languages, ghostId, works: links, plan, script }),
       });
       if (res.status === 401) {
         setAccount(null);
@@ -84,6 +126,11 @@ export function OnboardForm({ ghosts, initialAccount, notice }: { ghosts: Ghost[
       }
       const body = (await res.json()) as { creator?: { id: string }; error?: string };
       if (!res.ok || !body.creator) throw new Error(body.error ?? String(res.status));
+      try {
+        localStorage.removeItem(DRAFT_KEY);
+      } catch {
+        // nothing kept to clear
+      }
       router.push(`/profile/${body.creator.id}`);
     } catch (e) {
       setError((e as Error).message);
@@ -94,6 +141,35 @@ export function OnboardForm({ ghosts, initialAccount, notice }: { ghosts: Ghost[
 
   const toggleLang = (l: Lang) =>
     setLanguages((cur) => (cur.includes(l) ? cur.filter((x) => x !== l) : [...cur, l]));
+
+  if (welcome && saved) {
+    const ghost = ghosts.find((g) => g.id === saved.ghostId);
+    return (
+      <section className="flex flex-col gap-4 pt-2">
+        <div className="flex flex-col gap-1">
+          <h2 className={title}>{t("obWelcome")}</h2>
+          <p className="text-[13px] leading-snug text-text-dim">{t("obWelcomeLine")}</p>
+        </div>
+        <div className="flex items-center gap-3 rounded-[var(--radius-card)] bg-surface p-3 ring-1 ring-inset ring-line">
+          {ghost?.portraitUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={ghost.portraitUrl} alt="" className="size-14 shrink-0 rounded-[var(--radius-pic)] object-cover object-[50%_18%]" />
+          ) : null}
+          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+            <span className="truncate text-[15px] font-[720]">{saved.name}</span>
+            <span className="truncate text-[13px] text-text-dim">{saved.niche} · {saved.market} · {saved.languages.map((l) => l.toUpperCase()).join("·")}</span>
+            {ghost ? <span className="truncate text-[12px] text-text-3">{ghost.name} · AI-generated · Virtual human</span> : null}
+          </div>
+        </div>
+        {account ? <p className="text-[12px] text-text-3">{account.email}</p> : null}
+        <VerbSpacer />
+        <Verb>
+          <Button kind="secondary" size="xl" onClick={() => { setWelcome(false); setStep(2); }}>{t("obEditProfile")}</Button>
+          <ButtonLink size="xl" href={`/profile/${saved.id}`}>{t("obContinue")}</ButtonLink>
+        </Verb>
+      </section>
+    );
+  }
 
   return (
     <form
@@ -130,6 +206,7 @@ export function OnboardForm({ ghosts, initialAccount, notice }: { ghosts: Ghost[
       </section>
       <section hidden={step !== 2} className="flex flex-col gap-3">
         <h2 className={title}>{t("obAbout")}</h2>
+        {resumed ? <p className="text-[12px] text-ghost">✓ {t("obResumed")}</p> : null}
         <label className="flex flex-col gap-1">
           <span className={label}>{t("obName")}</span>
           <input value={name} onChange={(e) => setName(e.target.value)} maxLength={40} className={`${field} h-11`} />
@@ -211,7 +288,7 @@ export function OnboardForm({ ghosts, initialAccount, notice }: { ghosts: Ghost[
           <Button key="next" size="xl" block disabled={!stepOk[step - 1]} onClick={() => setStep(step + 1)}>{t("next")}</Button>
         ) : (
           <Button key="submit" type="submit" size="xl" block disabled={!ready || busy}>
-            {busy ? t("obSaving") : t("obSubmit")}
+            {busy ? t("obSaving") : t(saved ? "obUpdate" : "obSubmit")}
           </Button>
         )}
       </Verb>

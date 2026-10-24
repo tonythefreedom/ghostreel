@@ -3,12 +3,13 @@ import { z } from "zod";
 import { env } from "@/lib/env";
 import { isOwner, OWNER_COOKIE, ownerToken, passcodeMatches } from "@/lib/guard";
 import { clearUnlockFailures, clientIp, recordUnlockFailure, unlockBlockedFor } from "@/lib/limits";
+import { actor } from "@/lib/owner";
 
 const Body = z.object({ passcode: z.string().min(1).max(200) });
 
-// Whether this browser already holds the owner cookie (so a page can ask for the passcode up front).
+// Whether this browser may already act: an approved Google sign-in, or the passcode owner's cookie.
 export async function GET(req: NextRequest) {
-  return NextResponse.json({ owner: isOwner(req) });
+  return NextResponse.json({ owner: isOwner(req) || (await actor(req)) !== null });
 }
 
 export async function POST(req: NextRequest) {

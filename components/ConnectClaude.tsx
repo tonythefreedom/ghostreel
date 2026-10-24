@@ -12,6 +12,8 @@ import { useLang, useT } from "./Lang";
 import { Button, CodeBlock } from "./ui";
 
 type Row = { id: string; createdAt: string; expiresAt: string };
+// A sentence as one shell argument: single quotes, each inner quote closed, escaped and reopened.
+const shell = (text: string) => `'${text.replace(/'/g, `'\\''`)}'`;
 type Tool = { name: string; description?: string };
 type Check = { state: "idle" | "busy" | "ok" | "fail"; tools: Tool[]; detail?: string };
 
@@ -176,8 +178,10 @@ export function ConnectClaude({ mcpUrl, siteUrl, initialAccount }: { mcpUrl: str
       <Step n={4} done={false} locked={!fresh} title={t("connectStep4")} line={t("connectStep4Line")}>
         {fresh ? (
           <div className="flex flex-col gap-2">
-            <CodeBlock text={t("connectAsk1")} />
-            <CodeBlock text={t("connectAsk2")} />
+            <CodeBlock label={t("connectModel")} text={`claude --model opus --effort max ${shell(t("connectAsk1"))}`} />
+            <p className="text-[12px] leading-snug text-text-3">{t("connectModelLine")}</p>
+            <CodeBlock label={t("connectDesktopAsk")} text={t("connectAsk1")} />
+            <CodeBlock label={t("loopTitle")} text={t("connectAsk2")} />
             <p className="text-[12px] leading-snug text-text-3">{t("connectAskAfter")}</p>
           </div>
         ) : null}

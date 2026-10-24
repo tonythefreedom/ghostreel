@@ -98,7 +98,7 @@ export function RenderState({ job, brief, poster, fallback, lang }: {
       {done && job.videoUrl ? (
         <Player src={job.videoUrl} poster={picture} label={t("aiLabel", lang)}
           marks={prerender ? <DemoTag>{t("prerendered", lang)}</DemoTag> : notSynced ? <DemoTag>{t("notLipSynced", lang)}</DemoTag> : undefined}
-          cues={!prerender || prerenderMatches(job, brief) ? briefCues(brief) : []} />
+          cues={!prerender || prerenderMatches(job, brief) ? briefCues(brief, lang) : []} />
       ) : active && picture ? (
         <Player poster={picture} autoPlay={false} label={t("aiLabel", lang)} />
       ) : job.status === "failed" && fallback ? (

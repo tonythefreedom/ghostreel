@@ -6,6 +6,10 @@ export function langFromAccept(accept: string | null): UiLang {
   return /^\s*ko\b/i.test(accept ?? "") ? "ko" : "en";
 }
 
+/** A ghost's niche in the page's language (the roster carries Korean beside English). */
+export const nicheIn = (ghost: { niche: string; ko?: { niche?: string } }, lang: UiLang) =>
+  (lang === "ko" && ghost.ko?.niche) || ghost.niche;
+
 export const words = {
   brand: { ko: "고스트릴", en: "GhostReel" },
   tasteTitle: { ko: "오늘의 감각 고르기", en: "Teach your taste" },
@@ -43,7 +47,6 @@ export const words = {
   intentTwist: { ko: "비틀기", en: "Twist" },
   writeBrief: { ko: "브리프 쓰기", en: "Write the brief" },
   writing: { ko: "쓰는 중", en: "Writing" },
-  locked: { ko: "오너만 쓸 수 있어요. 패스코드를 넣어 주세요.", en: "Owner only. Enter the passcode." },
   unlock: { ko: "열기", en: "Unlock" },
   wrongPasscode: { ko: "패스코드가 달라요. 다시 넣어 주세요.", en: "Wrong passcode. Try again." },
   save: { ko: "저장", en: "Save" },
@@ -84,8 +87,8 @@ export const words = {
   prerenderOther: { ko: "다른 대본으로 렌더한 클립", en: "rendered from a different script" },
   speech: { ko: "대사", en: "Speech" },
   approveNote: {
-    ko: "승인하면 브리프가 잠기고, 그때 처음으로 GPU 렌더가 시작돼요.",
-    en: "Approving locks the brief; only then does a GPU render start.",
+    ko: "승인하면 잠기고 렌더가 시작돼요.",
+    en: "Approving locks it and starts the render.",
   },
   noModelKey: { ko: "이 배포에는 아직 모델 키가 없어요.", en: "This deploy has no model key yet." },
   briefFailed: { ko: "브리프를 못 썼어요. 다시 해 볼게요?", en: "Couldn't write the brief. Try again?" },
@@ -162,7 +165,10 @@ export const words = {
   },
   navLabel: { ko: "주요 메뉴", en: "Main" },
   navConnect: { ko: "Claude 연결", en: "Connect Claude" },
-  navConnectShort: { ko: "Claude 연결", en: "Claude" },
+  navConnectShort: {
+    ko: "Claude로 만들기",
+    en: "Make with Claude",
+  },
   play: { ko: "재생", en: "Play" },
   pause: { ko: "일시정지", en: "Pause" },
   soundOn: { ko: "소리 켜기", en: "Sound on" },
@@ -175,16 +181,31 @@ export const words = {
   fieldBeauty: { ko: "뷰티", en: "Beauty" },
   fieldFashion: { ko: "패션", en: "Fashion" },
   // Connect your Claude (/connect).
-  connectEyebrow: { ko: "Claude 연결", en: "Connect your Claude" },
-  connectTitle: { ko: "내 Claude가 브리프를 써요", en: "Your Claude writes the brief" },
+  connectEyebrow: {
+    ko: "Claude 구독으로 만들기 · MCP",
+    en: "Make it with your Claude · MCP",
+  },
+  connectTitle: {
+    ko: "내 Claude가 고스트 영상을 만들어요",
+    en: "Your Claude makes the ghost's video",
+  },
   connectLede: {
-    ko: "Claude Code나 Claude Desktop에 고스트릴을 붙이면, 내 Claude가 고스트와 내 스타일, 남긴 숏폼의 쇼티 분석을 읽고 브리프 초안을 여기에 저장해요. 승인과 렌더는 이 사이트에서 내가 해요.",
-    en: "Add GhostReel to Claude Code or Claude Desktop. Your Claude reads your ghost, your style and Shorti's reading of the short you kept, and saves a brief here as a draft. Approving and rendering stay with you on this site.",
+    ko: "Claude Pro·Max 구독 그대로, Opus 5.5가 고스트릴 MCP 도구로 이번 주 트렌드를 보고, 브리프를 쓰고, 다시 읽고 고쳐요. 내가 승인하면 렌더해서 영상 링크까지 줘요. 고스트릴은 모델 키도 비용도 받지 않아요.",
+    en: "On your Claude Pro or Max plan, Opus 5.5 uses GhostReel's MCP tools to read this week's trends, write the brief, read it back and refine it. Once you approve, it renders and hands you the video link. GhostReel takes no model key and no fee.",
   },
   connectHowLabel: { ko: "연결하면 이렇게 돼요", en: "How it works" },
-  connectHow1: { ko: "내 Claude가 고스트릴 도구 3개를 써요", en: "Your Claude uses GhostReel's three tools" },
-  connectHow2: { ko: "브리프는 초안으로만 저장돼요", en: "Briefs are saved as drafts only" },
-  connectHow3: { ko: "승인·렌더는 여기서 내가 해요", en: "You approve and render here" },
+  connectHow1: {
+    ko: "로그인하고 토큰 받기 · 1분",
+    en: "Sign in, get a token · 1 min",
+  },
+  connectHow2: {
+    ko: "Claude가 트렌드 보고 브리프 작성",
+    en: "Claude reads the trends and writes the brief",
+  },
+  connectHow3: {
+    ko: "내가 승인 → Claude가 렌더해 영상 전달",
+    en: "You approve → Claude renders and hands you the video",
+  },
   connectStep1: { ko: "Google로 로그인", en: "Sign in with Google" },
   connectStep1Line: { ko: "CineSynth와 같은 계정이에요. 토큰은 이 계정에 묶여요.", en: "The same account as CineSynth. The token is tied to it." },
   connectPending: { ko: "CineSynth 승인 대기 중", en: "Waiting for CineSynth's approval" },
@@ -204,8 +225,8 @@ export const words = {
   connectStep3Line: { ko: "쓰는 Claude를 고르고 그대로 붙여 넣으세요.", en: "Pick your Claude and paste this as it is." },
   connectRunOnce: { ko: "터미널에서 한 번 실행", en: "Run once in a terminal" },
   connectCodeAfter: {
-    ko: "실행한 뒤 Claude Code를 다시 열거나 /mcp 를 입력하면 ghostreel 도구 3개가 보여요.",
-    en: "Then reopen Claude Code or type /mcp: three ghostreel tools appear.",
+    ko: "실행한 뒤 Claude Code를 다시 열거나 /mcp 를 입력하면 ghostreel 도구 5개가 보여요.",
+    en: "Then reopen Claude Code or type /mcp: five ghostreel tools appear.",
   },
   connectDesktopAfter: {
     ko: "Claude Desktop › 설정 › 개발자 › 구성 편집에 넣고 앱을 다시 켜세요. 웹 claude.ai는 아직 지원하지 않아요(OAuth 필요).",
@@ -217,13 +238,22 @@ export const words = {
   connectOk: { ko: "연결됐어요. 쓸 수 있는 도구", en: "Connected. Tools ready" },
   connectFail: { ko: "연결이 안 돼요.", en: "Not connected." },
   connectFail401: { ko: "토큰이 맞지 않거나 끊겼어요. 새 토큰을 만들어 주세요.", en: "The token is wrong or revoked. Make a new one." },
-  connectStep4: { ko: "Claude에게 말하기", en: "Ask your Claude" },
-  connectStep4Line: { ko: "이렇게 말하면 초안을 써서 여기에 저장해요.", en: "Say this and it saves a draft here." },
-  connectAsk1: { ko: "내 고스트릴 고스트랑 남긴 숏폼 보여주고, 다음 브리프 초안 써줘.", en: "Show my GhostReel ghosts and kept shorts, then write the next brief." },
-  connectAsk2: { ko: "남긴 숏폼마다 '내 식대로' 브리프 초안을 하나씩 써줘.", en: "Write one 'make it yours' brief draft for each short I kept." },
+  connectStep4: {
+    ko: "Claude에게 말하기",
+    en: "Ask your Claude",
+  },
+  connectStep4Line: {
+    ko: "이 한 줄이면 트렌드 고르기부터 영상까지 이어져요.",
+    en: "One line takes it from picking a trend to the video.",
+  },
+  connectAsk1: {
+    ko: "고스트릴로 유나의 다음 영상을 만들어줘. 이번 주 뷰티 트렌드를 보여 주고 내가 고르면 남겨 줘. 브리프를 써서 승인 링크를 주고, 내가 승인하면 렌더해서 영상 링크까지 줘.",
+    en: "Make Yuna's next video with GhostReel: show me this week's beauty trends and keep the one I pick. Write the brief and give me the approval link; once I approve, render it and give me the video link.",
+  },
+  connectAsk2: { ko: "가장 최근 브리프를 읽고, 내 메모대로 다음 버전을 써서 다시 저장해줘.", en: "Read my latest brief and write its next version from my note." },
   connectAskAfter: {
-    ko: "초안 링크가 돌아오면 열어서 고치고 승인하세요. Claude는 승인·렌더·게시를 할 수 없어요.",
-    en: "Open the draft link it returns, edit and approve it. Claude can't approve, render or post.",
+    ko: "브리프 링크가 돌아오면 열어 보세요. 메모를 남기면 Claude가 다시 읽고 다음 버전을 같은 링크에 써요. 승인·렌더·게시는 Claude가 할 수 없어요.",
+    en: "Open the brief link it returns. Leave a note and your Claude reads it and writes the next version at the same link. Claude can't approve, render or post.",
   },
   connectSelfTitle: { ko: "Claude가 알아서 연결하게 하기", en: "Let Claude set it up" },
   connectSelfLine: {
@@ -300,25 +330,25 @@ export const words = {
   obNeedLinks: { ko: "링크는 10개까지예요.", en: "Up to 10 links." },
   obSaving: { ko: "저장 중…", en: "Saving…" },
   obSubmit: { ko: "가입하고 내 스타일 읽기", en: "Sign up and read my style" },
-  noticeTitle: { ko: "내 Claude와 함께 써요", en: "Works with your own Claude" },
+  noticeTitle: { ko: "내 Claude 구독으로 영상까지", en: "Your own Claude makes it, start to finish" },
   noticeLine: {
-    ko: "내 Claude가 고스트릴 MCP 서버로 고스트의 브리프를 써요. 우리 서버엔 모델 키가 없어요. 가입 후 토큰만 받으면 돼요.",
-    en: "Your Claude writes your ghost's briefs through GhostReel's MCP server. No model key on our side. After sign-up, get a token.",
+    ko: "Claude Pro·Max 구독의 Claude가 고스트릴 MCP로 트렌드 고르기부터 브리프, 렌더까지 해요. 로그인하고 토큰만 받으면 돼요.",
+    en: "On your Claude Pro or Max plan, your Claude goes from picking a trend to the brief and the render over GhostReel's MCP. Sign in and get a token.",
   },
   noticeSelf: { ko: "Claude Code에 이렇게 말해도 돼요: “이 안내를 읽고 고스트릴 연결해줘”", en: "Or tell Claude Code: “Read this and connect GhostReel”" },
   // Landing additions.
   landingCue1: { ko: "민낯으로 시작, 화면에 20%", en: "Bare face to start, 20% on screen" },
   landingCue2: { ko: "세럼 한 번, 60%로 점프", en: "One serum, a jump to 60%" },
-  landingCue3: { ko: "틴트 한 번에 100%", en: "One swipe of tint: 100%" },
+  landingCue3: { ko: "입술에 틴트, 카운터가 100%로", en: "Tint on the lips; the counter hits 100%" },
   landingCue4: { ko: "완성된 룩으로 끝", en: "End on the finished look" },
   landingPreviewNote: {
     ko: "고스트 유나의 미리보기 클립이에요(립싱크 전). 색연필이 브리프의 비트를 영상 위에 써요.",
     en: "A preview clip of Yuna, our ghost (before lip-sync). The pencil writes the brief's beats over it.",
   },
-  landingClaudeH: { ko: "내 Claude로 쓰기", en: "Write with your Claude" },
+  landingClaudeH: { ko: "내 Claude로 영상 만들기", en: "Make it with your own Claude" },
   landingClaudeLine: {
-    ko: "Claude Code나 Claude Desktop에 연결하면 내 Claude가 브리프 초안을 써요. 승인은 여기서 내가 해요.",
-    en: "Connect Claude Code or Claude Desktop and your own Claude drafts the brief. You approve it here.",
+    ko: "Claude Pro·Max 구독 그대로. Claude Code나 데스크톱에 연결하면 트렌드 고르기부터 브리프, 렌더까지 내 Claude가 MCP로 해요. 승인만 내가 해요.",
+    en: "On your Claude Pro or Max plan. Connect Claude Code or Desktop and your own Claude does it over MCP, from picking a trend to the brief and the render. You only approve.",
   },
   close: { ko: "닫기", en: "Close" },
   download: { ko: "다운로드", en: "Download" },
@@ -329,7 +359,6 @@ export const words = {
     ko: "원본에서 폰이 서 있던 자리를 시점마다 옆에서 본 그림이에요(쇼티 추정). 고스트 촬영도 이 자리에서 해요.",
     en: "Where the phone stood in the original, setup by setup, seen from the side (Shorti's estimate). The ghost's shot takes the same place.",
   },
-  presetOpen4d: { ko: "쇼티에서 4D로 보기", en: "Open in 4D on Shorti" },
   presetEstimate: { ko: "추정", en: "estimate" },
   presetHeight: { ko: "높이", en: "Height" },
   presetDist: { ko: "거리", en: "Distance" },
@@ -380,9 +409,6 @@ export const words = {
   pfOwn: { ko: "고스트가 내 것으로 바꿀 수 있는 것", en: "What your ghost can make its own" },
   pfCounted: { ko: "쇼티가 읽은 것으로 셌어요. 조회수나 결과는 예측하지 않아요.", en: "Counted from what Shorti read. No views or results are forecast." },
   unlockChecking: { ko: "로그인 확인 중…", en: "Checking your sign-in…" },
-  unlockNoPass: { ko: "패스코드가 없나요?", en: "No passcode?" },
-  unlockSignIn: { ko: "Google로 로그인", en: "Sign in with Google" },
-  unlockThen: { ko: "(승인된 계정, 이 브라우저) 후 돌아오세요.", en: "in this browser with an approved account, then come back." },
   castReady: { ko: "CineSynth 캐릭터 준비됨", en: "Ready in CineSynth" },
   castIncomplete: { ko: "CineSynth 3면 이미지 일부 없음", en: "CineSynth views incomplete" },
   castMissing: { ko: "내 CineSynth에 아직 없음", en: "Not in your CineSynth yet" },
@@ -392,11 +418,94 @@ export const words = {
     en: "Once all three views (front, side, back) are ready, it shows up here. The list refreshes when you come back.",
   },
   newCharacterFirst: { ko: "내 CineSynth에 아직 캐릭터가 없어요.", en: "Your CineSynth has no characters yet." },
-  orClaude: { ko: "내 Claude로 쓰고 싶다면:", en: "Rather write it with your own Claude?" },
+  // Your own Claude makes it (Ted, 10-24: «mcp BYO로 claude opus 5.5 max등을 … 구독토큰을 써서»).
+  cmTitleWrite: {
+    ko: "내 Claude로 영상 만들기",
+    en: "Make the video with your Claude",
+  },
+  cmTitleRevise: { ko: "내 Claude로 다듬고 영상까지", en: "Refine it and make the video with your Claude" },
+  cmTitleShoot: {
+    ko: "MCP로 영상 만들기",
+    en: "Make the video over MCP",
+  },
+  cmLine: {
+    ko: "Claude Pro·Max 구독 그대로 Opus 5.5를 effort max로 돌려요. 고스트릴은 키도 비용도 받지 않아요.",
+    en: "Runs on your Claude Pro or Max plan: Opus 5.5 at max effort. GhostReel takes no key and no fee.",
+  },
+  cmCode: { ko: "Claude Code", en: "Claude Code" },
+  cmApp: { ko: "Claude 데스크톱", en: "Claude Desktop" },
+  cmCodeLabel: { ko: "터미널에 붙여 넣기", en: "Paste into a terminal" },
+  cmAppLabel: { ko: "모델을 Opus 5.5로 고르고 이 문장을 보내세요", en: "Pick Opus 5.5, then send this" },
+  cmNotYet: { ko: "아직 연결 전이라면", en: "Not connected yet?" },
+  cmConnect: { ko: "1분 만에 연결", en: "Connect in a minute" },
+  cmAskWrite: {
+    ko: "고스트릴 MCP로 {ghost}의 다음 영상을 만들어줘. ghostreel_brief_context(ghostId \"{ghostId}\", videoId \"{videoId}\", intent \"{intent}\")로 자료를 받아 브리프를 직접 쓰고 ghostreel_brief_submit으로 저장한 뒤 승인 링크를 줘. 내가 승인하면 ghostreel_render로 렌더해서 영상 링크까지 줘.",
+    en: "Make {ghost}'s next video with GhostReel's MCP: get the pack with ghostreel_brief_context (ghostId \"{ghostId}\", videoId \"{videoId}\", intent \"{intent}\"), write the brief yourself, save it with ghostreel_brief_submit and give me the approval link. Once I approve, render it with ghostreel_render and give me the video link.",
+  },
+  cmAskRevise: {
+    ko: "고스트릴 브리프 {id}를 ghostreel_brief_get으로 읽고, 내 메모를 반영해 더 좋게 고친 다음 ghostreel_brief_revise로 다시 저장해줘. 무엇을 바꿨는지 한 줄로 알려주고, 내가 승인하면 ghostreel_render로 렌더해서 영상 링크까지 줘.",
+    en: "Read GhostReel brief {id} with ghostreel_brief_get, apply my note and make it better, then save it back with ghostreel_brief_revise. Tell me in one line what you changed, and once I approve, render it with ghostreel_render and give me the video link.",
+  },
+  cmAskShoot: {
+    ko: "고스트릴 브리프 {id}를 ghostreel_render로 렌더해줘. 끝날 때까지 다시 확인해서 영상 링크를 주고, 비트별 촬영 대본도 정리해줘.",
+    en: "Render GhostReel brief {id} with ghostreel_render. Check again until it is done, give me the video link, and lay out a shot script per beat.",
+  },
+  // The loop on the brief page.
+  loopTitle: { ko: "Claude와 고치기", en: "Refine it with your Claude" },
+  loopLine: {
+    ko: "메모를 남기고 Claude에게 다듬어 달라고 하면, 새 버전이 이 페이지에 바로 써져요.",
+    en: "Leave a note, ask your Claude to refine it, and the new version lands on this page.",
+  },
+  noteLabel: { ko: "Claude에게 남길 메모", en: "Note for your Claude" },
+  notePh: { ko: "예: 훅을 질문으로 바꿔줘. 마지막 비트는 더 짧게.", en: "e.g. Make the hook a question. A shorter last beat." },
+  noteSave: { ko: "메모 저장", en: "Save note" },
+  noteSaved: { ko: "✓ 메모 저장됨", en: "✓ Note saved" },
+  versionWord: { ko: "버전", en: "Version" },
+  byGhostreel: { ko: "고스트릴", en: "GhostReel" },
+  byClaude: { ko: "내 Claude", en: "Your Claude" },
+  byOwner: { ko: "내가 고침", en: "Edited by you" },
+  newVersion: { ko: "새 버전 v{n}이 왔어요", en: "Version {n} is in" },
+  loadIt: { ko: "불러오기", en: "Load it" },
+  loadDrops: { ko: "저장 안 한 수정은 사라져요.", en: "Your unsaved edits will be dropped." },
+  koMeaning: { ko: "뜻", en: "Meaning" },
+  koStale: { ko: "고친 비트라 한국어 뜻은 다음 버전에서 다시 써져요.", en: "Edited; its Korean comes with the next version." },
+  // Sign in instead of a passcode.
+  signInToGo: { ko: "Google로 로그인하면 바로 이어져요", en: "Sign in with Google to carry on" },
+  signInToGoLine: { ko: "로그인하면 방금 하던 일이 그대로 이어져요.", en: "Sign in and what you were doing carries on." },
+  signInPending: { ko: "계정이 승인 대기 중이에요. 승인되면 바로 쓸 수 있어요.", en: "Your account is waiting for approval; it works as soon as it is approved." },
+  operatorPasscode: { ko: "운영자 패스코드", en: "Operator passcode" },
+  // Taste: the way on, in plain sight.
+  writeFromKept: { ko: "{n}개로 브리프 쓰기", en: "Brief from {n} kept" },
+  // Onboarding: a saved profile.
+  obWelcome: { ko: "다시 오셨네요", en: "Welcome back" },
+  obWelcomeLine: { ko: "저장된 프로필이 있어요. 이어서 하거나 고칠 수 있어요.", en: "Your profile is saved. Carry on, or edit it." },
+  obContinue: { ko: "이어서 하기", en: "Carry on" },
+  obEditProfile: { ko: "프로필 고치기", en: "Edit profile" },
+  obUpdate: { ko: "저장하고 계속", en: "Save and continue" },
+  obResumed: { ko: "입력하던 내용을 이어서 보여 줘요.", en: "Picked up where you left off." },
+  // The landing hero's lines in Korean (Yuna speaks English).
+  landingSay1: { ko: "준비 시작, 20퍼센트.", en: "Getting ready — twenty percent." },
+  landingSay2: { ko: "세럼 바르고, 60.", en: "Serum on: sixty." },
+  landingSay3: { ko: "틴트 한 번에 100.", en: "One swipe of tint: a hundred." },
+  landingSay4: { ko: "끝.", en: "Done." },
+  connectModel: {
+    ko: "Claude Code에서 바로 · Opus 5.5 · effort max",
+    en: "Straight from Claude Code · Opus 5.5 · max effort",
+  },
+  connectDesktopAsk: { ko: "Claude 데스크톱이라면 모델을 Opus 5.5로 고르고 이렇게 보내세요", en: "In Claude Desktop, pick Opus 5.5 and send this" },
+  renderByClaude: { ko: "내 Claude로도 렌더할 수 있어요.", en: "Your Claude can render it too." },
+  landingClaudeGo: { ko: "내 Claude로 만들기", en: "Make it with Claude" },
+  connectModelLine: {
+    ko: "Claude Pro·Max 구독이 그대로 쓰여요. 고스트릴은 모델 비용을 받지 않아요.",
+    en: "Your Claude Pro or Max plan covers it. GhostReel never bills for the model.",
+  },
 } as const satisfies Record<string, Record<UiLang, string>>;
 
 export type WordKey = keyof typeof words;
 export const t = (key: WordKey, lang: UiLang = "en") => words[key][lang];
+/** A line with {slots} filled in. */
+export const fill = (text: string, slots: Record<string, string | number>) =>
+  text.replace(/\{(\w+)\}/g, (m, k: string) => (k in slots ? String(slots[k]) : m));
 
 // Counts: at most three significant digits. KO uses 만/억, EN uses K/M/B. Never a forecast, only what was read.
 export function viewCount(n: number, lang: UiLang = "en"): string {

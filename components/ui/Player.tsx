@@ -22,6 +22,8 @@ export type Cue = {
   t: number;
   /** the craft point, short: «Look up while applying» */
   title: string;
+  /** the words as spoken, when the title is their meaning in the page's language */
+  quote?: string;
   /** what to do, one or two lines */
   line?: string;
   /** what to look at in the frame, each ringed */
@@ -358,7 +360,8 @@ function CueCard({ cue, small, hasNext, onNext, raised, top }: { cue: Cue; small
               ) : null}
             </span>
           </p>
-          {cue.line && !small ? <p className="gr-cue-line mt-2 line-clamp-2 text-[12px] leading-snug text-text-dim @[300px]:text-[13px]">{cue.line}</p> : null}
+          {cue.quote ? <p className={`gr-cue-line mt-2 font-[560] leading-snug text-text ${small ? "line-clamp-1 text-[12px]" : "line-clamp-2 text-[12px] @[300px]:text-[13px]"}`}>“{cue.quote}”</p> : null}
+          {cue.line && !small ? <p className={`gr-cue-line line-clamp-2 text-[12px] leading-snug text-text-dim @[300px]:text-[13px] ${cue.quote ? "mt-1" : "mt-2"}`}>{cue.line}</p> : null}
         </div>
         {hasNext && !small ? (
           <button type="button" data-no-drag onClick={onNext} className="-my-1 flex h-11 shrink-0 items-center gap-0.5 whitespace-nowrap rounded-[var(--radius-control)] px-1.5 text-[12px] font-[640] text-pencil @[300px]:px-2 @[300px]:text-[13px]">

@@ -2,9 +2,10 @@
 import type { Brief } from "@/lib/types";
 import { t, type UiLang } from "@/lib/words";
 
-export function BriefHead({ name, status, duration, editable, onDuration, lang }: {
+export function BriefHead({ name, status, version = 1, duration, editable, onDuration, lang }: {
   name: string;
   status: Brief["status"];
+  version?: number;
   duration: Brief["durationSec"];
   editable: boolean;
   onDuration: (d: Brief["durationSec"]) => void;
@@ -27,6 +28,7 @@ export function BriefHead({ name, status, duration, editable, onDuration, lang }
           >
             {approved ? `✓ ${t("approved", lang)}` : t("draft", lang)}
           </span>
+          {version > 1 ? <span className="font-mono text-[12px] font-[640] text-pencil">v{version}</span> : null}
         </span>
       </div>
       {editable ? (

@@ -1,6 +1,6 @@
 "use client";
-// Lane A. The one bar on every page: the brand home on the left; on the right the way to connect your own Claude and
-// the KO/EN key. It spans the window and stays at the top as the page scrolls, its contents in the page's column.
+// Lane A. The one bar on every page: the brand home on the left; on the right the way to make it with your own Claude
+// (always in sight, Ted 10-24: judges should find it) and the KO/EN key. It spans the window and stays at the top as the page scrolls, its contents in the page's column.
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LangToggle, useT } from "./Lang";
@@ -18,8 +18,8 @@ export function TopBar() {
         </Link>
         <nav aria-label={t("navLabel")} className="flex items-center gap-1">
           <Link href="/connect" aria-current={connect ? "page" : undefined} aria-label={t("navConnect")}
-            className={`flex h-10 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-[13px] font-[560] transition-colors duration-[125ms] ${
-              connect ? "bg-accent-soft text-text" : "text-text-dim hover:text-text"
+            className={`flex h-9 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-[13px] font-[640] ring-1 ring-inset transition-colors duration-[125ms] ${
+              connect ? "bg-accent text-white ring-accent" : "bg-accent-soft text-text ring-accent/45 hover:bg-accent/25"
             }`}>
             <ClaudeGlyph />
             {t("navConnectShort")}

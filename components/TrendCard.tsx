@@ -2,7 +2,8 @@
 // One short as Shorti read it: a real creator's post, so it never wears the AI label. The deck's top card plays Shorti's
 // own copy of the hit in place, with the same keys as every video and the coaching pencil on its cues; a card behind it
 // is its poster alone. Under the picture at most three lines, never cut: what happens first, who and where, and the
-// platform's count with its date. One number a card.
+// platform's count with its date. One number a card. Under them, the format's lineage as Shorti counts it (its
+// number, how many videos carry it, how far it has spread), so a pick is a lineage and not one lucky video.
 import { useState } from "react";
 import { hitCues } from "@/lib/cues";
 import type { TrendCard as Card, VideoReading } from "@/lib/types";
@@ -40,7 +41,6 @@ export function TrendCard({ card, reading, live = false, behind = false, lang: l
           marks={tag}
           cues={hitCues(reading)}
           cuts={reading?.cuts}
-          coachFirst={false}
         />
       ) : (
         <div className="relative aspect-[9/16] w-full overflow-hidden rounded-[var(--radius-pic)] bg-surface-2">
@@ -64,7 +64,23 @@ export function TrendCard({ card, reading, live = false, behind = false, lang: l
         {title ? <p className="text-[15px] font-[560] leading-snug text-text">{title}</p> : null}
         {meta ? <p className="text-[13px] text-text-3">{meta}</p> : null}
         <TrustLine views={card.views} asOf={card.viewsAsOf} lang={lang} />
+        {card.lineage?.videos ? <Lineage lineage={card.lineage} lang={lang} /> : null}
       </div>
     </article>
+  );
+}
+
+/** The format's lineage in one line: #0405 · 26 videos · steadily copied (Shorti's words, in the page's language). */
+function Lineage({ lineage, lang }: { lineage: NonNullable<Card["lineage"]>; lang: UiLang }) {
+  const parts = [
+    lineage.number,
+    lineage.videos ? (lang === "ko" ? `영상 ${lineage.videos}개` : `${lineage.videos} videos`) : null,
+    lineage.stage ?? lineage.ride?.split(" · ")[0],
+  ].filter(Boolean);
+  return (
+    <p className="flex min-w-0 items-center gap-1.5 text-[12px] text-text-3">
+      <span className="shrink-0 font-[640] text-pencil">{lang === "ko" ? "계보" : "Lineage"}</span>
+      <span className="truncate">{parts.join(" · ")}</span>
+    </p>
   );
 }

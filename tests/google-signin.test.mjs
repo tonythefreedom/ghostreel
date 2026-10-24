@@ -29,11 +29,22 @@ test("onboarding starts with Google sign-in", () => {
   assert.match(form, /const STEPS = 4/);
 });
 
-test("a locked action checks the Google sign-in before asking for the passcode", () => {
+test("a locked action asks for the Google sign-in in place; the passcode is folded away", () => {
   const form = src("../components/UnlockForm.tsx");
   assert.match(form, /fetch\("\/api\/auth\/session"\)/);
   assert.match(form, /status === "approved"/);
-  assert.match(form, /t\("unlockSignIn", lang\)/); // "Sign in with Google", in the page's language
+  assert.match(form, /<GoogleSignIn /);
+  assert.match(form, /<details/); // the operator's passcode, closed by default
   const session = src("../app/api/auth/session/route.ts");
   assert.match(session, /ownerCookieFor\(account\)/);
+});
+
+test("an approved Google sign-in is the owner on every owner-only route", () => {
+  const owner = src("../lib/owner.ts");
+  assert.match(owner, /account\?\.status === "approved"/);
+  for (const route of ["../app/api/taste/route.ts", "../app/api/brief/route.ts", "../app/api/render/route.ts"]) {
+    const code = src(route);
+    assert.match(code, /await actor\(req\)/, route);
+    assert.doesNotMatch(code, /requireOwner/, route);
+  }
 });

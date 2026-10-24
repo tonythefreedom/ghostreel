@@ -2,7 +2,8 @@
 // the analysis that spends money is T21's route, behind the spend guard.
 import { randomUUID } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
-import { CREATOR_TTL, creatorKey } from "@/lib/creator";
+import { z } from "zod";
+import { CREATOR_TTL, creatorKey, creatorsKey } from "@/lib/creator";
 import { requireSameSite } from "@/lib/guard";
 import { getGhost } from "@/lib/newtype";
 import { currentAccount, SESSION_COOKIE } from "@/lib/newtype/cinesynth";
@@ -21,18 +22,25 @@ export async function POST(req: NextRequest) {
 
   const raw = await req.text();
   if (raw.length > MAX_BYTES) return NextResponse.json({ error: "too_large" }, { status: 413 });
-  const parsed = CreatorInput.safeParse((() => { try { return JSON.parse(raw); } catch { return null; } })());
+  const body = (() => { try { return JSON.parse(raw) as unknown; } catch { return null; } })();
+  const parsed = CreatorInput.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "bad_body", issues: parsed.error.issues.slice(0, 3) }, { status: 400 });
   if (!(await getGhost(parsed.data.ghostId))) return NextResponse.json({ error: "no_ghost" }, { status: 404 });
+
+  // Editing a saved profile keeps its id (the profile link, the brief's creator block); only the account's own.
+  const editing = z.object({ id: z.string().uuid() }).safeParse(body);
+  const before = editing.success ? Creator.safeParse(await store.get(creatorKey(editing.data.id))) : null;
+  const own = before?.success && before.data.account?.id === account.id ? before.data : null;
 
   const creator = Creator.parse({
     ...parsed.data,
     works: [...new Set(parsed.data.works)],
-    id: randomUUID(),
-    createdAt: new Date().toISOString(),
+    id: own?.id ?? randomUUID(),
+    createdAt: own?.createdAt ?? new Date().toISOString(),
     account: { id: account.id, email: account.email },
   });
   await store.set(creatorKey(creator.id), creator, CREATOR_TTL);
-  await store.push(`creators:${account.id}`, creator.id, 20, CREATOR_TTL); // the account's ghosts, for its MCP tokens
-  return NextResponse.json({ creator }, { status: 201 });
+  // The account's ghosts, for its MCP tokens, newest first; an edited profile is already on the list.
+  if (!own) await store.push(creatorsKey(account.id), creator.id, 20, CREATOR_TTL);
+  return NextResponse.json({ creator }, { status: own ? 200 : 201 });
 }
