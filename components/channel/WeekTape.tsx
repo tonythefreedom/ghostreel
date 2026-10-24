@@ -31,7 +31,7 @@ export function WeekTape({ days, later, ghostId, lang }: { days: WeekDay[]; late
             {d.brief && d.state ? (
               <>
                 <span className="flex flex-col gap-0.5">
-                  <span className="text-[15px] text-text">{d.brief.hook}</span>
+                  <span className="text-[15px] text-text">{lang === "ko" && d.brief.ko?.hook ? d.brief.ko.hook : d.brief.hook}</span>
                   <span className="text-[13px] text-text-3">
                     <span className={STATE[d.state].tone}>{d.state === "failed" ? "✕ " : ""}{t(STATE[d.state].word, lang)}</span>
                     {" · "}{t("written", lang)} <span className="font-mono">{shortDate(d.brief.createdAt, lang)}</span>

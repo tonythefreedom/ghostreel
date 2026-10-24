@@ -53,7 +53,7 @@ export function LinePicker({ briefId, lines, index, options, locked }: {
             } disabled:cursor-default`}>
             <span className="text-[12px] font-[560] leading-snug">{busy === o.say ? t("sbChanging") : o.say}</span>
             <span className="text-[12px] leading-snug text-text-3">
-              {o.basis}
+              {o.current ? t("currentLine") : o.basis}
               {o.share ? <span className="text-text-dim"> · {o.share}</span> : null}
             </span>
           </button>

@@ -69,6 +69,7 @@ export default async function StoryboardPage({ params }: { params: Promise<{ id:
           <span className="font-mono text-[12px]">{brief.durationSec}s · 9:16 · {brief.lang.toUpperCase()}</span>
         </div>
         <h1 className="text-[22px] font-[720] leading-[1.27] tracking-[-0.01em]">{brief.hook}</h1>
+        {lang === "ko" && brief.ko?.hook ? <p className="-mt-1 text-[15px] leading-snug text-text-dim">{brief.ko.hook}</p> : null}
         <p className="text-[13px] leading-snug text-text-3">
           <span className="font-mono">{frames.length}</span> {t("sbBeats", lang)} · <span className="font-mono">{made}</span> {t("sbReady", lang)}. {t("sbNote", lang)}
         </p>

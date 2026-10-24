@@ -2,7 +2,7 @@
 // Lane B (T23). One beat of the storyboard: the scene image when one was made, else the prompt it will be made from.
 // The AI label sits on every image and is never optional.
 import { AiLabel } from "@/components/ui";
-import { useT } from "@/components/Lang";
+import { useLang, useT } from "@/components/Lang";
 import { useState } from "react";
 import { LinePicker } from "@/components/LinePicker";
 import type { LineOption } from "@/lib/lineSuggestions";
@@ -14,6 +14,7 @@ export function StoryboardFrame({ frame, pick }: {
   pick?: { briefId: string; lines: BriefLine[]; options: LineOption[]; locked: boolean };
 }) {
   const t = useT();
+  const ko = useLang() === "ko" ? pick?.lines[frame.index]?.ko : undefined; // the beat's Korean, on a Korean page
   const [copied, setCopied] = useState(false);
 
   async function copy() {
@@ -54,7 +55,8 @@ export function StoryboardFrame({ frame, pick }: {
       ) : (
         <p className="text-[13px] font-[560] leading-snug">“{frame.say}”</p>
       )}
-      <p className="text-[12px] leading-snug text-text-3">{frame.do}</p>
+      {ko?.say ? <p className="-mt-1 text-[12px] leading-snug text-text-dim">{ko.say}</p> : null}
+      <p className="text-[12px] leading-snug text-text-3">{ko?.do || frame.do}</p>
       <div className="flex gap-2">
         {frame.image ? (
           <a href={frame.image.url} download

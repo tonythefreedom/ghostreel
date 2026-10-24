@@ -493,6 +493,7 @@ export const words = {
     en: "Straight from Claude Code · Opus 5.5 · max effort",
   },
   connectDesktopAsk: { ko: "Claude 데스크톱이라면 모델을 Opus 5.5로 고르고 이렇게 보내세요", en: "In Claude Desktop, pick Opus 5.5 and send this" },
+  currentLine: { ko: "지금 대사", en: "Current line" },
   renderByClaude: { ko: "내 Claude로도 렌더할 수 있어요.", en: "Your Claude can render it too." },
   landingClaudeGo: { ko: "내 Claude로 만들기", en: "Make it with Claude" },
   connectModelLine: {

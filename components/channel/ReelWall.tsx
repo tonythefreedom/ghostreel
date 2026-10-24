@@ -5,7 +5,7 @@ import { useState } from "react";
 import { ReelLightbox } from "@/components/kit";
 import { Player } from "@/components/ui";
 import type { Brief, RenderJob } from "@/lib/types";
-import { useT } from "@/components/Lang";
+import { useLang, useT } from "@/components/Lang";
 
 export type Reel = { job: RenderJob; brief: Brief };
 
@@ -13,6 +13,7 @@ const pill = "vellum inline-flex items-center rounded-full px-2.5 py-1 text-[12p
 
 export function ReelWall({ reels }: { reels: Reel[] }) {
   const t = useT();
+  const lang = useLang();
   const [open, setOpen] = useState<Reel | null>(null);
   return (
     <>
@@ -38,7 +39,7 @@ export function ReelWall({ reels }: { reels: Reel[] }) {
                     </>} />
                 )}
               </div>
-              <p className="text-[13px] text-text-dim">{r.brief.hook}</p>
+              <p className="text-[13px] text-text-dim">{lang === "ko" && r.brief.ko?.hook ? r.brief.ko.hook : r.brief.hook}</p>
             </li>
           );
         })}
