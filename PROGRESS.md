@@ -2,6 +2,20 @@
 
 Newest first. Each entry: what is true now, what broke, what is next. Keep it short; long output goes in files.
 
+## 2026-10-24 · A+B — the memory store survives a restart (Tony's decision, Ted's yes)
+
+- Each redeploy restarted `next start` and wiped the memory store: sign-ups, kept shorts, briefs and MCP connect
+  tokens. Tony had to sign up, keep, reconnect Claude and rewrite the brief after every deploy.
+- Without Redis, `lib/store.ts` now also keeps the map in `.data/store.json`. `lib/storeFile.ts` writes it 300 ms
+  after the last change: written whole, temp file then rename, mode 600 in a 700 folder. Expired entries are
+  neither written nor loaded. `GHOSTREEL_STORE_FILE` moves it; `off` turns it off.
+- `.data/` is in `.gitignore`. The file holds creators' plans and scripts, picks, briefs and token hashes (never
+  tokens or CineSynth sessions).
+- Verified on the dev server: seeded a brief, stopped and restarted it, and the brief read back.
+  `tests/store-file.test.mjs`: 5 tests.
+- The first deploy of this commit still starts empty (the old process had no file); every restart after it keeps
+  the data.
+
 ## 2026-10-24 · B — a locked action asks Google before the passcode
 
 - Tony hit the passcode prompt on approve. The brief came from his Claude over MCP, and the browser he opened its

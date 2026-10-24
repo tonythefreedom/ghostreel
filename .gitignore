@@ -7,3 +7,6 @@ node_modules/
 .DS_Store
 .claude/
 .vercel
+
+# The memory store kept across restarts (lib/storeFile.ts): sign-ups, picks, briefs, MCP token hashes
+.data/

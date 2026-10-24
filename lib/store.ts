@@ -1,13 +1,34 @@
 // Small JSON store: Upstash Redis over REST when configured, one process-wide memory map otherwise
 // (a single `next start` process, or dev). Memory paths never await between a read and its write, so they are atomic.
+// Without Redis the map is also kept in a file (lib/storeFile.ts) so a restart keeps sign-ups, picks, briefs and
+// MCP tokens; GHOSTREEL_STORE_FILE=off turns that off.
 import "server-only";
 import { env } from "./env.ts";
+import { loadSnapshot, saveSnapshot, type Entry } from "./storeFile.ts";
 
-type Entry = { value: string; expiresAt?: number };
 type Memory = Map<string, Entry>;
 // One map per process: Next may load this module separately for pages and for route handlers.
-const scope = globalThis as typeof globalThis & { __ghostreelStore?: Memory; __ghostreelSweep?: ReturnType<typeof setInterval> };
-const memory: Memory = (scope.__ghostreelStore ??= new Map());
+const scope = globalThis as typeof globalThis & {
+  __ghostreelStore?: Memory;
+  __ghostreelSweep?: ReturnType<typeof setInterval>;
+  __ghostreelSave?: ReturnType<typeof setTimeout>;
+};
+const file = env.storeFile() === "off" ? null : env.storeFile();
+const memory: Memory = (scope.__ghostreelStore ??= file && !(env.redisUrl() && env.redisToken()) ? loadSnapshot(file) : new Map());
+
+// Writes the map a moment after the last change, so a burst of writes is one file write.
+function persist() {
+  if (!file || usingRedis()) return;
+  if (scope.__ghostreelSave) clearTimeout(scope.__ghostreelSave);
+  scope.__ghostreelSave = setTimeout(() => {
+    scope.__ghostreelSave = undefined;
+    try {
+      saveSnapshot(file, memory);
+    } catch (e) {
+      console.warn(`[store] could not save: ${(e as Error).message}`);
+    }
+  }, 300);
+}
 
 async function redis(command: (string | number)[]): Promise<unknown> {
   const url = env.redisUrl();
@@ -40,7 +61,14 @@ function live(key: string): Entry | undefined {
 
 function sweep() {
   const now = Date.now();
-  for (const [key, entry] of memory) if (entry.expiresAt !== undefined && entry.expiresAt <= now) memory.delete(key);
+  let dropped = false;
+  for (const [key, entry] of memory) {
+    if (entry.expiresAt !== undefined && entry.expiresAt <= now) {
+      memory.delete(key);
+      dropped = true;
+    }
+  }
+  if (dropped) persist();
 }
 if (!scope.__ghostreelSweep) {
   scope.__ghostreelSweep = setInterval(sweep, 60_000);
@@ -68,6 +96,7 @@ export const store = {
       return;
     }
     memory.set(k(key), { value: raw, expiresAt: expiry(ttlSec) });
+    persist();
   },
 
   // Counter whose window starts at its first increment; used for spend caps.
@@ -80,6 +109,7 @@ export const store = {
     const hit = live(k(key));
     const n = (hit ? Number(hit.value) : 0) + 1;
     memory.set(k(key), { value: String(n), expiresAt: hit?.expiresAt ?? expiry(ttlSec) });
+    persist();
     return n;
   },
 
@@ -94,6 +124,7 @@ export const store = {
     const hit = live(k(key));
     const list = hit ? (JSON.parse(hit.value) as string[]) : [];
     memory.set(k(key), { value: JSON.stringify([item, ...list].slice(0, max)), expiresAt: expiry(ttlSec) });
+    persist();
   },
 
   async list(key: string): Promise<string[]> {

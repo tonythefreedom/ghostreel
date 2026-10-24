@@ -14,4 +14,6 @@ export const env = {
   redisToken: () => optional("UPSTASH_REDIS_REST_TOKEN"),
   passcode: () => optional("GHOSTREEL_PASSCODE"),
   dailyCap: () => Number(optional("GHOSTREEL_DAILY_CAP") ?? "40"),
+  // Where the memory store is kept across restarts (no Redis); "off" keeps it in memory only.
+  storeFile: () => optional("GHOSTREEL_STORE_FILE") ?? `${process.cwd()}/.data/store.json`,
 };
