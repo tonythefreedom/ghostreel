@@ -10,7 +10,7 @@ import { TrendCard } from "./TrendCard";
 const PARTS: KeepPart[] = ["hook", "beat", "look", "sound"];
 const THRESHOLD = 96;
 
-export function TasteSwipe({ cards, ghostId, lang = "ko" }: { cards: Card[]; ghostId: string; lang?: UiLang }) {
+export function TasteSwipe({ cards, ghostId, lang = "en" }: { cards: Card[]; ghostId: string; lang?: UiLang }) {
   const [picks, setPicks] = useState<TastePick[]>([]);
   const [asking, setAsking] = useState<Card | null>(null);
   const [parts, setParts] = useState<KeepPart[]>(["hook"]);

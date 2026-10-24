@@ -65,10 +65,10 @@ export const words = {
 } as const satisfies Record<string, Record<UiLang, string>>;
 
 export type WordKey = keyof typeof words;
-export const t = (key: WordKey, lang: UiLang = "ko") => words[key][lang];
+export const t = (key: WordKey, lang: UiLang = "en") => words[key][lang];
 
 // Counts: at most three significant digits. KO uses 만/억, EN uses K/M/B. Never a forecast, only what was read.
-export function viewCount(n: number, lang: UiLang = "ko"): string {
+export function viewCount(n: number, lang: UiLang = "en"): string {
   const sig = (x: number) => (x >= 100 ? Math.round(x).toString() : x >= 10 ? x.toFixed(1).replace(/\.0$/, "") : x.toFixed(2).replace(/\.?0+$/, ""));
   if (lang === "ko") {
     if (n >= 1e8) return `${sig(n / 1e8)}억`;
@@ -82,7 +82,7 @@ export function viewCount(n: number, lang: UiLang = "ko"): string {
 }
 
 // Dates in KST: «10.21» in KO, "Oct 21" in EN.
-export function shortDate(iso: string, lang: UiLang = "ko"): string {
+export function shortDate(iso: string, lang: UiLang = "en"): string {
   const d = new Date(iso.length === 10 ? `${iso}T00:00:00Z` : iso);
   if (Number.isNaN(d.getTime())) return "";
   const kst = new Date(d.getTime() + 9 * 3600_000);

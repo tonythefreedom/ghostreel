@@ -2,7 +2,7 @@
 // so the owner plans against it instead of meeting a 429. Turns amber at a fifth left.
 import { remaining } from "./logic";
 
-export function SpendMeter({ used, cap, lang = "ko" }: { used: number; cap: number; lang?: "ko" | "en" }) {
+export function SpendMeter({ used, cap, lang = "en" }: { used: number; cap: number; lang?: "ko" | "en" }) {
   const { left, pct, low } = remaining(used, cap);
   return (
     <div className="flex flex-col gap-1.5 rounded-[var(--radius-card)] border border-line bg-surface p-3">

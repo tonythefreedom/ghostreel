@@ -31,7 +31,7 @@ export function StoryboardFrame({ frame, pick }: {
           <img src={frame.image.url} alt="" className="size-full object-cover" />
         ) : (
           <div className="flex size-full flex-col justify-end gap-1 bg-gradient-to-b from-accent/30 to-surface-2 p-3">
-            <span className="text-[12px] font-semibold text-text-dim">장면 대기</span>
+            <span className="text-[12px] font-semibold text-text-dim">Scene pending</span>
             <p className="line-clamp-6 font-mono text-[11px] leading-snug text-text">{frame.prompt}</p>
           </div>
         )}
@@ -39,7 +39,7 @@ export function StoryboardFrame({ frame, pick }: {
           AI-generated · Virtual human
         </span>
         {frame.image ? (
-          <span className="absolute bottom-2 left-2 rounded-full bg-bg/80 px-2 py-0.5 text-[10px] font-semibold text-warn">미리 만든 장면</span>
+          <span className="absolute bottom-2 left-2 rounded-full bg-bg/80 px-2 py-0.5 text-[10px] font-semibold text-warn">Pre-made scene</span>
         ) : null}
       </div>
       <div className="flex items-baseline gap-2">
@@ -56,12 +56,12 @@ export function StoryboardFrame({ frame, pick }: {
         {frame.image ? (
           <a href={frame.image.url} download
             className="grid h-9 flex-1 place-items-center rounded-[var(--radius-card)] bg-surface-2 text-[12px] font-semibold">
-            장면 받기
+            Download
           </a>
         ) : null}
         <button type="button" onClick={() => void copy()}
           className="h-9 flex-1 rounded-[var(--radius-card)] border border-line text-[12px] font-semibold text-text-dim">
-          {copied ? "복사됨" : frame.image ? "프롬프트" : "장면 프롬프트 복사"}
+          {copied ? "Copied" : frame.image ? "Prompt" : "Copy scene prompt"}
         </button>
       </div>
     </li>

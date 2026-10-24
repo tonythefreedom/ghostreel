@@ -15,7 +15,7 @@ export interface KeptItem {
 
 const INTENTS: Array<[Intent, WordKey]> = [["keep", "intentKeep"], ["adapt", "intentAdapt"], ["twist", "intentTwist"]];
 
-export function BriefStarter({ ghostId, items, lang = "ko" }: { ghostId: string; items: KeptItem[]; lang?: UiLang }) {
+export function BriefStarter({ ghostId, items, lang = "en" }: { ghostId: string; items: KeptItem[]; lang?: UiLang }) {
   const router = useRouter();
   const [intent, setIntent] = useState<Record<string, Intent>>({});
   const [busy, setBusy] = useState<string | null>(null);

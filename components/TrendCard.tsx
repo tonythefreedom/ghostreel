@@ -5,7 +5,7 @@ import type { UiLang } from "@/lib/words";
 
 const PLATFORM: Record<string, string> = { instagram: "Reels", tiktok: "TikTok", youtube: "Shorts" };
 
-export function TrendCard({ card, lang = "ko" }: { card: Card; lang?: UiLang }) {
+export function TrendCard({ card, lang = "en" }: { card: Card; lang?: UiLang }) {
   return (
     <article className="relative aspect-[9/16] w-full overflow-hidden rounded-[var(--radius-card)] border border-line bg-surface select-none">
       {card.posterUrl ? (

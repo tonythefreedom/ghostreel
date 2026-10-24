@@ -5,7 +5,7 @@ import { segments } from "./logic";
 
 type Props = { step: number; total: number; onBack?: () => void; lang?: "ko" | "en" };
 
-export function FunnelProgress({ step, total, onBack, lang = "ko" }: Props) {
+export function FunnelProgress({ step, total, onBack, lang = "en" }: Props) {
   return (
     <div className="flex items-center gap-3">
       <button

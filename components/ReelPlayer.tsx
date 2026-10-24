@@ -3,7 +3,7 @@
 import { prerenderMatches, type Brief, type RenderJob } from "@/lib/types";
 import { DemoTag } from "./TrustLine";
 
-export function ReelPlayer({ job, brief, lang = "ko" }: { job: RenderJob; brief?: Brief; lang?: "ko" | "en" }) {
+export function ReelPlayer({ job, brief, lang = "en" }: { job: RenderJob; brief?: Brief; lang?: "ko" | "en" }) {
   const prerender = job.provider === "prerender";
   const mismatch = prerender && (!brief || !prerenderMatches(job, brief));
   return (

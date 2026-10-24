@@ -15,7 +15,7 @@ const JOB_WORD: Record<RenderJob["status"], WordKey> = {
   failed: "renderFailed",
 };
 
-export function BriefEditor({ initial, initialJob, lang = "ko" }: { initial: Brief; initialJob: RenderJob | null; lang?: UiLang }) {
+export function BriefEditor({ initial, initialJob, lang = "en" }: { initial: Brief; initialJob: RenderJob | null; lang?: UiLang }) {
   const [brief, setBrief] = useState(initial);
   const [dirty, setDirty] = useState(false);
   const [busy, setBusy] = useState(false);

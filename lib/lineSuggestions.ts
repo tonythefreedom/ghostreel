@@ -14,7 +14,7 @@ export type LineSuggestions = z.infer<typeof LineSuggestions>;
 
 export interface LineOption {
   say: string;
-  basis: string; // Shorti's words, or "지금 대사" for the brief's own line
+  basis: string; // Shorti's words, or "Current line" for the brief's own line
   share?: string; // how many of the format's hits do it, as Shorti says it
   current: boolean;
 }
@@ -34,14 +34,14 @@ function basisFor(from: z.infer<typeof From>, reads: ShortiReads): Pick<LineOpti
   }
   if (from.kind === "hook") {
     const fact = r?.hookFacts.find((f) => same(f, from.match));
-    return fact ? { basis: `Shorti 오프닝 · ${fact}` } : null;
+    return fact ? { basis: `Shorti opening · ${fact}` } : null;
   }
   if (from.kind === "yours") {
     const item = r?.makeItYours.find((m) => same(m, from.match));
-    return item ? { basis: `바꿔도 되는 것 · ${item}` } : null;
+    return item ? { basis: `Yours to change · ${item}` } : null;
   }
   const spot = reads.spots.find((s) => same(s.label, from.match));
-  return spot ? { basis: `빈자리 · ${spot.label}` } : null;
+  return spot ? { basis: `Open spot · ${spot.label}` } : null;
 }
 
 /** Per beat: the brief's own line first, then the options whose Shorti read is present. Empty when none are. */
@@ -53,6 +53,6 @@ export function suggestionsFor(brief: Brief, data: LineSuggestions, reads: Short
       const b = basisFor(o.from, reads);
       return b ? [{ say: o.say, ...b, current: false }] : [];
     });
-    return more.length ? [{ say: line.say, basis: "지금 대사", current: true }, ...more] : [];
+    return more.length ? [{ say: line.say, basis: "Current line", current: true }, ...more] : [];
   });
 }

@@ -9,7 +9,7 @@ const states = {
   en: { queued: "Queued", running: "Running", done: "Done", failed: "Failed" },
 };
 
-export function RenderJob({ job, brief, lang = "ko" }: { job: RenderJobData; brief?: Brief; lang?: "ko" | "en" }) {
+export function RenderJob({ job, brief, lang = "en" }: { job: RenderJobData; brief?: Brief; lang?: "ko" | "en" }) {
   const [now, setNow] = useState<number | null>(null);
   const active = job.status === "queued" || job.status === "running";
   useEffect(() => {

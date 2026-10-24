@@ -13,7 +13,7 @@ const TONE = { queued: "bg-surface-2 text-text-dim", running: "bg-accent text-te
 
 type Props = { jobs: RenderJob[]; onOpen: (job: RenderJob) => void; empty?: ReactNode; lang?: "ko" | "en" };
 
-export function ReelGrid({ jobs, onOpen, empty, lang = "ko" }: Props) {
+export function ReelGrid({ jobs, onOpen, empty, lang = "en" }: Props) {
   // Ages are drawn after mount so the server and the first client paint agree.
   const [now, setNow] = useState<number | null>(null);
   useEffect(() => {

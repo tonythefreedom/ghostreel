@@ -17,8 +17,8 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "고스트릴 GhostReel",
-  description: "내 숏폼 감각을 사람처럼 출연하는 가상 캐릭터에 입혀, 얼굴도 촬영도 없이 매일 올라가는 채널을 부업으로.",
+  title: "GhostReel",
+  description: "Your short-form style, performed every day by a virtual human: no face, no shoot, a channel on the side.",
 };
 
 export const viewport: Viewport = {
@@ -28,7 +28,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko" className={`${pretendard.variable} ${jetbrains.variable}`}>
+    <html lang="en" className={`${pretendard.variable} ${jetbrains.variable}`}>
       <body className="min-h-dvh">
         <div className="mx-auto w-full max-w-[430px] px-4">{children}</div>
       </body>

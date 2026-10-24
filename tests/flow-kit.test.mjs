@@ -20,7 +20,7 @@ test("every ghost thumbnail and frame in the kit carries the full AI label", () 
 });
 
 test("the creator loop has four steps and every screen points inside it", () => {
-  assert.deepEqual(CREATOR_FLOW.map((s) => s.title), ["등록", "고르기", "승인하기", "받기"]);
+  assert.deepEqual(CREATOR_FLOW.map((s) => s.title), ["Sign up", "Pick", "Approve", "Get it"]);
   for (const n of Object.values(FLOW_STEP)) assert.ok(n >= 1 && n <= CREATOR_FLOW.length);
 });
 

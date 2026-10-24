@@ -29,7 +29,7 @@ test("every option's basis is Shorti's own words from the recorded read", () => 
 
 test("an option whose Shorti read is missing is not offered", () => {
   const beats = suggestionsFor(brief, data, { recipe: null, spots });
-  assert.ok(beats.flat().every((o) => o.current || o.basis.startsWith("빈자리")));
+  assert.ok(beats.flat().every((o) => o.current || o.basis.startsWith("Open spot")));
   assert.deepEqual(suggestionsFor(brief, data, { recipe: null, spots: [] }), [[], []]);
 });
 

@@ -5,7 +5,7 @@ import type { Ghost, RenderJob } from "@/lib/types";
 import { FunnelProgress, GhostDock, ReelGrid, ReelLightbox, SpendMeter, StepStrip } from ".";
 
 export function KitPreview({ ghosts, jobs }: { ghosts: Ghost[]; jobs: RenderJob[] }) {
-  const [lang, setLang] = useState<"ko" | "en">("ko");
+  const [lang, setLang] = useState<"ko" | "en">("en");
   const [ghost, setGhost] = useState(ghosts[0]?.id);
   const [step, setStep] = useState(2);
   const [open, setOpen] = useState<RenderJob | null>(null);
@@ -17,7 +17,7 @@ export function KitPreview({ ghosts, jobs }: { ghosts: Ghost[]; jobs: RenderJob[
       <header className="flex items-center justify-between">
         <h1 className="text-[24px] font-extrabold tracking-[-0.02em]">Kit</h1>
         <button type="button" onClick={() => setLang(lang === "ko" ? "en" : "ko")} className="rounded-full border border-line px-3 py-1 text-[13px]">
-          {lang === "ko" ? "EN" : "한국어"}
+          {lang === "ko" ? "EN" : "KO"}
         </button>
       </header>
 

@@ -14,7 +14,7 @@ const T = {
   en: { play: "Play", pause: "Pause", mute: "Mute", unmute: "Unmute", seek: "Position", download: "Download", copy: "Copy link", copied: "Copied", close: "Close", pre: "pre-rendered", mismatch: "Not rendered from this brief" },
 };
 
-export function ReelLightbox({ job, brief, onClose, shareUrl, lang = "ko" }: Props) {
+export function ReelLightbox({ job, brief, onClose, shareUrl, lang = "en" }: Props) {
   const t = T[lang];
   const dialog = useRef<HTMLDialogElement>(null);
   const video = useRef<HTMLVideoElement>(null);

@@ -14,7 +14,7 @@ type Props = {
   lang?: "ko" | "en";
 };
 
-export function GhostDock({ ghosts, selectedId, onSelect, onCreate, max = 5, lang = "ko" }: Props) {
+export function GhostDock({ ghosts, selectedId, onSelect, onCreate, max = 5, lang = "en" }: Props) {
   const shown = ghosts.slice(0, max);
   const hidden = ghosts.length - shown.length;
   const refs = useRef<(HTMLButtonElement | null)[]>([]);

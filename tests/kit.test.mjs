@@ -22,10 +22,10 @@ test("clock reads m:ss and never shows NaN", () => {
 
 test("age is short and local", () => {
   const now = Date.parse("2026-10-24T12:00:00Z");
-  assert.equal(age("2026-10-24T11:59:30Z", now), "방금");
-  assert.equal(age("2026-10-24T11:57:00Z", now), "3분");
+  assert.equal(age("2026-10-24T11:59:30Z", now, "ko"), "방금");
+  assert.equal(age("2026-10-24T11:57:00Z", now, "ko"), "3분");
   assert.equal(age("2026-10-24T09:00:00Z", now, "en"), "3h");
-  assert.equal(age("2026-10-21T12:00:00Z", now), "3일");
+  assert.equal(age("2026-10-21T12:00:00Z", now), "3d");
   assert.equal(age("not a date", now), "");
 });
 

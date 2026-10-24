@@ -1,9 +1,9 @@
 // Lane B. The creator-first loop as the step strip shows it: register once, then pick, approve, get, every day.
 export const CREATOR_FLOW: Array<{ title: string; body: string }> = [
-  { title: "등록", body: "내 배경과 숏폼, 기획을 한 번 알려 줘요. Shorti 가 내 스타일을 읽어요." },
-  { title: "고르기", body: "이번 주 해외에서 뜨는 숏폼에서 내 스타일에 맞는 것을 남겨요." },
-  { title: "승인하기", body: "고스트가 쓴 브리프와 콘티를 고치고, 대사를 고른 뒤 승인해요." },
-  { title: "받기", body: "가상 인물이 출연한 숏폼을 받아 예약해요. 내 얼굴은 나오지 않아요." },
+  { title: "Sign up", body: "Share your background, shorts and plans once. Shorti reads your style." },
+  { title: "Pick", body: "Keep the shorts trending abroad this week that fit your style." },
+  { title: "Approve", body: "Edit the brief and storyboard your ghost wrote, pick the lines, then approve." },
+  { title: "Get it", body: "Get the short your virtual human stars in and schedule it. Your face never appears." },
 ];
 
 /** Which trend deck fits a creator's niche: Shorti's fields are beauty and fashion; beauty when neither is named. */

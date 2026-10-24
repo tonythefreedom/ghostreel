@@ -54,18 +54,18 @@ export default async function StoryboardPage({ params }: { params: Promise<{ id:
           <span className="grid size-6 place-items-center rounded-full bg-accent text-[11px] font-extrabold text-text">
             {ghost.name.slice(0, 1)}
           </span>
-          {ghost.name} · 콘티
+          {ghost.name} · Storyboard
           <span className="font-mono text-[11px]">{brief.durationSec}s · 9:16 · {brief.lang.toUpperCase()}</span>
         </div>
         <h1 className="text-[24px] font-extrabold leading-tight tracking-[-0.02em]">{brief.hook}</h1>
         <p className="text-[13px] text-text-dim">
-          비트 {frames.length}개 · 장면 {made}개 준비됨. 장면은 CineSynth 로 만들고, 만들기 전에는 쓸 프롬프트를 보여 줍니다.
+          {frames.length} beats · {made} scenes ready. Scenes are made with CineSynth; until then each shows the prompt it will use.
         </p>
         {offered ? (
           <p className="text-[12px] text-text-dim">
-            대사 후보는 GhostReel 이 썼고, 근거는 Shorti 가 이 원본에서 읽은 move·오프닝·빈자리를 그대로 보여 줘요
-            {recipe?.bpm ? ` (원본 ${Math.round(recipe.bpm)} BPM, ${((recipe.lengthMs ?? 0) / 1000).toFixed(1)}초)` : ""}.
-            {locked ? " 승인된 브리프라 바꿀 수 없어요." : " 고르면 브리프에 바로 반영돼요."}
+            GhostReel wrote the line options; each shows, in Shorti's own words, the move, opening or open spot it read in the source
+            {recipe?.bpm ? ` (source ${Math.round(recipe.bpm)} BPM, ${((recipe.lengthMs ?? 0) / 1000).toFixed(1)} s)` : ""}.
+            {locked ? " The brief is approved, so it can't change." : " Picking one updates the brief right away."}
           </p>
         ) : null}
       </header>
@@ -81,7 +81,7 @@ export default async function StoryboardPage({ params }: { params: Promise<{ id:
         <div className="mx-auto w-full max-w-[430px] px-4">
           <Link href={`/brief/${brief.id}`}
             className="grid h-14 w-full place-items-center rounded-[var(--radius-card)] bg-accent text-[15px] font-extrabold">
-            {brief.status === "approved" ? "브리프와 렌더 보기" : "브리프로 돌아가 승인하기"}
+            {brief.status === "approved" ? "See the brief and render" : "Back to the brief to approve"}
           </Link>
         </div>
       </div>

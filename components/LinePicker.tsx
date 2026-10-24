@@ -29,11 +29,11 @@ export function LinePicker({ briefId, lines, index, options, locked }: {
         body: JSON.stringify({ id: briefId, edits: { lines: next } }),
       });
       if (res.status === 401) return setNeedsUnlock(say);
-      if (res.status === 409) return setError("승인된 브리프는 바꿀 수 없어요.");
+      if (res.status === 409) return setError("An approved brief can't be changed.");
       if (!res.ok) throw new Error(String(res.status));
       router.refresh();
     } catch {
-      setError("저장하지 못했어요.");
+      setError("Couldn't save.");
     } finally {
       setBusy(null);
     }
@@ -41,7 +41,7 @@ export function LinePicker({ briefId, lines, index, options, locked }: {
 
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-[11px] font-semibold text-text-dim">Shorti 추천 대사</span>
+      <span className="text-[11px] font-semibold text-text-dim">Lines from Shorti</span>
       <div role="radiogroup" className="flex flex-col gap-1">
         {options.map((o) => (
           <button key={o.say} type="button" role="radio" aria-checked={o.current} disabled={locked || o.current || busy !== null}
@@ -49,7 +49,7 @@ export function LinePicker({ briefId, lines, index, options, locked }: {
             className={`flex flex-col items-start gap-0.5 rounded-[8px] border px-2 py-1.5 text-left ${
               o.current ? "border-ghost bg-ghost/10" : "border-line"
             } disabled:cursor-default`}>
-            <span className="text-[12px] font-semibold leading-snug">{busy === o.say ? "바꾸는 중…" : o.say}</span>
+            <span className="text-[12px] font-semibold leading-snug">{busy === o.say ? "Changing…" : o.say}</span>
             <span className="text-[10px] leading-snug text-text-dim">
               {o.basis}
               {o.share ? <span className="text-ghost"> · {o.share}</span> : null}

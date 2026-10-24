@@ -17,7 +17,7 @@ export const LOOP_STEPS: Record<"ko" | "en", Step[]> = {
   ],
 };
 
-export function StepStrip({ steps, current, lang = "ko" }: { steps?: Step[]; current: number; lang?: "ko" | "en" }) {
+export function StepStrip({ steps, current, lang = "en" }: { steps?: Step[]; current: number; lang?: "ko" | "en" }) {
   const list = steps ?? LOOP_STEPS[lang];
   const marks = segments(current, list.length);
   return (

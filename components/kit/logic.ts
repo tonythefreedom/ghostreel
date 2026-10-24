@@ -17,7 +17,7 @@ export function clock(seconds: number): string {
 }
 
 /** "방금", "3분", "2시간", "5일" (or the English short form) since an ISO time. */
-export function age(iso: string, now: number, lang: "ko" | "en" = "ko"): string {
+export function age(iso: string, now: number, lang: "ko" | "en" = "en"): string {
   const at = Date.parse(iso);
   if (Number.isNaN(at)) return "";
   const min = Math.floor(Math.max(0, now - at) / 60_000);

@@ -32,6 +32,18 @@ Ted: "토니가 대사 MCP 툴 등을 데모에 사용하려고하니까 로그�
   or the new `recipeEdit` cues for `LinePicker`. (2) a recipe-edit reader in `lib/shorti/`: done (`recipeEdit`);
   Lane B may call it from server code.
 
+## 2026-10-24 · English by default, every screen (Tony's decision)
+
+- Tony: the front end defaults to English and everything on screen is English. Done across both lanes in one
+  commit: Lane B copy rewritten in English (onboarding, profile, style, storyboard, line picker, flow strip, scene
+  labels); the kit, player and render job default to `lang = "en"`; Lane A components and `lib/words.ts` helpers
+  (`t`, `viewCount`, `shortDate`) default to `"en"`; the landing page, `<html lang>`, title and description are
+  English. The Korean halves of `words.ts` and the kit stay, so a toggle (T17) can still switch.
+- Lane A files changed by Lane B on Tony's say-so: `app/page.tsx`, `lib/words.ts`, `components/BriefEditor.tsx`,
+  `BriefStarter.tsx`, `TasteSwipe.tsx`, `TrendCard.tsx`, `TrustLine.tsx`, `UnlockForm.tsx` (defaults only, plus
+  the landing copy). Shared: `app/layout.tsx`, `tests/kit.test.mjs` (default-language `age` now expects English).
+- Verified at 375 px: landing, onboarding, taste deck, brief editor and storyboard all read in English.
+
 ## 2026-10-24 · B — demo flow: profile → taste carries field and creator; asks for Lane A
 
 - `/profile/[id]` now opens `/taste?ghost=…&field=…&creator=…`: the deck follows the creator's niche (`fieldFor` in

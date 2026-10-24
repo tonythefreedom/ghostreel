@@ -1,7 +1,7 @@
 // Where a number came from and when it was read. Never a forecast.
 import { shortDate, t, viewCount, type UiLang } from "@/lib/words";
 
-export function TrustLine({ views, asOf, lang = "ko" }: { views?: number; asOf?: string; lang?: UiLang }) {
+export function TrustLine({ views, asOf, lang = "en" }: { views?: number; asOf?: string; lang?: UiLang }) {
   if (views === undefined) return null;
   return (
     <p className="flex items-center gap-1.5 text-[13px] text-text-dim">

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { t, type UiLang } from "@/lib/words";
 
-export function UnlockForm({ onUnlocked, lang = "ko" }: { onUnlocked: () => void; lang?: UiLang }) {
+export function UnlockForm({ onUnlocked, lang = "en" }: { onUnlocked: () => void; lang?: UiLang }) {
   const [passcode, setPasscode] = useState("");
   const [wrong, setWrong] = useState(false);
 
