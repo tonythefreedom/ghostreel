@@ -87,7 +87,23 @@ export const CreatorInput = z.object({
 });
 export type CreatorInput = z.infer<typeof CreatorInput>;
 
-export const Creator = CreatorInput.extend({ id: z.string().uuid(), createdAt: z.string() });
+// The CineSynth user a creator signed in as (Google, the same account CineSynth uses). Its status is CineSynth's:
+// "pending" until CineSynth approves the email, and nothing renders before that.
+export const CinesynthAccount = z.object({
+  id: z.number().int(),
+  email: z.string().email(),
+  name: z.string().default(""),
+  picture: z.string().nullish(),
+  role: z.string().default("user"),
+  status: z.enum(["approved", "pending", "suspended"]),
+});
+export type CinesynthAccount = z.infer<typeof CinesynthAccount>;
+
+export const Creator = CreatorInput.extend({
+  id: z.string().uuid(),
+  createdAt: z.string(),
+  account: CinesynthAccount.pick({ id: true, email: true }).optional(), // who signed up; set by the server, never the form
+});
 export type Creator = z.infer<typeof Creator>;
 
 // How a hit moves, beat by beat (shorti_recipe kind "edit"): what its hits share and what is free to change.

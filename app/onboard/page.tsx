@@ -1,11 +1,16 @@
 // Lane B (T8). Registration: the creator's background, past shorts, plans and scripts, and the virtual human.
+import { cookies } from "next/headers";
 import { OnboardForm } from "@/components/OnboardForm";
 import { listCharacters } from "@/lib/newtype";
+import { currentAccount, SESSION_COOKIE } from "@/lib/newtype/cinesynth";
 
 export const dynamic = "force-dynamic";
 
 export default async function OnboardPage() {
-  const ghosts = await listCharacters();
+  const [ghosts, account] = await Promise.all([
+    listCharacters(),
+    currentAccount((await cookies()).get(SESSION_COOKIE)?.value),
+  ]);
   return (
     <main className="flex min-h-dvh flex-col gap-6 py-6">
       <header className="flex flex-col gap-2">
@@ -18,7 +23,7 @@ export default async function OnboardPage() {
           We read the shorts and plans you've made, learn your style, and a virtual human makes a new short in it every day, ready to schedule.
         </p>
       </header>
-      <OnboardForm ghosts={ghosts} />
+      <OnboardForm ghosts={ghosts} initialAccount={account} />
     </main>
   );
 }

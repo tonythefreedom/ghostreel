@@ -2,6 +2,22 @@
 
 Newest first. Each entry: what is true now, what broke, what is next. Keep it short; long output goes in files.
 
+## 2026-10-24 · B — sign in with Google as the CineSynth user (Tony's decision)
+
+- Tony: Nexus and CineSynth need Google sign-in, so GhostReel onboarding uses CineSynth's own Google sign-in. This
+  replaces PRD's "no accounts or sign-in" for the creator path; the owner passcode still guards spend routes.
+- `/onboard` starts with "Continue with Google" (Google Identity Services, CineSynth's public client id read from its
+  `/api/config`). `POST /api/auth/google` trades the Google ID token at CineSynth `/api/auth/google` for a CineSynth
+  session; that token stays in the httpOnly cookie `gr_cs` (7 days) and never reaches the page.
+  `GET /api/auth/session` returns the account and client id; `DELETE` signs out.
+- `POST /api/creator` now needs an approved CineSynth account (CineSynth marks a new email "pending") and stores it on
+  `Creator.account`. `CinesynthAccount` is in `lib/types.ts`.
+- `GET /api/newtype/media?url=` streams the signed-in user's own CineSynth result links with their session; only
+  CineSynth `/api/mcp/media/…` links pass. (CineSynth now also serves those links without a session for an hour.)
+- Tony added `http://localhost:3000` and `https://ghost.newtype-ai.com` as JavaScript origins on the Google client.
+  The button renders on both lanes' new design. The sign-in itself is to be checked by Tony on the deployed site.
+- `tests/google-signin.test.mjs`: 4 tests. Gate: 65 tests, typecheck, build.
+
 ## 2026-10-24 · Lane A screens on the new design: landing, taste, brief, ghost channel (A)
 
 - Taste: the deck as a fan (fan spring; drag past 96 px decides, ← skip, → keep, Z undo), eight a round with

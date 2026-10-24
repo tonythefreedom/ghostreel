@@ -27,5 +27,5 @@ test("the creator loop has four steps and every screen points inside it", () => 
 test("onboarding asks one thing per screen with the kit's progress bar", () => {
   const form = src("../components/OnboardForm.tsx");
   assert.match(form, /<FunnelProgress /);
-  assert.equal((form.match(/hidden=\{step !== \d\}/g) ?? []).length, 3);
+  assert.equal((form.match(/hidden=\{step !== \d\}/g) ?? []).length, 4);
 });
