@@ -17,6 +17,15 @@ Ted: "토니가 대사 MCP 툴 등을 데모에 사용하려고하니까 로그�
   or the new `recipeEdit` cues for `LinePicker`. (2) a recipe-edit reader in `lib/shorti/`: done (`recipeEdit`);
   Lane B may call it from server code.
 
+## 2026-10-24 · T22 (B) — the creator's style from their own shorts
+
+- `/profile/[id]` reads each registered short with keyless Shorti (`reading` + `recipeEdit`, cached) and sums them up
+  in `lib/creatorStyle.ts`: openings as Shorti said them, the moves their formats' hits share (with Shorti's share and
+  how many of the creator's shorts carry each), what the take may change, median BPM and length. Counting only, no
+  forecast; a short Shorti cannot read is left out and the card says so. `tests/creator-style.test.mjs`: 3 tests.
+- Verified at 375 px: 2/2 shorts read, 117 BPM, 16.7 s, three shared moves, four make-it-yours items.
+- `cinesynth_link` without `create` now answers `linked: true` after the CineSynth fix went live (13:12 KST).
+
 ## 2026-10-24 · T23 (B) — line options rest on Shorti's live moves; T7 lip-sync blocked
 
 - Each line option now points at a Shorti read (a hit's move, an opening fact, what the take may change, an open
