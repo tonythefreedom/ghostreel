@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { KeepPart, TastePick, TrendCard as Card } from "@/lib/types";
 import { t, type UiLang } from "@/lib/words";
+import { BriefStarter } from "./BriefStarter";
 import { TrendCard } from "./TrendCard";
 
 const PARTS: KeepPart[] = ["hook", "beat", "look", "sound"];
@@ -14,11 +15,12 @@ export function TasteSwipe({ cards, ghostId, lang = "ko" }: { cards: Card[]; gho
   const [parts, setParts] = useState<KeepPart[]>(["hook"]);
   const [dx, setDx] = useState(0);
   const [toast, setToast] = useState(false);
+  const [finished, setFinished] = useState(false);
   const drag = useRef<{ x: number; id: number } | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const index = picks.length;
-  const card = asking ? null : cards[index];
+  const card = asking || finished ? null : cards[index];
 
   useEffect(() => {
     fetch(`/api/taste?ghost=${ghostId}`)
@@ -43,7 +45,7 @@ export function TasteSwipe({ cards, ghostId, lang = "ko" }: { cards: Card[]; gho
   );
 
   const pick = (c: Card, kept: boolean, keep: KeepPart[] = []) =>
-    save([...picks, { ghostId, videoId: c.videoId, formatId: c.formatId, kept, keep, at: new Date().toISOString() }]);
+    save([...picks, { ghostId, videoId: c.videoId, url: c.url, formatId: c.formatId, kept, keep, at: new Date().toISOString() }]);
 
   const decide = useCallback(
     (kept: boolean) => {
@@ -134,19 +136,16 @@ export function TasteSwipe({ cards, ghostId, lang = "ko" }: { cards: Card[]; gho
           </button>
         </section>
       ) : (
-        <section className="flex flex-col gap-3 rounded-[var(--radius-card)] border border-line bg-surface p-4">
+        <section className="flex flex-col gap-3">
           <p className="text-[18px] font-extrabold">{t("done", lang)}</p>
-          <ul className="flex flex-col gap-2 text-[13px]">
-            {kept.map((p) => {
+          <BriefStarter
+            ghostId={ghostId}
+            lang={lang}
+            items={kept.map((p) => {
               const c = cards.find((x) => x.videoId === p.videoId);
-              return (
-                <li key={p.videoId} className="flex items-start justify-between gap-3">
-                  <span className="text-text">{c?.formatTitle ?? c?.hook ?? p.videoId}</span>
-                  <span className="shrink-0 text-ghost">{p.keep.map((k) => t(k, lang)).join(" · ")}</span>
-                </li>
-              );
+              return { videoId: p.videoId, title: c?.formatTitle ?? c?.hook ?? p.videoId, keep: p.keep };
             })}
-          </ul>
+          />
         </section>
       )}
 
@@ -158,6 +157,11 @@ export function TasteSwipe({ cards, ghostId, lang = "ko" }: { cards: Card[]; gho
           <button type="button" onClick={() => decide(true)} className="h-14 rounded-[var(--radius-card)] bg-ghost font-extrabold text-bg">
             {t("keep", lang)} →
           </button>
+          {kept.length > 0 ? (
+            <button type="button" onClick={() => setFinished(true)} className="col-span-2 h-10 text-[13px] font-semibold text-ghost">
+              {t("done", lang)} · {t("writeBrief", lang)} →
+            </button>
+          ) : null}
         </div>
       ) : null}
 

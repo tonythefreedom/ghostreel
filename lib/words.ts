@@ -23,6 +23,21 @@ export const words = {
   readBy: { ko: "Shorti 읽음", en: "read by Shorti" },
   fixture: { ko: "기록된 데이터", en: "recorded data" },
   aiLabel: { ko: "AI-generated · Virtual human", en: "AI-generated · Virtual human" },
+  intentKeep: { ko: "그대로", en: "Keep" },
+  intentAdapt: { ko: "내 식대로", en: "Adapt" },
+  intentTwist: { ko: "비틀기", en: "Twist" },
+  writeBrief: { ko: "브리프 쓰기", en: "Write the brief" },
+  writing: { ko: "쓰는 중", en: "Writing" },
+  locked: { ko: "오너만 쓸 수 있어요. 패스코드를 넣어 주세요.", en: "Owner only. Enter the passcode." },
+  unlock: { ko: "열기", en: "Unlock" },
+  noModelKey: { ko: "이 배포에는 아직 모델 키가 없어요.", en: "This deploy has no model key yet." },
+  briefFailed: { ko: "브리프를 못 썼어요. 다시 해 볼게요?", en: "Couldn't write the brief. Try again?" },
+  briefTitle: { ko: "고스트 브리프", en: "Ghost brief" },
+  draft: { ko: "초안", en: "Draft" },
+  outfit: { ko: "의상", en: "Outfit" },
+  scene: { ko: "장면", en: "Scene" },
+  caption: { ko: "캡션", en: "Caption" },
+  twistUsed: { ko: "비튼 지점", en: "Twist" },
 } as const satisfies Record<string, Record<UiLang, string>>;
 
 export type WordKey = keyof typeof words;

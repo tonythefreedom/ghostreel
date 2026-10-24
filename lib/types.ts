@@ -75,6 +75,7 @@ export const KeepPart = z.enum(["hook", "beat", "look", "sound"]);
 export const TastePick = z.object({
   ghostId: z.string(),
   videoId: z.string(),
+  url: z.string().url().optional(), // the original post, so a reading can be fetched later
   formatId: z.string().optional(),
   kept: z.boolean(),
   keep: z.array(KeepPart).default([]),
@@ -82,6 +83,8 @@ export const TastePick = z.object({
   at: z.string(),
 });
 export type KeepPart = z.infer<typeof KeepPart>;
+export const Intent = z.enum(["keep", "adapt", "twist"]); // how close the ghost's take stays to the original
+export type Intent = z.infer<typeof Intent>;
 export type TastePick = z.infer<typeof TastePick>;
 
 // ── Brief → render → check → queue ───────────────────────────────────────────
@@ -104,6 +107,7 @@ export const Brief = z.object({
   caption: z.string().max(300),
   hashtags: z.array(z.string()).max(8),
   twist: z.string().max(200).default(""), // the open spot this take uses, if any
+  intent: Intent.default("adapt"),
   status: z.enum(["draft", "approved"]),
   createdAt: z.string(),
 });

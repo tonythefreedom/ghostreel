@@ -32,7 +32,7 @@ their *insides*.
 | Contracts | zod 4 in `lib/types.ts` | Every outside answer and request body is parsed at the edge. |
 | Short-form data | Shorti public MCP, keyless (`lib/mcp.ts` ~90-line client, JSON or SSE) | Verified 2026-10-24: stateless, plain JSON; keyless limit 20 req/s per IP, so enrich 4 at a time with backoff. |
 | Ghost render | NEWTYPE CineSynth on Nexus, endpoint and token from env (`lib/newtype/`) | Production characters, voice consent, AI label, watermark. |
-| Brief and captions | Claude via `@anthropic-ai/sdk`, `claude-sonnet-5-5` (`lib/claude.ts`, T10) | Fast enough for a live edit loop; multilingual captions. |
+| Brief and captions | Claude via `@anthropic-ai/sdk` 1.3: `claude-opus-5-5`, effort `low`, zod structured output (`beta.messages.parse`), `fallbacks: "default"` (`lib/claude.ts`; prompt and clean-up in `lib/brief.ts`) | Current default model; `low` effort keeps a live edit loop short; a policy decline is retried server-side on Anthropic's recommended fallback. |
 | State | Upstash Redis over REST when env is set, process memory otherwise (`lib/store.ts`) | No schema in an 8-hour build. Memory resets between serverless instances, so prod wants Redis. |
 | Deploy | `vercel deploy --prod` from a teammate machine; CI runs the gate on every push | Ted has push, not admin, on the repo. |
 
@@ -54,10 +54,12 @@ their *insides*.
 app/
   page.tsx                    landing → /taste
   taste/page.tsx              the daily game (live Shorti deck, fixture fallback)
-  brief/…  ghost/…            T11, T13
+  brief/[id]/page.tsx         the ghost's draft brief (read-only until T11)
+  ghost/…                     T13
   api/taste/route.ts          GET/PUT picks (cheap, size-capped)
   api/unlock/route.ts         owner passcode → httpOnly cookie
-  api/brief, api/render, …    spend routes: always behind lib/guard.ts
+  api/brief/route.ts          POST: kept short → brief (spend-guarded); GET ?id=
+  api/render, …               spend routes: always behind lib/guard.ts
 components/                   TrendCard, TrustLine, TasteSwipe, … (DESIGN.md names)
 lib/
   types.ts                    contracts (zod); change by agreement
@@ -65,7 +67,8 @@ lib/
   shorti/read.ts              Lane A: live reads + reducers (Node-safe, used by the recorder)
   shorti/index.ts             Lane A: what pages call: cache, fixture fallback, provenance
   newtype/index.ts            Lane B: roster, render, job status
-  claude.ts                   Lane A: brief and captions (T10)
+  claude.ts                   Lane A: the Claude call (server-only)
+  brief.ts                    Lane A: brief prompt + clean-up (pure, tested without a model)
   env.ts                      the only reader of secrets (server-only)
   guard.ts                    spend guard: owner cookie, per-IP burst, daily cap
   store.ts                    Redis or memory

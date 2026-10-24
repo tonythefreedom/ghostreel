@@ -2,6 +2,19 @@
 
 Newest first. Each entry: what is true now, what broke, what is next. Keep it short; long output goes in files.
 
+## 2026-10-24 · T10 — brief writer (live call pending a key)
+
+Done
+- `lib/brief.ts`: GhostReel's own prompt (Shorti reading + format plan + ghost + what the owner kept + intent),
+  outside text fenced as data, the original creator never named; `finishBrief` clamps the draft into `Brief`. Tested.
+- `lib/claude.ts`: `claude-opus-5-5`, effort `low`, zod structured output, server-side `fallbacks: "default"`.
+- `/api/brief`: cheap checks first (body, ghost, kept pick), then `guardSpend`, then Claude. Verified on `next start`:
+  not kept 409, locked 401, wrong passcode 401, unlock sets an httpOnly cookie, no key 503, burst 429.
+- `/taste` ends in a brief starter (그대로 / 내 식대로 / 비틀기, passcode prompt when locked) → `/brief/[id]`.
+
+Open
+- No Anthropic key on this machine or in Vercel, so no live brief yet; the < 15 s check is the first thing to run.
+
 ## 2026-10-24 · T0 T4 T5 T9 — public boundary hardened, taste game live
 
 Done

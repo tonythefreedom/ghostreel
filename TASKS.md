@@ -29,8 +29,8 @@ the gate output. Hours count from the start (H0). Lane A = loop and Shorti, Lane
 
 ## H3–H5 — The brief and the render
 
-- [ ] **T10 · A** `lib/claude.ts` + `/api/brief`: taste + format plan + ghost → `Brief` JSON (schema-checked).
-  Done: brief for a kept card in < 15 s, valid against the type.
+- [~] **T10 · A** `lib/claude.ts` + `lib/brief.ts` + `/api/brief` (spend-guarded) + brief starter (keep / adapt / twist)
+  + read-only `/brief/[id]`. Guards verified on a prod build. Open: the live < 15 s check needs `ANTHROPIC_API_KEY`.
 - [ ] **T11 · A** `/brief/[id]`: `BriefSheet`, inline line edits, Approve → POST `/api/render`. Done: an approved
   brief creates a `RenderJob`; an unapproved one cannot.
 - [ ] **T12 · B** `ReelPlayer` + `RenderJob` components: poll, shimmer, AI label pill always on, `prerender` tag.
