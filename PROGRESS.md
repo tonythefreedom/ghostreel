@@ -2,6 +2,26 @@
 
 Newest first. Each entry: what is true now, what broke, what is next. Keep it short; long output goes in files.
 
+## 2026-10-24 · A — every flow overhauled: KO/EN, one player with the coaching pencil, 4D camera preset, Connect as steps
+
+Ted, 10-24: «한/영 토글도 없고 … 재생 음소거나 코칭 색연필 등등도 안되어있고 … 대대적인 개선이 필요하다».
+- Language: a top bar on every page (brand · Connect Claude · 한/EN). Cookie `gr_lang`, else the browser's first
+  language. Every screen's copy lives in lib/words.ts in both; Shorti's own Korean is recorded and read for KO pages
+  (fixtures `trending-*.ko.json`, reads take `lang`), never translated.
+- One Player for every video (components/ui/Player.tsx): play · sound · pencil keys top right, same place everywhere;
+  a scrub line with measured cuts and cue dots. The pencil (`--pencil` #6CC6FF, DESIGN.md): at each cue the clip
+  stands on its frame while the cue is written by hand (underline, rings round what to look at), "Next" jumps cues.
+  Hits use Shorti's cues (`shorti_video` → `cues`, `look_at`, `clock.cuts_s`, the 720p clip); ghost reels use their
+  brief's beats. The taste deck's top card now plays the hit itself; the lightbox uses the same Player.
+- 4D camera preset (components/CameraPreset.tsx): Shorti's scene read (`shorti_format part=scene`: height, distance,
+  tilt, FOV per setup over time) drawn to scale on the brief and storyboard, with "Open in 4D on Shorti". It also
+  reaches the brief prompt as `<camera>` (our route and the MCP context), so the ghost's beats are framed from it.
+- /connect is four steps: Google sign-in in place, a token shown once (masked, copy), Claude Code command or Claude
+  Desktop config, a live check that calls `/mcp` with that token (initialize + tools/list), then what to ask.
+- Brief model: Haiku 5.5 at medium effort (Ted). The API key is not in the repo; set `ANTHROPIC_API_KEY` on the host.
+- Also: ghost faces from its own CineSynth keyframe (AI label on any full frame), back links on brief and storyboard,
+  onboarding says why Next is off, the landing hero plays Yuna's preview with its beats pencilled.
+- Gate: 83 tests, typecheck, build. Verified at 375 px in KO and EN. Not verified: a real Google sign-in and token.
 ## 2026-10-24 · A+B — the memory store survives a restart (Tony's decision, Ted's yes)
 
 - Each redeploy restarted `next start` and wiped the memory store: sign-ups, kept shorts, briefs and MCP connect

@@ -4,7 +4,9 @@ import { notFound } from "next/navigation";
 import { z } from "zod";
 import { StepStrip } from "@/components/kit";
 import { StyleSummary } from "@/components/StyleSummary";
-import { CREATOR_FLOW, FLOW_STEP, fieldFor } from "@/lib/flow";
+import { CREATOR_FLOW, CREATOR_FLOW_KO, FLOW_STEP, fieldFor } from "@/lib/flow";
+import { getLang } from "@/lib/lang";
+import { t } from "@/lib/words";
 import { creatorKey } from "@/lib/creator";
 import { summarize } from "@/lib/creatorStyle";
 import { getGhost } from "@/lib/newtype";
@@ -20,6 +22,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
   const creator = await store.get<Creator>(creatorKey(id));
   if (!creator) notFound();
   const ghost = await getGhost(creator.ghostId);
+  const lang = await getLang();
   // Keyless Shorti reads of the creator's own shorts (cached 10 min); a miss just leaves that short out.
   const style = creator.works.length
     ? summarize(await Promise.all(creator.works.map(async (url) => ({
@@ -30,27 +33,27 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
     : null;
 
   return (
-    <main className="flex min-h-dvh flex-col gap-10 py-6">
+    <main className="flex min-h-dvh flex-col gap-10 pt-4">
       <header className="flex flex-col gap-2">
         <div className="flex items-center gap-2 text-[13px] font-[560] text-text-dim">
           <span className="inline-block size-2 rounded-full bg-accent" aria-hidden />
           {creator.niche} · {creator.market} · {creator.languages.map((l) => l.toUpperCase()).join(" · ")}
         </div>
-        <h1 className="text-[28px] font-[720] leading-[1.27] tracking-[-0.02em]">{creator.name}'s style</h1>
+        <h1 className="text-[28px] font-[720] leading-[1.27] tracking-[-0.02em]">{lang === "ko" ? `${creator.name}의 스타일` : `${creator.name}'s style`}</h1>
         {creator.bio ? <p className="text-[15px] text-text-dim">{creator.bio}</p> : null}
       </header>
 
       {style ? (
-        <StyleSummary style={style} />
+        <StyleSummary style={style} lang={lang} />
       ) : (
         <p className="rounded-[var(--radius-card)] border border-dashed border-line-strong/60 p-5 text-[15px] text-text-dim">
-          No shorts of your own yet? That's fine. Next, you'll pick shorts trending abroad to teach your ghost.
+          {t("pfNoShorts", lang)}
         </p>
       )}
 
       {creator.works.length > 0 ? (
       <section className="flex flex-col gap-2">
-        <h2 className="text-[18px] font-[720]">Your shorts</h2>
+        <h2 className="text-[18px] font-[720]">{t("pfYourShorts", lang)}</h2>
         <ul className="flex flex-col gap-1">
           {creator.works.map((url) => (
             <li key={url} className="break-all font-mono text-[12px] text-text-3">
@@ -60,7 +63,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
         </ul>
         {creator.plan || creator.script ? (
           <p className="text-[13px] text-text-dim">
-            Also shared: {[creator.plan && "a plan", creator.script && "a script"].filter(Boolean).join(", ")}
+            {t("pfAlso", lang)} {[creator.plan && t("pfPlan", lang), creator.script && t("pfScript", lang)].filter(Boolean).join(", ")}
           </p>
         ) : null}
       </section>
@@ -70,21 +73,29 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
         <section className="flex items-center gap-3 rounded-[var(--radius-card)] bg-surface p-4">
           <span className="grid size-12 shrink-0 place-items-center rounded-full bg-accent-soft text-[18px] font-[720] text-accent ring-2 ring-accent">{ghost.name.slice(0, 1)}</span>
           <div className="flex flex-col">
-            <span className="text-[15px] font-[720]">{ghost.name} performs for you</span>
+            <span className="text-[15px] font-[720]">{lang === "ko" ? `${ghost.name}가 대신 출연해요` : `${ghost.name} performs for you`}</span>
             <span className="text-[13px] text-text-3">AI-generated · Virtual human</span>
           </div>
         </section>
       ) : null}
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-[18px] font-[720]">What happens next</h2>
-        <StepStrip steps={CREATOR_FLOW} current={FLOW_STEP.profile} />
+        <h2 className="text-[18px] font-[720]">{t("pfNext", lang)}</h2>
+        <StepStrip steps={lang === "ko" ? CREATOR_FLOW_KO : CREATOR_FLOW} current={FLOW_STEP.profile} lang={lang} />
+      </section>
+
+      <section className="flex flex-col gap-3 rounded-[var(--radius-card)] bg-accent-soft p-4 ring-1 ring-inset ring-accent/30">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-[15px] font-[720]">{t("landingClaudeH", lang)}</h2>
+          <p className="text-[13px] leading-snug text-text-dim">{t("landingClaudeLine", lang)}</p>
+        </div>
+        <ButtonLink href="/connect" kind="secondary" size="l" className="self-start">{t("navConnect", lang)} →</ButtonLink>
       </section>
 
       <VerbSpacer />
       <Verb>
         <ButtonLink href={`/taste?ghost=${creator.ghostId}&field=${fieldFor(creator.niche)}&creator=${creator.id}`} size="xl" block>
-          Tune it to this week&apos;s trends
+          {t("pfTune", lang)}
         </ButtonLink>
       </Verb>
     </main>

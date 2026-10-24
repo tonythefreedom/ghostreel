@@ -2,17 +2,20 @@
 // The daily taste game: eight shorts as a fanned deck. Drag the top card, ←/→, or the docked verbs skip or keep;
 // Z undoes. A keep asks in a sheet what to keep; the end lists what was kept and writes the brief from one.
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { KeepPart, TastePick, TrendCard as Card } from "@/lib/types";
+import type { KeepPart, TastePick, TrendCard as Card, VideoReading } from "@/lib/types";
 import { t, type UiLang } from "@/lib/words";
 import { Button, Empty, Verb } from "./ui";
 import { BriefStarter } from "./BriefStarter";
 import { UnlockForm } from "./UnlockForm";
 import { Deck, type Leaving } from "./taste/Deck";
 import { KeepSheet } from "./taste/KeepSheet";
+import { useLang } from "@/components/Lang";
 
 const ROUND = 8; // fewer, truer: a round is eight shorts
 
-export function TasteSwipe({ cards: all, ghostId, creatorId, lang = "en" }: { cards: Card[]; ghostId: string; creatorId?: string; lang?: UiLang }) {
+export function TasteSwipe({ cards: all, readings = {}, ghostId, creatorId, lang: langProp }: { cards: Card[]; readings?: Record<string, VideoReading>; ghostId: string; creatorId?: string; lang?: UiLang }) {
+  const ctxLang = useLang();
+  const lang = langProp ?? ctxLang;
   const cards = useMemo(() => all.slice(0, ROUND), [all]);
   const [picks, setPicks] = useState<TastePick[]>([]);
   const [asking, setAsking] = useState<Card | null>(null);
@@ -157,7 +160,7 @@ export function TasteSwipe({ cards: all, ghostId, creatorId, lang = "en" }: { ca
               </Button>
             ) : null}
           </div>
-          <Deck cards={cards.slice(top, top + 3)} leaving={leaving} onDecide={decide} onGone={() => setLeaving(null)} label={t("deck", lang)} lang={lang} />
+          <Deck cards={cards.slice(top, top + 3)} readings={readings} leaving={leaving} onDecide={decide} onGone={() => setLeaving(null)} label={t("deck", lang)} lang={lang} />
           {asking ? null : (
             <Verb>
               <Button kind="secondary" size="xl" disabled={!card} onClick={() => decide(false)}>

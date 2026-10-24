@@ -86,6 +86,7 @@ test("fixtures hold only reduced public fields and stay small", () => {
     "id", "name", "characterId", "portraitUrl", "voiceId", "bio", "niche", "market", "languages",
     "briefId", "provider", "status", "videoUrl", "startedAt", "finishedAt", "jobs", "characters",
     "recipes", "lengthMs", "bpm", "hookFacts", "cues", "cue", "share", "makeItYours", "free",
+    "clipUrl", "t", "look", "cuts",
   ]);
   const fixtures = files.filter((f) => f.startsWith("fixtures/") && f.endsWith(".json"));
   for (const f of fixtures) {

@@ -1,10 +1,10 @@
 "use client";
-// The taste deck as a fan (DESIGN.md › Motion on screens): the top card and two behind it, each 22 px right, 7 px down
+// The taste deck as a fan (DESIGN.md › Motion on screens): the top card and two behind it, each 12 px right, 6 px down
 // at 0.96, settling on the fan spring; the ones behind are inert. A sideways drag moves the top card; past 96 px it
 // decides (right keeps, left skips). A decided card leaves on `leave`: kept up and right, skipped down and left.
 // A tap is never a pick. Reduced motion: no fan, no flight, fades only.
 import { useEffect, useRef, useState, useSyncExternalStore, type PointerEvent } from "react";
-import type { TrendCard as Card } from "@/lib/types";
+import type { TrendCard as Card, VideoReading } from "@/lib/types";
 import type { UiLang } from "@/lib/words";
 import { TrendCard } from "../TrendCard";
 
@@ -15,15 +15,17 @@ const DECIDE = 96;
 // taken back out in percent of the card's own box (1 - 0.96 = 4 %, 1 - 0.9216 = 7.84 %).
 const FAN = [
   "none",
-  "translate(calc(22px - 2%), calc(7px - 4%)) scale(0.96)",
-  "translate(calc(44px - 3.92%), calc(14px - 7.84%)) scale(0.9216)",
+  "translate(calc(12px - 2%), calc(6px - 4%)) scale(0.96)",
+  "translate(calc(24px - 3.92%), calc(12px - 7.84%)) scale(0.9216)",
 ];
 const SETTLE = "transform var(--spring-fan-ms) var(--spring-fan), opacity var(--move-lift)";
 const tilt = (dx: number) => `translateX(${dx}px) rotate(${dx / 40}deg)`;
 
-export function Deck({ cards, leaving, onDecide, onGone, label, lang }: {
+export function Deck({ cards, readings, leaving, onDecide, onGone, label, lang }: {
   /** The top card first, then up to two behind it. */
   cards: Card[];
+  /** Shorti's reading of each card, by video: the top card's coaching pencil writes its cues. */
+  readings: Record<string, VideoReading>;
   leaving: Leaving | null;
   onDecide: (kept: boolean, dx: number) => void;
   onGone: () => void;
@@ -35,16 +37,20 @@ export function Deck({ cards, leaving, onDecide, onGone, label, lang }: {
   const [dx, setDx] = useState(0);
   const [dragging, setDragging] = useState(false);
 
+  // A press on a video's keys or its scrub line is theirs, never a drag; a drag takes the pointer only once it moves,
+  // so a tap still reaches the video (play, pause) under it.
   const down = (e: PointerEvent<HTMLDivElement>) => {
-    if (e.button !== 0) return;
+    if (e.button !== 0 || (e.target as HTMLElement).closest("[data-no-drag]")) return;
     drag.current = { x: e.clientX, dx: 0 };
-    setDragging(true);
-    e.currentTarget.setPointerCapture(e.pointerId);
   };
   const move = (e: PointerEvent<HTMLDivElement>) => {
     if (!drag.current) return;
     drag.current.dx = e.clientX - drag.current.x;
-    setDx(drag.current.dx);
+    if (!dragging && Math.abs(drag.current.dx) > 6) {
+      setDragging(true);
+      e.currentTarget.setPointerCapture(e.pointerId);
+    }
+    if (dragging || Math.abs(drag.current.dx) > 6) setDx(drag.current.dx);
   };
   const up = (decide: boolean) => {
     const d = drag.current?.dx ?? 0;
@@ -55,7 +61,7 @@ export function Deck({ cards, leaving, onDecide, onGone, label, lang }: {
   };
 
   return (
-    <div role="group" aria-roledescription="deck" aria-label={label} className="mx-auto grid w-full max-w-[calc(46dvh*9/16+44px)] pr-11">
+    <div role="group" aria-roledescription="deck" aria-label={label} className="mx-auto grid w-full max-w-[calc(54dvh*9/16+24px)] pr-6">
       {cards.slice(0, 3).map((c, layer) => {
         const top = layer === 0;
         return (
@@ -75,7 +81,7 @@ export function Deck({ cards, leaving, onDecide, onGone, label, lang }: {
             onPointerUp={top ? () => up(true) : undefined}
             onPointerCancel={top ? () => up(false) : undefined}
           >
-            <TrendCard card={c} lang={lang} behind={!top} />
+            <TrendCard card={c} reading={readings[c.videoId]} live={top && !leaving} lang={lang} behind={!top} />
           </div>
         );
       })}

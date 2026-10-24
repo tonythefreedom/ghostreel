@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { Brief, RenderJob as RenderJobData } from "@/lib/types";
 import { Progress, type Step } from "./ui";
 import { ReelPlayer } from "./ReelPlayer";
+import { useLang } from "@/components/Lang";
 
 // Lane B. A render as its steps (✓ approved · ● rendering · ○ ready) with the elapsed time beside the step that is
 // running, the ghost's poster standing in until the reel is ready. Never a spinner or a shimmer.
@@ -12,7 +13,9 @@ const words = {
   en: { approved: "Brief approved", queued: "Waiting for the renderer", running: "Your ghost is filming", ready: "Reel ready", failed: "Render failed" },
 };
 
-export function RenderJob({ job, brief, lang = "en" }: { job: RenderJobData; brief?: Brief; lang?: "ko" | "en" }) {
+export function RenderJob({ job, brief, lang: langProp }: { job: RenderJobData; brief?: Brief; lang?: "ko" | "en" }) {
+  const ctxLang = useLang();
+  const lang = langProp ?? ctxLang;
   const w = words[lang];
   const [now, setNow] = useState<number | null>(null);
   const active = job.status === "queued" || job.status === "running";

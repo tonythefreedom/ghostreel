@@ -1,18 +1,18 @@
 "use client";
 // Lane B (T8). The creator registers their own background and past work, and picks the virtual human who performs,
 // one screen per step.
-// Copy stays here until lib/words.ts (Lane A) takes it.
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { GhostCard } from "@/components/GhostCard";
 import { GoogleSignIn } from "@/components/GoogleSignIn";
+import { useT } from "@/components/Lang";
 import { FunnelProgress } from "@/components/kit";
 import { Button, Chip, ChipRow, Verb, VerbSpacer } from "@/components/ui";
 import type { CinesynthAccount, Ghost, Lang } from "@/lib/types";
 
 const STEPS = 4; // account · about me · what I made · who performs: one question per screen (kit FunnelProgress)
 const MARKETS = ["US", "KR", "JP", "Global"] as const;
-const LANGS: Array<[Lang, string]> = [["en", "English"], ["ko", "Korean"], ["ja", "Japanese"], ["es", "Spanish"]];
+const LANGS: Array<[Lang, "langEn" | "langKo" | "langJa" | "langEs"]> = [["en", "langEn"], ["ko", "langKo"], ["ja", "langJa"], ["es", "langEs"]];
 const field = "w-full rounded-[var(--radius-control)] bg-surface-2 px-3 text-[15px] text-text placeholder:text-text-3 ring-1 ring-inset ring-line focus:ring-line-strong";
 const label = "text-[13px] font-[560] text-text-dim";
 const title = "text-[22px] font-[720] tracking-[-0.01em]";
@@ -20,7 +20,8 @@ const title = "text-[22px] font-[720] tracking-[-0.01em]";
 const urls = (text: string) =>
   text.split(/\s+/).map((s) => s.trim()).filter((s) => /^https?:\/\/\S+$/.test(s));
 
-export function OnboardForm({ ghosts, initialAccount }: { ghosts: Ghost[]; initialAccount: CinesynthAccount | null }) {
+export function OnboardForm({ ghosts, initialAccount, notice }: { ghosts: Ghost[]; initialAccount: CinesynthAccount | null; notice?: ReactNode }) {
+  const t = useT();
   const router = useRouter();
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
@@ -32,6 +33,7 @@ export function OnboardForm({ ghosts, initialAccount }: { ghosts: Ghost[]; initi
   const [script, setScript] = useState("");
   const [ghostId, setGhostId] = useState(ghosts[0]?.id ?? "");
   const [account, setAccount] = useState<CinesynthAccount | null>(initialAccount);
+  const signedIn = useCallback((a: CinesynthAccount) => setAccount(a), []);
   const [step, setStep] = useState(initialAccount?.status === "approved" ? 2 : 1);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -83,10 +85,8 @@ export function OnboardForm({ ghosts, initialAccount }: { ghosts: Ghost[]; initi
     >
       <FunnelProgress step={step} total={STEPS} onBack={() => setStep(Math.max(1, step - 1))} />
       <section hidden={step !== 1} className="flex flex-col gap-3">
-        <h2 className={title}>Sign in</h2>
-        <p className="text-[13px] text-text-dim">
-          Use the Google account you use for CineSynth. GhostReel renders and downloads as that account; no new password.
-        </p>
+        <h2 className={title}>{t("obSignIn")}</h2>
+        <p className="text-[13px] leading-snug text-text-dim">{t("obSignInLine")}</p>
         {account ? (
           <div className="flex items-center gap-3 rounded-[var(--radius-card)] bg-surface-2 p-3 ring-1 ring-inset ring-line">
             {account.picture ? (
@@ -99,86 +99,85 @@ export function OnboardForm({ ghosts, initialAccount }: { ghosts: Ghost[]; initi
             </div>
           </div>
         ) : (
-          <GoogleSignIn onSignedIn={setAccount} />
+          <GoogleSignIn onSignedIn={signedIn} />
         )}
         {account && account.status !== "approved" ? (
-          <p className="text-[13px] text-warn">
-            CineSynth hasn&apos;t approved this account yet ({account.status}). Ask the team to approve it, then sign in again.
-          </p>
+          <p className="text-[13px] leading-snug text-warn">{t("obPending")}</p>
         ) : null}
+        {notice}
       </section>
       <section hidden={step !== 2} className="flex flex-col gap-3">
-        <h2 className={title}>About you</h2>
+        <h2 className={title}>{t("obAbout")}</h2>
         <label className="flex flex-col gap-1">
-          <span className={label}>Name or channel name</span>
+          <span className={label}>{t("obName")}</span>
           <input value={name} onChange={(e) => setName(e.target.value)} maxLength={40} className={`${field} h-11`} />
         </label>
         <label className="flex flex-col gap-1">
-          <span className={label}>Niche</span>
-          <input value={niche} onChange={(e) => setNiche(e.target.value)} maxLength={80} placeholder="e.g. K-beauty routines, home café, fashion hauls" className={`${field} h-11`} />
+          <span className={label}>{t("obNiche")}</span>
+          <input value={niche} onChange={(e) => setNiche(e.target.value)} maxLength={80} placeholder={t("obNichePh")} className={`${field} h-11`} />
         </label>
         <label className="flex flex-col gap-1">
-          <span className={label}>Bio and background</span>
-          <textarea value={bio} onChange={(e) => setBio(e.target.value)} maxLength={600} rows={3} placeholder="What you've been making, and what you're good at" className={`${field} py-2`} />
+          <span className={label}>{t("obBio")}</span>
+          <textarea value={bio} onChange={(e) => setBio(e.target.value)} maxLength={600} rows={3} placeholder={t("obBioPh")} className={`${field} py-2`} />
         </label>
         <div className="flex flex-col gap-1">
-          <span className={label}>Market</span>
-          <ChipRow label="Market">
+          <span className={label}>{t("obMarket")}</span>
+          <ChipRow label={t("obMarket")}>
             {MARKETS.map((m) => (
               <Chip key={m} on={market === m} onClick={() => setMarket(m)}>{m}</Chip>
             ))}
           </ChipRow>
         </div>
         <div className="flex flex-col gap-1">
-          <span className={label}>Video languages</span>
-          <ChipRow label="Video languages">
+          <span className={label}>{t("obLangs")}</span>
+          <ChipRow label={t("obLangs")}>
             {LANGS.map(([l, name]) => (
-              <Chip key={l} on={languages.includes(l)} onClick={() => toggleLang(l)}>{name}</Chip>
+              <Chip key={l} on={languages.includes(l)} onClick={() => toggleLang(l)}>{t(name)}</Chip>
             ))}
           </ChipRow>
         </div>
       </section>
 
       <section hidden={step !== 3} className="flex flex-col gap-3">
-        <h2 className={title}>What you've made</h2>
+        <h2 className={title}>{t("obMade")}</h2>
         <label className="flex flex-col gap-1">
-          <span className={label}>Links to your shorts (optional, one per line, up to 10)</span>
-          <textarea value={works} onChange={(e) => setWorks(e.target.value)} rows={4} placeholder="Paste your TikTok, Reels or Shorts links" className={`${field} py-2 font-mono text-[13px]`} />
+          <span className={label}>{t("obLinks")}</span>
+          <textarea value={works} onChange={(e) => setWorks(e.target.value)} rows={4} placeholder={t("obLinksPh")} className={`${field} py-2 font-mono text-[13px]`} />
           <span className={`font-mono text-[12px] ${links.length > 10 ? "text-danger" : "text-text-3"}`}>
-            {links.length} / 10{links.length === 0 ? " · none: your ghost learns from this week's trends" : ""}
+            {links.length} / 10{links.length === 0 ? ` · ${t("obLinksNone")}` : ""}
           </span>
         </label>
         <label className="flex flex-col gap-1">
-          <span className={label}>A past plan (optional)</span>
-          <textarea value={plan} onChange={(e) => setPlan(e.target.value)} maxLength={4000} rows={4} placeholder="Paste a plan or pitch you wrote" className={`${field} py-2`} />
+          <span className={label}>{t("obPlan")}</span>
+          <textarea value={plan} onChange={(e) => setPlan(e.target.value)} maxLength={4000} rows={4} placeholder={t("obPlanPh")} className={`${field} py-2`} />
         </label>
         <label className="flex flex-col gap-1">
-          <span className={label}>A past script (optional)</span>
-          <textarea value={script} onChange={(e) => setScript(e.target.value)} maxLength={4000} rows={4} placeholder="Paste a script you wrote" className={`${field} py-2`} />
+          <span className={label}>{t("obScript")}</span>
+          <textarea value={script} onChange={(e) => setScript(e.target.value)} maxLength={4000} rows={4} placeholder={t("obScriptPh")} className={`${field} py-2`} />
         </label>
-        <p className="text-[13px] text-text-3">Share only videos and writing you own. We use them to learn your style and never copy them.</p>
+        <p className="text-[13px] leading-snug text-text-3">{t("obOwn")}</p>
       </section>
 
       <section hidden={step !== 4} className="flex flex-col gap-3">
-        <h2 className={title}>Who performs for you</h2>
-        <div role="radiogroup" className="grid grid-cols-2 gap-3">
+        <h2 className={title}>{t("obWho")}</h2>
+        <div role="radiogroup" aria-label={t("obWho")} className="grid grid-cols-2 gap-3">
           {ghosts.map((g) => (
             <GhostCard key={g.id} ghost={g} selected={ghostId === g.id} onSelect={() => setGhostId(g.id)} />
           ))}
         </div>
-        <p className="text-[13px] text-text-3">
-          A virtual human appears instead of you, and every video carries the <span className="font-[560] text-text">AI-generated · Virtual human</span> label.
+        <p className="text-[13px] leading-snug text-text-3">
+          {t("obWhoLine")} <span className="font-[560] text-text">AI-generated · Virtual human</span>
         </p>
       </section>
 
-      {error ? <p role="alert" className="text-[13px] text-danger">✕ Couldn&apos;t save ({error}). Check your answers.</p> : null}
+      {error ? <p role="alert" className="text-[13px] text-danger">✕ {t("obSaveFailed")} ({error})</p> : null}
       <VerbSpacer />
-      <Verb note={step === STEPS ? "Your face never appears. The ghost performs." : undefined}>
+      <Verb note={step === STEPS ? t("obFaceNever") : !stepOk[step - 1] ? t(step === 1 ? "obNeedSignIn" : step === 2 ? "obNeedAbout" : "obNeedLinks") : undefined}>
         {step < STEPS ? (
-          <Button key="next" size="xl" block disabled={!stepOk[step - 1]} onClick={() => setStep(step + 1)}>Next</Button>
+          <Button key="next" size="xl" block disabled={!stepOk[step - 1]} onClick={() => setStep(step + 1)}>{t("next")}</Button>
         ) : (
           <Button key="submit" type="submit" size="xl" block disabled={!ready || busy}>
-            {busy ? "Saving…" : "Sign up and read my style"}
+            {busy ? t("obSaving") : t("obSubmit")}
           </Button>
         )}
       </Verb>

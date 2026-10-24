@@ -4,6 +4,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import type { RenderJob } from "@/lib/types";
 import { age } from "./logic";
+import { useLang } from "@/components/Lang";
 
 const STATE = {
   ko: { queued: "대기 중", running: "렌더 중", done: "완료", failed: "실패" },
@@ -13,7 +14,9 @@ const TONE = { queued: "vellum text-text-dim", running: "vellum text-text", done
 
 type Props = { jobs: RenderJob[]; onOpen: (job: RenderJob) => void; empty?: ReactNode; lang?: "ko" | "en" };
 
-export function ReelGrid({ jobs, onOpen, empty, lang = "en" }: Props) {
+export function ReelGrid({ jobs, onOpen, empty, lang: langProp }: Props) {
+  const ctxLang = useLang();
+  const lang = langProp ?? ctxLang;
   // Ages are drawn after mount so the server and the first client paint agree.
   const [now, setNow] = useState<number | null>(null);
   useEffect(() => {

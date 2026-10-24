@@ -4,6 +4,7 @@
 import { useEffect, useRef, useState } from "react";
 import { GIS_SRC, type GoogleId } from "@/lib/newtype/gis";
 import type { CinesynthAccount } from "@/lib/types";
+import { useLang, useT } from "./Lang";
 
 declare global {
   interface Window {
@@ -23,6 +24,10 @@ function loadScript(): Promise<void> {
 }
 
 export function GoogleSignIn({ onSignedIn }: { onSignedIn: (account: CinesynthAccount) => void }) {
+  const lang = useLang();
+  const t = useT();
+  const words = useRef({ failed: t("signInFailed"), noLoad: t("signInNoLoad") });
+  words.current = { failed: t("signInFailed"), noLoad: t("signInNoLoad") };
   const slot = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -49,7 +54,7 @@ export function GoogleSignIn({ onSignedIn }: { onSignedIn: (account: CinesynthAc
             const body = (await res.json().catch(() => ({}))) as { account?: CinesynthAccount };
             setBusy(false);
             if (res.ok && body.account) onSignedIn(body.account);
-            else setError("Sign-in didn't go through. Try again.");
+            else setError(words.current.failed);
           },
         });
         window.google.accounts.id.renderButton(slot.current, {
@@ -57,22 +62,23 @@ export function GoogleSignIn({ onSignedIn }: { onSignedIn: (account: CinesynthAc
           size: "large",
           shape: "pill",
           text: "continue_with",
-          width: 320,
-          locale: "en",
+          // Google draws the button at a fixed width (200–400 px): the room it has here.
+          width: Math.max(200, Math.min(400, Math.floor(slot.current.getBoundingClientRect().width || 320))),
+          locale: lang,
         });
       } catch {
-        if (live) setError("Google sign-in couldn't load here. Check this site is an allowed origin for the client.");
+        if (live) setError(words.current.noLoad);
       }
     })();
     return () => {
       live = false;
     };
-  }, [onSignedIn]);
+  }, [onSignedIn, lang]);
 
   return (
-    <div className="flex flex-col items-start gap-2">
-      <div ref={slot} className="min-h-11" aria-busy={busy} />
-      {busy ? <p className="text-[13px] text-text-dim">Signing in…</p> : null}
+    <div className="flex w-full flex-col items-start gap-2">
+      <div ref={slot} className="min-h-11 w-full" aria-busy={busy} />
+      {busy ? <p className="text-[13px] text-text-dim">{t("signingIn")}</p> : null}
       {error ? <p className="text-[13px] text-danger">{error}</p> : null}
     </div>
   );

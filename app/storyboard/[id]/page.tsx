@@ -1,14 +1,18 @@
 // Lane B (T23). The storyboard for one brief: a scene per timed beat, in order, before the render.
-import { ButtonLink, Verb, VerbSpacer } from "@/components/ui";
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { CameraPreset } from "@/components/CameraPreset";
+import { ButtonLink, Verb, VerbSpacer } from "@/components/ui";
+import { getLang } from "@/lib/lang";
 import { z } from "zod";
 import { StoryboardFrame } from "@/components/StoryboardFrame";
 import { getGhost } from "@/lib/newtype";
 import { LineSuggestions, suggestionsFor } from "@/lib/lineSuggestions";
-import { FIELDS, formatPlan, recipeEdit, trending } from "@/lib/shorti";
+import { cameraSetups, FIELDS, formatPlan, hitCard, recipeEdit, trending } from "@/lib/shorti";
 import { buildStoryboard, KeyframeManifest } from "@/lib/storyboard";
 import { store } from "@/lib/store";
 import type { Brief, TastePick } from "@/lib/types";
+import { t } from "@/lib/words";
 import lineData from "@/content/line-suggestions.json";
 import keyframes from "@/public/prerender/keyframes.json";
 
@@ -36,36 +40,42 @@ export default async function StoryboardPage({ params }: { params: Promise<{ id:
   if (!brief) notFound();
   const ghost = await getGhost(brief.ghostId);
   if (!ghost) notFound();
+  const lang = await getLang();
   const frames = buildStoryboard(brief, ghost, manifest);
   const made = frames.filter((f) => f.image).length;
   const url = await sourceUrl(brief);
-  const [recipe, plan] = await Promise.all([
+  const [recipe, plan, setups, card] = await Promise.all([
     url ? recipeEdit(url) : Promise.resolve(null),
     brief.formatId ? formatPlan(brief.formatId) : Promise.resolve(null),
+    url ? cameraSetups(url, lang) : Promise.resolve([]),
+    url ? hitCard(brief.sourceVideoId, url, lang) : Promise.resolve(null),
   ]);
   const lines = suggestionsFor(brief, lineSuggestions, { recipe, spots: plan?.open ?? [] });
   const offered = lines.some((b) => b.length > 0);
   const locked = brief.status === "approved";
 
   return (
-    <main className="flex min-h-dvh flex-col gap-6 py-6">
+    <main className="flex min-h-dvh flex-col gap-6 pt-1">
+      <Link href={`/brief/${brief.id}`} className="-ml-1 -mb-3 inline-flex min-h-11 items-center gap-1 self-start px-1 text-[13px] font-[560] text-text-dim hover:text-text">
+        ← {t("briefTitle", lang)}
+      </Link>
       <header className="flex flex-col gap-2">
         <div className="flex items-center gap-2 text-[13px] font-[560] text-text-dim">
           <span className="grid size-6 place-items-center rounded-full bg-accent-soft text-[12px] font-[720] text-accent ring-1 ring-accent">
             {ghost.name.slice(0, 1)}
           </span>
-          {ghost.name} · Storyboard
+          {ghost.name} · {t("sbTitle", lang)}
           <span className="font-mono text-[12px]">{brief.durationSec}s · 9:16 · {brief.lang.toUpperCase()}</span>
         </div>
         <h1 className="text-[22px] font-[720] leading-[1.27] tracking-[-0.01em]">{brief.hook}</h1>
-        <p className="text-[13px] text-text-3">
-          {frames.length} beats · {made} scenes ready. Scenes are made with CineSynth; until then each shows the prompt it will use.
+        <p className="text-[13px] leading-snug text-text-3">
+          <span className="font-mono">{frames.length}</span> {t("sbBeats", lang)} · <span className="font-mono">{made}</span> {t("sbReady", lang)}. {t("sbNote", lang)}
         </p>
         {offered ? (
-          <p className="text-[12px] text-text-3">
-            GhostReel wrote the line options; each shows, in Shorti's own words, the move, opening or open spot it read in the source
-            {recipe?.bpm ? ` (source ${Math.round(recipe.bpm)} BPM, ${((recipe.lengthMs ?? 0) / 1000).toFixed(1)} s)` : ""}.
-            {locked ? " The brief is approved, so it can't change." : " Picking one updates the brief right away."}
+          <p className="text-[12px] leading-snug text-text-3">
+            {t("sbLines", lang)}
+            {recipe?.bpm ? ` (${Math.round(recipe.bpm)} BPM, ${((recipe.lengthMs ?? 0) / 1000).toFixed(1)}s)` : ""}.{" "}
+            {locked ? t("sbLocked", lang) : t("sbPickNow", lang)}
           </p>
         ) : null}
       </header>
@@ -77,10 +87,12 @@ export default async function StoryboardPage({ params }: { params: Promise<{ id:
         ))}
       </ol>
 
+      <CameraPreset setups={setups} lang={lang} page={card?.page ? `${card.page}?m=4d` : undefined} />
+
       <VerbSpacer />
       <Verb>
         <ButtonLink href={`/brief/${brief.id}`} size="xl" block>
-          {brief.status === "approved" ? "See the brief and render" : "Back to the brief to approve"}
+          {t(brief.status === "approved" ? "sbToRender" : "sbToApprove", lang)}
         </ButtonLink>
       </Verb>
     </main>

@@ -1,4 +1,5 @@
 // Lane B. One virtual human to pick: monogram (portrait when NEWTYPE supplies one), name, niche, languages.
+import { AiLabel } from "@/components/ui";
 import type { Ghost } from "@/lib/types";
 
 export function GhostCard({ ghost, selected, onSelect }: { ghost: Ghost; selected: boolean; onSelect: () => void }) {
@@ -13,8 +14,11 @@ export function GhostCard({ ghost, selected, onSelect }: { ghost: Ghost; selecte
       }`}
     >
       {ghost.portraitUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={ghost.portraitUrl} alt="" className="aspect-square w-full rounded-[var(--radius-pic)] object-cover" />
+        <span className="relative block aspect-square w-full overflow-hidden rounded-[var(--radius-pic)]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={ghost.portraitUrl} alt="" className="size-full object-cover object-[50%_20%]" />
+          <span className="absolute inset-x-1.5 bottom-1.5 flex"><AiLabel /></span>
+        </span>
       ) : (
         <span className="grid aspect-square w-full place-items-center rounded-[var(--radius-pic)] bg-accent-soft text-accent ring-1 ring-inset ring-accent/40 text-[32px] font-[720]">
           {ghost.name.slice(0, 1)}

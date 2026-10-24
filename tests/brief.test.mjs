@@ -94,3 +94,18 @@ test("the creator block carries their words and style, escaped, and only when gi
   assert.ok(!block.includes("</creator>") && block.includes("\\u003c/creator>"));
   assert.equal(JSON.parse(block.replace(/\\u003c/g, "<")).style.openings[0], "0% to ready");
 });
+
+test("the 4D camera preset reaches the prompt as data, setup by setup, and the rules say how to use it", () => {
+  const camera = [
+    { tMs: 0, mount: "tripod", move: "static", height: "high", distM: 0.8, heightM: 1.8, tiltDeg: -23, vfovDeg: 68.1 },
+    { tMs: 9167, mount: "tripod", move: "static", height: "eye", distM: 0.8, heightM: 1.45, tiltDeg: 0, vfovDeg: 70.7 },
+  ];
+  const { system, user } = buildBriefPrompt({ ...input, camera });
+  assert.match(system, /<camera>/);
+  const block = /<camera>(.*?)<\/camera>/.exec(user);
+  assert.ok(block, "a camera block");
+  const setups = JSON.parse(block[1]);
+  assert.deepEqual(setups.map((s) => s.fromSec), [0, 9.2]);
+  assert.equal(setups[0].tiltDeg, -23);
+  assert.doesNotMatch(buildBriefPrompt(input).user, /<camera>/, "no preset read, no block");
+});

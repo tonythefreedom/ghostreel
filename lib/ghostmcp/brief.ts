@@ -4,7 +4,7 @@
 // Nothing here approves, renders, spends or posts. Pure over injected readers, so tests run it without a server.
 import { z } from "zod";
 import { buildBriefPrompt, Draft, finishBrief, type BriefInput, type CreatorBlock } from "../brief.ts";
-import { Intent, type Brief, type Creator, type FormatPlan, type Ghost, type RecipeEdit, type TastePick, type VideoReading } from "../types.ts";
+import { Intent, type Brief, type CameraSetup, type Creator, type FormatPlan, type Ghost, type RecipeEdit, type TastePick, type VideoReading } from "../types.ts";
 import type { KV } from "./tokens.ts";
 
 export interface BriefDeps {
@@ -14,6 +14,8 @@ export interface BriefDeps {
   recipeEdit(url: string): Promise<RecipeEdit | null>;
   formatPlan(formatId: string): Promise<FormatPlan | null>;
   creatorStyle(creator: Creator): Promise<CreatorBlock["style"]>;
+  /** The 4D camera preset: where the phone stood in the hit (Shorti's scene read); none when not read. */
+  cameraSetups?(url: string): Promise<CameraSetup[]>;
 }
 
 export class ToolError extends Error {
@@ -66,14 +68,15 @@ async function assemble(deps: BriefDeps, accountId: number, args: z.infer<typeof
   const pick = picks.find((p) => p.videoId === args.videoId && p.kept);
   if (!pick) throw new ToolError("not_kept", "Keep this short on the taste deck first.");
   const creator = creators[0]!;
-  const [read, moves, plan, style] = withReads
+  const [read, moves, plan, style, camera] = withReads
     ? await Promise.all([
         pick.url ? deps.reading(args.videoId, pick.url) : Promise.resolve(null),
         pick.url ? deps.recipeEdit(pick.url) : Promise.resolve(null),
         pick.formatId ? deps.formatPlan(pick.formatId) : Promise.resolve(null),
         deps.creatorStyle(creator),
+        pick.url && deps.cameraSetups ? deps.cameraSetups(pick.url) : Promise.resolve([]),
       ])
-    : [null, null, null, undefined];
+    : [null, null, null, undefined, []];
   const openSpot = plan?.open[args.spot ?? 0];
   return {
     ghost,
@@ -87,6 +90,7 @@ async function assemble(deps: BriefDeps, accountId: number, args: z.infer<typeof
     moves,
     spot: openSpot ? { label: openSpot.label, what: openSpot.what, how: openSpot.how } : undefined,
     creator: { bio: creator.bio || undefined, plan: creator.plan || undefined, script: creator.script || undefined, style },
+    camera,
   };
 }
 

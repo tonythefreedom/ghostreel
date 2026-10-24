@@ -9,6 +9,7 @@ import { t, type UiLang } from "@/lib/words";
 import { Button, Verb } from "./ui";
 import { Segmented } from "./taste/Segmented";
 import { UnlockForm } from "./UnlockForm";
+import { useLang } from "@/components/Lang";
 
 export interface KeptItem {
   videoId: string;
@@ -20,7 +21,7 @@ export interface KeptItem {
 const INTENTS: Intent[] = ["keep", "adapt", "twist"];
 const INTENT_WORD = { keep: "intentKeep", adapt: "intentAdapt", twist: "intentTwist" } as const;
 
-export function BriefStarter({ ghostId, creatorId, items, lang = "en", back }: {
+export function BriefStarter({ ghostId, creatorId, items, lang: langProp, back }: {
   ghostId: string;
   creatorId?: string;
   items: KeptItem[];
@@ -28,6 +29,8 @@ export function BriefStarter({ ghostId, creatorId, items, lang = "en", back }: {
   /** The one quiet secondary beside the verb (the way back to the deck). */
   back?: ReactNode;
 }) {
+  const ctxLang = useLang();
+  const lang = langProp ?? ctxLang;
   const router = useRouter();
   const [selected, setSelected] = useState<string | null>(null);
   const [intent, setIntent] = useState<Record<string, Intent>>({});

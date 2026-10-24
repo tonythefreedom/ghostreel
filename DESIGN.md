@@ -40,6 +40,7 @@ One light, Screen: near-black with cool greys. The table is the single source; `
 | `--ghost` | `#3DD68C` | kept, approved, done |
 | `--warn` | `#F5B942` | a fix, demo and fallback notices |
 | `--danger` | `#FF6B75` | an error line (with ✕, never colour alone) |
+| `--pencil` | `#6CC6FF` | the coaching pencil: a cue's words and strokes drawn over a playing picture (an editor's blue pencil) |
 
 Over a picture: Vellum is `rgba(11,11,12,.38)` with `blur(20px) saturate(1.4)` and a 1 px `rgba(255,255,255,.1)` edge
 (`rgba(11,11,12,.62)` without backdrop-filter).
@@ -111,6 +112,6 @@ Over a picture: Vellum is `rgba(11,11,12,.38)` with `blur(20px) saturate(1.4)` a
 
 ## Motion on screens
 
-- The taste deck fans (22 px right, 7 px down, 0.96) on the fan spring; a kept card leaves up-right, a skipped one
+- The taste deck fans (12 px right, 6 px down, 0.96) on the fan spring; its top card plays the hit with the coaching pencil; a kept card leaves up-right, a skipped one
   drops left, on `leave`.
 - Render waiting shows the ghost's poster and a `Progress` list, never a spinner or shimmer.

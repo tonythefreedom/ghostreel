@@ -1,40 +1,34 @@
-// Lane B. Connect your own Claude to GhostReel: your Claude writes the brief (no model key on our server), GhostReel
-// keeps it as a draft for you to approve.
+// Connect your own Claude to GhostReel: your Claude writes the brief (no model key on our server), GhostReel keeps it as
+// a draft for you to approve. The page leads through sign-in, the token, the add step and a live check.
 import { cookies, headers } from "next/headers";
 import { ConnectClaude } from "@/components/ConnectClaude";
-import { ButtonLink } from "@/components/ui";
+import { getLang } from "@/lib/lang";
 import { publicOrigin } from "@/lib/limits";
 import { currentAccount, SESSION_COOKIE } from "@/lib/newtype/cinesynth";
+import { t } from "@/lib/words";
 
 export const dynamic = "force-dynamic";
 
 export default async function ConnectPage() {
-  const account = await currentAccount((await cookies()).get(SESSION_COOKIE)?.value);
+  const lang = await getLang();
+  const account = await currentAccount((await cookies()).get(SESSION_COOKIE)?.value).catch(() => null);
   const base = publicOrigin(await headers(), "http://localhost:3000"); // the tunnel's address, not the server's own
   return (
-    <main className="flex min-h-dvh flex-col gap-6 py-6">
-      <header className="flex flex-col gap-2">
-        <div className="flex items-center gap-2 text-[13px] font-[560] text-text-dim">
-          <span aria-hidden className="size-2 rounded-full bg-accent" />
-          GhostReel · Connect your Claude
-        </div>
-        <h1 className="text-[28px] font-[720] leading-tight tracking-[-0.02em]">Your Claude writes the brief</h1>
-        <p className="text-[15px] text-text-dim">
-          Add GhostReel to Claude Code or Claude Desktop. Your Claude reads your ghost, your style and Shorti&apos;s
-          reading of the short you kept, writes the brief, and saves it here as a draft. Approving and rendering stay
-          with you on this site.
-        </p>
+    <main className="flex min-h-dvh flex-col gap-6 pb-12 pt-2">
+      <header className="flex flex-col gap-3">
+        <p className="text-[13px] font-[640] text-accent">{t("connectEyebrow", lang)}</p>
+        <h1 className="text-[28px] font-[720] leading-[1.15] tracking-[-0.02em]">{t("connectTitle", lang)}</h1>
+        <p className="text-[15px] leading-[1.5] text-text-dim">{t("connectLede", lang)}</p>
+        <ol className="mt-1 grid grid-cols-3 gap-2" aria-label={t("connectHowLabel", lang)}>
+          {(["connectHow1", "connectHow2", "connectHow3"] as const).map((k, i) => (
+            <li key={k} className="flex flex-col gap-1.5 rounded-[var(--radius-control)] bg-surface p-3 ring-1 ring-inset ring-line">
+              <span className={`font-mono text-[12px] font-[640] ${i === 2 ? "text-ghost" : i === 1 ? "text-accent" : "text-pencil"}`}>0{i + 1}</span>
+              <span className="text-[12px] leading-snug text-text-dim">{t(k, lang)}</span>
+            </li>
+          ))}
+        </ol>
       </header>
-      {account?.status === "approved" ? (
-        <ConnectClaude mcpUrl={`${base}/mcp`} />
-      ) : (
-        <section className="flex flex-col gap-3">
-          <p className="text-[13px] text-text-dim">
-            {account ? "CineSynth hasn't approved this account yet." : "Sign in with Google first; the token is tied to that account."}
-          </p>
-          <ButtonLink size="xl" block href="/onboard">Sign in</ButtonLink>
-        </section>
-      )}
+      <ConnectClaude mcpUrl={`${base}/mcp`} siteUrl={base} initialAccount={account} />
     </main>
   );
 }

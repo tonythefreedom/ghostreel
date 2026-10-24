@@ -12,10 +12,19 @@ const write = (name: string, data: unknown) =>
   writeFileSync(new URL(`${name}.json`, OUT), JSON.stringify(data, null, 2) + "\n");
 
 const formats: Record<string, unknown> = {};
+// A deck round is eight cards; ten keeps a spare or two and each file under the fixture size limit.
+const DECK = 10;
 const recipes: Record<string, unknown> = {};
 for (const field of ["beauty", "fashion"]) {
+  // Korean first-class: the same deck in Shorti's own Korean, for pages shown in Korean.
+  {
+    const { cards, asOf } = await readTrending(field, "ko");
+    const { cards: rich, readings } = await enrich(cards.slice(0, DECK), "ko");
+    write(`trending-${field}.ko`, { field, asOf, recordedAt: new Date().toISOString(), cards: rich, readings: Object.fromEntries(readings) });
+    console.log(`trending-${field}.ko: ${rich.length} cards, ${readings.size} readings`);
+  }
   const { cards, asOf } = await readTrending(field);
-  const { cards: rich, readings } = await enrich(cards);
+  const { cards: rich, readings } = await enrich(cards.slice(0, DECK));
   write(`trending-${field}`, { field, asOf, recordedAt: new Date().toISOString(), cards: rich, readings: Object.fromEntries(readings) });
   console.log(`trending-${field}: ${rich.length} cards, ${readings.size} readings`);
   for (const c of rich.filter((c) => c.formatKind === "format" && c.formatId).slice(0, 3)) {

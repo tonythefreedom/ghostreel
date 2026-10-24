@@ -4,6 +4,7 @@
 import { useRef, type KeyboardEvent } from "react";
 import type { Ghost } from "@/lib/types";
 import { rovingNext } from "./logic";
+import { useLang } from "@/components/Lang";
 
 type Props = {
   ghosts: Ghost[];
@@ -14,7 +15,9 @@ type Props = {
   lang?: "ko" | "en";
 };
 
-export function GhostDock({ ghosts, selectedId, onSelect, onCreate, max = 5, lang = "en" }: Props) {
+export function GhostDock({ ghosts, selectedId, onSelect, onCreate, max = 5, lang: langProp }: Props) {
+  const ctxLang = useLang();
+  const lang = langProp ?? ctxLang;
   const shown = ghosts.slice(0, max);
   const hidden = ghosts.length - shown.length;
   const refs = useRef<(HTMLButtonElement | null)[]>([]);

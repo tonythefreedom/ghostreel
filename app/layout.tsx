@@ -1,6 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Geist } from "next/font/google";
+import { LangProvider } from "@/components/Lang";
+import { TopBar } from "@/components/TopBar";
+import { getLang } from "@/lib/lang";
+import { t } from "@/lib/words";
 import "./globals.css";
 
 const pretendard = localFont({
@@ -18,23 +22,32 @@ const geist = Geist({
   preload: false,
 });
 
-export const metadata: Metadata = {
-  title: "GhostReel",
-  description: "Your short-form style, performed every day by a virtual human: no face, no shoot, a channel on the side.",
-  // For AI assistants: how to use GhostReel and connect its MCP server (public/llms.txt).
-  alternates: { types: { "text/markdown": "/llms.txt" } },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const lang = await getLang();
+  return {
+    title: t("brand", lang),
+    description: t("metaDescription", lang),
+    // For AI assistants: how to use GhostReel and connect its MCP server (public/llms.txt).
+    alternates: { types: { "text/markdown": "/llms.txt" } },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: "#0B0B0C",
   colorScheme: "dark",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const lang = await getLang();
   return (
-    <html lang="en" className={`${pretendard.variable} ${geist.variable}`}>
+    <html lang={lang} className={`${pretendard.variable} ${geist.variable}`}>
       <body className="min-h-dvh">
-        <div className="mx-auto w-full max-w-[430px] px-5">{children}</div>
+        <LangProvider lang={lang}>
+          <div className="mx-auto w-full max-w-[430px] px-5">
+            <TopBar />
+            {children}
+          </div>
+        </LangProvider>
       </body>
     </html>
   );

@@ -5,6 +5,12 @@ export const CREATOR_FLOW: Array<{ title: string; body: string }> = [
   { title: "Approve", body: "Edit the brief and storyboard your ghost wrote, pick the lines, then approve." },
   { title: "Get it", body: "Get the short your virtual human stars in and schedule it. Your face never appears." },
 ];
+export const CREATOR_FLOW_KO: Array<{ title: string; body: string }> = [
+  { title: "가입", body: "경력과 숏폼, 기획을 한 번만 알려 주면 쇼티가 내 스타일을 읽어요." },
+  { title: "고르기", body: "이번 주 해외에서 뜨는 숏폼 중 내 스타일에 맞는 것만 남겨요." },
+  { title: "승인하기", body: "고스트가 쓴 브리프와 콘티를 고치고 대사를 골라 승인해요." },
+  { title: "받기", body: "가상 인간이 출연한 숏폼을 받아 예약해요. 내 얼굴은 나오지 않아요." },
+];
 
 /** Which trend deck fits a creator's niche: Shorti's fields are beauty and fashion; beauty when neither is named. */
 export function fieldFor(niche: string): "beauty" | "fashion" {

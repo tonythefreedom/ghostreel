@@ -8,7 +8,7 @@ import { summarize } from "@/lib/creatorStyle";
 import { guardSpend, requireOwner } from "@/lib/guard";
 import { BriefRefused, ModelKeyMissing, modelReady, writeBrief } from "@/lib/claude";
 import { getGhost } from "@/lib/newtype";
-import { formatPlan, reading, recipeEdit } from "@/lib/shorti";
+import { cameraSetups, formatPlan, reading, recipeEdit } from "@/lib/shorti";
 import { store } from "@/lib/store";
 import { Intent, type Brief, type Creator, type TastePick } from "@/lib/types";
 
@@ -54,11 +54,12 @@ export async function POST(req: NextRequest) {
   const refused = await guardSpend(req, "brief"); // after cheap checks, so bad requests never count against the cap
   if (refused) return refused;
 
-  const [read, moves, plan, creator] = await Promise.all([
+  const [read, moves, plan, creator, camera] = await Promise.all([
     pick.url ? reading(videoId, pick.url) : Promise.resolve(null),
     pick.url ? recipeEdit(pick.url) : Promise.resolve(null),
     pick.formatId ? formatPlan(pick.formatId) : Promise.resolve(null),
     creatorBlock(creatorId, ghostId),
+    pick.url ? cameraSetups(pick.url) : Promise.resolve([]),
   ]);
   if (!read && !plan) return NextResponse.json({ error: "no_reading", hint: "Shorti had nothing on this short" }, { status: 424 });
   const openSpot = plan?.open[spot ?? 0];
@@ -76,6 +77,7 @@ export async function POST(req: NextRequest) {
       moves,
       spot: openSpot ? { label: openSpot.label, what: openSpot.what, how: openSpot.how } : undefined,
       creator,
+      camera,
     });
     await store.set(`brief:${brief.id}`, brief, 60 * 60 * 24 * 7);
     await store.push(`briefs:${ghostId}`, brief.id, 50, 60 * 60 * 24 * 7);

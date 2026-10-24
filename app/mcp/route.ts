@@ -5,7 +5,7 @@ import { summarize } from "@/lib/creatorStyle";
 import { handleRpc, PROTOCOL } from "@/lib/ghostmcp/rpc";
 import { allowHit, publicOrigin } from "@/lib/limits";
 import { getGhost } from "@/lib/newtype";
-import { formatPlan, reading, recipeEdit } from "@/lib/shorti";
+import { cameraSetups, formatPlan, reading, recipeEdit } from "@/lib/shorti";
 import { store } from "@/lib/store";
 
 export const maxDuration = 60;
@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
       reading,
       recipeEdit,
       formatPlan,
+      cameraSetups,
       creatorStyle: async (c) => {
         if (!c.works.length) return undefined;
         const s = summarize(await Promise.all(c.works.map(async (url) => ({ url, reading: await reading(url, url), recipe: await recipeEdit(url) }))));

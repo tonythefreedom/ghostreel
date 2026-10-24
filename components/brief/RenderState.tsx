@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { clock } from "@/components/kit/logic";
 import { DemoTag } from "@/components/TrustLine";
 import { Player, Progress, type Step } from "@/components/ui";
+import { briefCues } from "@/lib/cues";
 import { prerenderMatches, type Brief, type RenderJob } from "@/lib/types";
 import { t, type UiLang, type WordKey } from "@/lib/words";
 
@@ -47,7 +48,8 @@ export function RenderState({ job, brief, poster, lang }: { job: RenderJob; brie
         </p>
       ) : null}
       {done && job.videoUrl ? (
-        <Player src={job.videoUrl} poster={picture} label={t("aiLabel", lang)} marks={prerender ? <DemoTag>{t("prerendered", lang)}</DemoTag> : undefined} />
+        <Player src={job.videoUrl} poster={picture} label={t("aiLabel", lang)} marks={prerender ? <DemoTag>{t("prerendered", lang)}</DemoTag> : undefined}
+          cues={!prerender || prerenderMatches(job, brief) ? briefCues(brief) : []} />
       ) : active && picture ? (
         <Player poster={picture} autoPlay={false} label={t("aiLabel", lang)} />
       ) : null}

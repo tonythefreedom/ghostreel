@@ -2,7 +2,7 @@
 // The owner's last word before any GPU spend: the hook as the title, the beats on a rail with the chosen one opened,
 // the rest folded away, and one docked verb. Approving locks the brief; the render route refuses anything unapproved.
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Button, ButtonLink, Rail, Verb, VerbSpacer, type Beat } from "@/components/ui";
 import type { Brief, BriefLine, KeepPart, RenderJob } from "@/lib/types";
 import { t, type UiLang, type WordKey } from "@/lib/words";
@@ -13,6 +13,7 @@ import { MoreDetail } from "./brief/MoreDetail";
 import { RenderState } from "./brief/RenderState";
 import { SpeechMeter } from "./brief/SpeechMeter";
 import { UnlockForm } from "./UnlockForm";
+import { useLang } from "@/components/Lang";
 
 type GhostFace = { id: string; name: string; portraitUrl?: string };
 
@@ -24,13 +25,17 @@ function beatTitle(line: BriefLine, i: number, lang: UiLang): string {
   return words.length > 1 ? words.slice(0, 3).join(" ") : [...say].slice(0, 8).join("");
 }
 
-export function BriefEditor({ initial, initialJob, ghost, kept = [], lang = "en" }: {
+export function BriefEditor({ initial, initialJob, ghost, kept = [], extra, lang: langProp }: {
   initial: Brief;
   initialJob: RenderJob | null;
   ghost: GhostFace;
   kept?: KeepPart[];
+  /** What the page shows under the brief: the source short and its camera preset. */
+  extra?: ReactNode;
   lang?: UiLang;
 }) {
+  const ctxLang = useLang();
+  const lang = langProp ?? ctxLang;
   const [brief, setBrief] = useState(initial);
   const [dirty, setDirty] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -161,6 +166,7 @@ export function BriefEditor({ initial, initialJob, ghost, kept = [], lang = "en"
       <Link href={`/storyboard/${brief.id}`} className="-my-2 inline-flex min-h-11 items-center self-end text-[13px] font-[560] text-text-dim underline-offset-4 hover:text-text hover:underline">
         {t("storyboard", lang)} →
       </Link>
+      {extra}
       <VerbSpacer />
       <div aria-hidden className="h-10" />
 

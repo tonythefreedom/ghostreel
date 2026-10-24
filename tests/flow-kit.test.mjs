@@ -13,9 +13,12 @@ test("a creator's niche picks the matching trend deck", () => {
 const src = (p) => readFileSync(new URL(p, import.meta.url), "utf8");
 
 test("every ghost thumbnail and frame in the kit carries the full AI label", () => {
-  for (const f of ["../components/kit/ReelGrid.tsx", "../components/kit/ReelLightbox.tsx"]) {
-    assert.match(src(f), /AI-generated · Virtual human/, f);
-  }
+  assert.match(src("../components/kit/ReelGrid.tsx"), /AI-generated · Virtual human/);
+  // The lightbox plays through the shared Player, whose AI label is on unless a page turns it off (a real creator's hit).
+  const box = src("../components/kit/ReelLightbox.tsx");
+  assert.match(box, /<Player\b/);
+  assert.doesNotMatch(box, /ai=\{false\}/);
+  assert.match(src("../components/ui/Player.tsx"), /ai = true/);
   assert.doesNotMatch(src("../components/kit/ReelGrid.tsx"), />AI<\/span>/);
 });
 

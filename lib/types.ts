@@ -40,6 +40,7 @@ export const TrendCard = z.object({
   views: z.number().int().nonnegative().optional(), // the platform's count, as read
   viewsAsOf: z.string().optional(),
   posterUrl: z.string().url().optional(),
+  clipUrl: z.string().url().optional(), // Shorti's own 720p copy of the hit, to play in place
   hook: z.string().optional(),
   whatHappens: z.string().optional(),
   lengthS: z.number().optional(),
@@ -48,6 +49,9 @@ export const TrendCard = z.object({
 export type TrendCard = z.infer<typeof TrendCard>;
 
 export const Beat = z.object({ at: z.string(), do: z.string() });
+// A coaching moment Shorti read in a hit: when (s), the craft point, what to do, and what in the frame to look at.
+export const HitCue = z.object({ t: z.number(), cue: z.string(), do: z.string().default(""), look: z.array(z.string()).default([]) });
+export type HitCue = z.infer<typeof HitCue>;
 export const VideoReading = z.object({
   videoId: z.string(),
   hook: z.string().default(""),
@@ -57,7 +61,9 @@ export const VideoReading = z.object({
   checklist: z.array(z.string()).default([]),
   needs: z.array(z.string()).default([]),
   props: z.array(z.string()).default([]),
-});
+  cues: z.array(HitCue).default([]),
+  cuts: z.array(z.number()).default([]), // measured cuts, seconds
+}); 
 export type VideoReading = z.infer<typeof VideoReading>;
 
 export const OpenSpot = z.object({ label: z.string(), what: z.string(), how: z.string().default("") });
@@ -119,13 +125,17 @@ export const RecipeEdit = z.object({
 export type RecipeEdit = z.infer<typeof RecipeEdit>;
 
 // Where the phone stood in a hit (shorti_format part "scene"): one row per camera setup.
+// Where the phone stood in a hit, per setup (Shorti's scene read, estimated): the camera preset a ghost's shot can take.
 export const CameraSetup = z.object({
   tMs: z.number(),
   mount: z.string().default(""),
   move: z.string().default(""),
   height: z.string().default(""),
   distM: z.number().optional(),
+  heightM: z.number().optional(),
   tiltDeg: z.number().optional(),
+  vfovDeg: z.number().optional(),
+  zoom: z.number().optional(),
 });
 export type CameraSetup = z.infer<typeof CameraSetup>;
 

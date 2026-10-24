@@ -5,13 +5,14 @@ import { useState } from "react";
 import { ReelLightbox } from "@/components/kit";
 import { Player } from "@/components/ui";
 import type { Brief, RenderJob } from "@/lib/types";
-import { t } from "@/lib/words";
+import { useT } from "@/components/Lang";
 
 export type Reel = { job: RenderJob; brief: Brief };
 
 const pill = "vellum inline-flex items-center rounded-full px-2.5 py-1 text-[12px] font-[560]";
 
 export function ReelWall({ reels }: { reels: Reel[] }) {
+  const t = useT();
   const [open, setOpen] = useState<Reel | null>(null);
   return (
     <>

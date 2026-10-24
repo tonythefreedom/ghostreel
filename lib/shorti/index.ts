@@ -3,9 +3,11 @@
 import "server-only";
 import beauty from "@/fixtures/shorti/trending-beauty.json";
 import fashion from "@/fixtures/shorti/trending-fashion.json";
+import beautyKo from "@/fixtures/shorti/trending-beauty.ko.json";
+import fashionKo from "@/fixtures/shorti/trending-fashion.ko.json";
 import recordedFormats from "@/fixtures/shorti/formats.json";
 import recordedRecipes from "@/fixtures/shorti/recipes.json";
-import { enrich, readCameraSetups, readFind, readFormatPlan, readOpenSpots, readRecipeEdit, readTrending, readVideo } from "./read.ts";
+import { enrich, readCameraSetups, readFind, readFormatPlan, readOpenSpots, readRecipeEdit, readTrending, readVideo, type ReadLang } from "./read.ts";
 import { FormatPlan, RecipeEdit, TrendCard, VideoReading, type CameraSetup, type FindMatch, type OpenSpot, type Sourced } from "../types.ts";
 import { z } from "zod";
 
@@ -17,9 +19,10 @@ const Recorded = z.object({
   cards: z.array(TrendCard),
   readings: z.record(z.string(), VideoReading),
 });
-const fixtures: Record<Field, z.infer<typeof Recorded>> = {
-  beauty: Recorded.parse(beauty),
-  fashion: Recorded.parse(fashion),
+// Recorded in each language Shorti speaks; a page in Korean shows Shorti's own Korean, never a translation.
+const fixtures: Record<ReadLang, Record<Field, z.infer<typeof Recorded>>> = {
+  en: { beauty: Recorded.parse(beauty), fashion: Recorded.parse(fashion) },
+  ko: { beauty: Recorded.parse(beautyKo), fashion: Recorded.parse(fashionKo) },
 };
 const fixtureFormats = z.record(z.string(), FormatPlan).parse(recordedFormats.formats);
 const fixtureRecipes = z.record(z.string(), RecipeEdit).parse(recordedRecipes.recipes); // by video url
@@ -35,22 +38,24 @@ async function cached<T>(key: string, load: () => Promise<T>): Promise<T> {
   return value;
 }
 
+// Readings by language and video: `${lang}:${videoId}`.
 const readingsByVideo = new Map<string, z.infer<typeof VideoReading>>();
-for (const f of Object.values(fixtures)) for (const [id, r] of Object.entries(f.readings)) readingsByVideo.set(id, r);
+for (const [lang, byField] of Object.entries(fixtures))
+  for (const f of Object.values(byField)) for (const [id, r] of Object.entries(f.readings)) readingsByVideo.set(`${lang}:${id}`, r);
 
 type Deck = { cards: z.infer<typeof TrendCard>[] };
 
-export async function trending(field: Field): Promise<Sourced<Deck>> {
+export async function trending(field: Field, lang: ReadLang = "en"): Promise<Sourced<Deck>> {
   const fallback = (): Sourced<Deck> => ({
-    data: { cards: fixtures[field].cards },
-    provenance: { source: "fixture", readAt: fixtures[field].recordedAt },
+    data: { cards: fixtures[lang][field].cards },
+    provenance: { source: "fixture", readAt: fixtures[lang][field].recordedAt },
   });
   if (offline()) return fallback();
   try {
-    return await cached(`trending:${field}`, async () => {
-      const { cards } = await readTrending(field);
-      const rich = await enrich(cards);
-      for (const [id, r] of rich.readings) readingsByVideo.set(id, r);
+    return await cached(`trending:${lang}:${field}`, async () => {
+      const { cards } = await readTrending(field, lang);
+      const rich = await enrich(cards, lang);
+      for (const [id, r] of rich.readings) readingsByVideo.set(`${lang}:${id}`, r);
       if (rich.cards.length < 4) throw new Error("shorti: too few cards");
       return { data: { cards: rich.cards }, provenance: { source: "live", readAt: new Date().toISOString() } } as const;
     });
@@ -60,12 +65,12 @@ export async function trending(field: Field): Promise<Sourced<Deck>> {
   }
 }
 
-export async function reading(videoId: string, url: string): Promise<z.infer<typeof VideoReading> | null> {
-  const known = readingsByVideo.get(videoId);
+export async function reading(videoId: string, url: string, lang: ReadLang = "en"): Promise<z.infer<typeof VideoReading> | null> {
+  const known = readingsByVideo.get(`${lang}:${videoId}`);
   if (known || offline()) return known ?? null;
   try {
-    const { reading } = await cached(`video:${url}`, () => readVideo(url));
-    readingsByVideo.set(videoId, { ...reading, videoId });
+    const { reading } = await cached(`video:${lang}:${url}`, () => readVideo(url, lang));
+    readingsByVideo.set(`${lang}:${videoId}`, { ...reading, videoId });
     return { ...reading, videoId };
   } catch {
     return null;
@@ -82,6 +87,25 @@ export async function formatPlan(formatId: string): Promise<z.infer<typeof Forma
   }
 }
 
+/**
+ * One hit as a card (its clip, poster, page), wherever it is known: a deck already read in this language, the
+ * recorded decks, else Shorti's own read of the video. Null when Shorti has none.
+ */
+export async function hitCard(videoId: string, url: string, lang: ReadLang = "en"): Promise<z.infer<typeof TrendCard> | null> {
+  for (const field of FIELDS) {
+    const hit = cache.get(`trending:${lang}:${field}`)?.value as Sourced<Deck> | undefined;
+    const card = hit?.data.cards.find((c) => c.videoId === videoId) ?? fixtures[lang][field].cards.find((c) => c.videoId === videoId);
+    if (card) return card;
+  }
+  if (offline()) return null;
+  try {
+    const { card } = await cached(`video:${lang}:${url}`, () => readVideo(url, lang));
+    return TrendCard.parse({ videoId, url, platform: "unknown", ...Object.fromEntries(Object.entries(card).filter(([, v]) => v !== undefined)) });
+  } catch {
+    return null;
+  }
+}
+
 // Every reader below is a keyless Shorti read: no sign-in ever reaches a viewer. A miss returns null or [] and the
 // caller carries on without it.
 
@@ -95,9 +119,9 @@ export async function recipeEdit(url: string): Promise<z.infer<typeof RecipeEdit
   }
 }
 
-export async function cameraSetups(url: string): Promise<CameraSetup[]> {
+export async function cameraSetups(url: string, lang: ReadLang = "en"): Promise<CameraSetup[]> {
   if (offline()) return [];
-  return cached(`scene:${url}`, () => readCameraSetups(url)).catch(() => []);
+  return cached(`scene:${lang}:${url}`, () => readCameraSetups(url, lang)).catch(() => []);
 }
 
 export async function findFormats(query: string, limit = 5): Promise<FindMatch[]> {

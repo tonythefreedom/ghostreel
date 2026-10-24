@@ -6,6 +6,8 @@ import { ReelWall, type Reel } from "@/components/channel/ReelWall";
 import { WeekTape } from "@/components/channel/WeekTape";
 import { byWritten, week } from "@/components/channel/week";
 import { ButtonLink, Empty, Verb, VerbSpacer } from "@/components/ui";
+import { withFace } from "@/lib/ghostFace";
+import { getLang } from "@/lib/lang";
 import { getGhost } from "@/lib/newtype";
 import { store } from "@/lib/store";
 import type { Brief, RenderJob } from "@/lib/types";
@@ -20,6 +22,7 @@ async function jobFor(briefId: string): Promise<RenderJob | null> {
 
 export default async function GhostChannel({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const lang = await getLang();
   const ghost = await getGhost(id);
   if (!ghost) notFound();
 
@@ -42,24 +45,24 @@ export default async function GhostChannel({ params }: { params: Promise<{ id: s
   const taste = `/taste?ghost=${ghost.id}`;
 
   return (
-    <main className="flex min-h-dvh flex-col gap-10 py-6">
-      <ChannelHead ghost={ghost} />
+    <main className="flex min-h-dvh flex-col gap-10 pt-4">
+      <ChannelHead ghost={withFace(ghost)} lang={lang} />
 
       <section aria-labelledby="reels" className="flex flex-col gap-3">
-        <h2 id="reels" className="text-[18px] font-[720] tracking-[-0.01em]">{t("reels")}</h2>
+        <h2 id="reels" className="text-[18px] font-[720] tracking-[-0.01em]">{t("reels", lang)}</h2>
         {reels.length ? (
           <ReelWall reels={reels} />
         ) : (
-          <Empty head={t("noReels")} line={t("noReelsLine")}
-            action={<ButtonLink href={taste} kind="secondary" size="m">{t("findShort")}</ButtonLink>} />
+          <Empty head={t("noReels", lang)} line={t("noReelsLine", lang)}
+            action={<ButtonLink href={taste} kind="secondary" size="m">{t("findShort", lang)}</ButtonLink>} />
         )}
       </section>
 
-      <WeekTape days={days} later={later} ghostId={ghost.id} />
+      <WeekTape days={days} later={later} ghostId={ghost.id} lang={lang} />
 
       <VerbSpacer />
-      <Verb note={t("noViewsPromise")}>
-        <ButtonLink href={draft ? `/brief/${draft.id}` : taste} size="xl">{t(draft ? "approveDraft" : "teachShort")}</ButtonLink>
+      <Verb note={t("noViewsPromise", lang)}>
+        <ButtonLink href={draft ? `/brief/${draft.id}` : taste} size="xl">{t(draft ? "approveDraft" : "teachShort", lang)}</ButtonLink>
       </Verb>
     </main>
   );

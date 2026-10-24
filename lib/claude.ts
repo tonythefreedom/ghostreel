@@ -7,7 +7,8 @@ import { env } from "./env.ts";
 import { buildBriefPrompt, Draft, finishBrief, type BriefInput } from "./brief.ts";
 import type { Brief } from "./types.ts";
 
-export const BRIEF_MODEL = "claude-opus-5-5";
+// Haiku 5.5 at medium effort (Ted, 10-24: «haiku 5.5 medium으로»): fast and cheap enough for a brief per pick.
+export const BRIEF_MODEL = "claude-haiku-5-5";
 
 let client: Anthropic | null = null;
 const anthropic = () => (client ??= new Anthropic({ apiKey: env.anthropicKey(), timeout: 45_000, maxRetries: 1 }));
@@ -23,9 +24,8 @@ export async function writeBrief(input: BriefInput): Promise<{ brief: Brief; ms:
   const response = await anthropic().beta.messages.parse({
     model: BRIEF_MODEL,
     max_tokens: 16000,
-    betas: ["server-side-fallback-2026-07-01"],
-    fallbacks: "default", // a policy decline is retried server-side on Anthropic's recommended fallback model
-    output_config: { effort: "low", format: betaZodOutputFormat(Draft) },
+    // Haiku 5.5 has no server-side fallback: a decline comes back as stop_reason "refusal", handled below.
+    output_config: { effort: "medium", format: betaZodOutputFormat(Draft) },
     system,
     messages: [{ role: "user", content: user }],
   });

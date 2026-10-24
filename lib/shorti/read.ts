@@ -119,9 +119,16 @@ export function toTrendCards(structured: unknown): TrendCardT[] {
   });
 }
 
+/** «0:03» or «0:03.7» → seconds; a range «0:01–0:03» takes its start. */
+export function seconds(at: string | undefined): number | undefined {
+  const m = /^(\d+):(\d{1,2}(?:\.\d+)?)/.exec((at ?? "").trim());
+  return m ? Number(m[1]) * 60 + Number(m[2]) : undefined;
+}
+
 export function toVideoReading(structured: unknown): { reading: VideoReadingT; card: Partial<TrendCardT> } {
   const v = obj(obj(structured).video);
   const shoot = obj(v.to_shoot);
+  const hit = obj(obj(obj(structured).context).hit);
   const reading = VideoReading.parse({
     videoId: str(v.video_id) ?? "",
     hook: str(v.hook),
@@ -131,12 +138,20 @@ export function toVideoReading(structured: unknown): { reading: VideoReadingT; c
     checklist: arr(v.checklist).filter((x): x is string => typeof x === "string"),
     needs: arr(shoot.needs).filter((x): x is string => typeof x === "string"),
     props: arr(shoot.props).filter((x): x is string => typeof x === "string"),
+    cues: arr(v.cues).flatMap((raw) => {
+      const c = obj(raw);
+      const t = seconds(str(c.at));
+      const cue = str(c.cue);
+      return t !== undefined && cue ? [{ t, cue, do: str(c.do) ?? "", look: strs(c.look_at).slice(0, 3) }] : [];
+    }),
+    cuts: arr(obj(hit.clock).cuts_s).filter((x): x is number => typeof x === "number" && Number.isFinite(x)),
   });
   const card: Partial<TrendCardT> = {
     by: str(v.by),
     views: num(v.views),
     viewsAsOf: str(v.views_as_of),
     posterUrl: str(v.poster),
+    clipUrl: str(hit.clip),
     hook: str(v.hook),
     whatHappens: str(v.what_happens),
     lengthS: num(v.length_s),
@@ -156,13 +171,15 @@ export function toFormatPlan(structured: unknown): FormatPlanT {
 
 // ── live reads ──
 
-export async function readTrending(field: string): Promise<{ cards: TrendCardT[]; asOf?: string }> {
-  const r = await call("shorti_what_to_shoot", { lens: "radar", field, limit: 8 });
+export type ReadLang = "en" | "ko";
+
+export async function readTrending(field: string, lang: ReadLang = "en"): Promise<{ cards: TrendCardT[]; asOf?: string }> {
+  const r = await call("shorti_what_to_shoot", { lens: "radar", field, limit: 8, lang });
   return { cards: toTrendCards(r.structured), asOf: str(obj(r.structured).as_of) };
 }
 
-export async function readVideo(url: string) {
-  return toVideoReading((await call("shorti_video", { url })).structured);
+export async function readVideo(url: string, lang: ReadLang = "en") {
+  return toVideoReading((await call("shorti_video", { url, lang })).structured);
 }
 
 export async function readFormatPlan(formatId: string) {
@@ -170,14 +187,14 @@ export async function readFormatPlan(formatId: string) {
 }
 
 // Enrich cards with posters and hooks, four at a time to stay well under the keyless rate limit.
-export async function enrich(cards: TrendCardT[]): Promise<{ cards: TrendCardT[]; readings: Map<string, VideoReadingT> }> {
+export async function enrich(cards: TrendCardT[], lang: ReadLang = "en"): Promise<{ cards: TrendCardT[]; readings: Map<string, VideoReadingT> }> {
   const readings = new Map<string, VideoReadingT>();
   const out = [...cards];
   for (let i = 0; i < out.length; i += 4) {
     await Promise.all(
       out.slice(i, i + 4).map(async (c, j) => {
         try {
-          const { reading, card } = await readVideo(c.url);
+          const { reading, card } = await readVideo(c.url, lang);
           const merged = { ...c, ...Object.fromEntries(Object.entries(card).filter(([, v]) => v !== undefined)) };
           out[i + j] = TrendCard.parse(merged);
           readings.set(c.videoId, { ...reading, videoId: c.videoId });
@@ -216,7 +233,8 @@ export function toCameraSetups(structured: unknown): CameraSetupT[] {
   return arr(obj(structured).setups).flatMap((raw) => {
     const u = obj(raw);
     const parsed = CameraSetup.safeParse({
-      tMs: num(u.t_ms) ?? 0, mount: str(u.mount), move: str(u.move), height: str(u.height), distM: num(u.dist_m), tiltDeg: num(u.tilt_deg),
+      tMs: num(u.t_ms) ?? 0, mount: str(u.mount), move: str(u.move), height: str(u.height), distM: num(u.dist_m),
+      heightM: num(u.height_m), tiltDeg: num(u.tilt_deg), vfovDeg: num(u.vfov_deg), zoom: num(u.zoom),
     });
     return parsed.success ? [parsed.data] : [];
   });
@@ -247,8 +265,8 @@ export async function readRecipeEdit(url: string): Promise<RecipeEditT> {
 }
 
 /** Where the phone stood in a hit, per setup. */
-export async function readCameraSetups(url: string): Promise<CameraSetupT[]> {
-  return toCameraSetups((await call("shorti_format", { part: "scene", url })).structured);
+export async function readCameraSetups(url: string, lang: ReadLang = "en"): Promise<CameraSetupT[]> {
+  return toCameraSetups((await call("shorti_format", { part: "scene", url, lang })).structured);
 }
 
 /** Formats that match words or a product line (e.g. a seller's product for a deal). */

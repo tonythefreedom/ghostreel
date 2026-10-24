@@ -2,10 +2,13 @@
 // Lane B (gift from Lane A, 10-24). The top of a step-by-step flow (onboarding): a back button and a bar of segments,
 // one per step, filled up to where the person is. One question per screen reads faster than one long form.
 import { segments } from "./logic";
+import { useLang } from "@/components/Lang";
 
 type Props = { step: number; total: number; onBack?: () => void; lang?: "ko" | "en" };
 
-export function FunnelProgress({ step, total, onBack, lang = "en" }: Props) {
+export function FunnelProgress({ step, total, onBack, lang: langProp }: Props) {
+  const ctxLang = useLang();
+  const lang = langProp ?? ctxLang;
   return (
     <div className="flex items-center gap-3">
       <button
