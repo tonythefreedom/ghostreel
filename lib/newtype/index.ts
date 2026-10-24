@@ -1,9 +1,10 @@
 // Lane B (NEWTYPE teammate owns this file). The only place that talks to CineSynth / Nexus.
-// Until the live path lands (TASKS T3, T6), it serves the recorded roster and refuses to render.
+// Until the live path lands, it serves the recorded roster and explicitly labelled owner-produced clips.
 import "server-only";
 import { z } from "zod";
-import roster from "@/fixtures/newtype/characters.json";
-import { Ghost, type Brief, type RenderJob } from "../types.ts";
+import roster from "../../fixtures/newtype/characters.json" with { type: "json" };
+import { Ghost, PrerenderManifest, type Brief, type RenderJob } from "../types.ts";
+import { pickClip } from "./prerender.ts";
 
 // What the adapter reports about a render; the route adds GhostReel's own id, briefId and timestamps.
 // Never retry a GPU start after an ambiguous timeout: read the job's status first (review 2026-10-24, rule 5).
@@ -19,8 +20,18 @@ export async function getGhost(id: string): Promise<Ghost | null> {
   return (await listCharacters()).find((g) => g.id === id) ?? null;
 }
 
-export async function render(_brief: Brief, _ghost: Ghost): Promise<ProviderJob> {
-  throw new Error("newtype: render not wired yet (TASKS T6)"); // TODO(B): start a GPU job for an approved brief
+export async function render(brief: Brief, ghost: Ghost): Promise<ProviderJob> {
+  const clip = pickClip(ghost.id, brief.lang);
+  if (!clip) throw new Error(`newtype: no pre-rendered clip for ${ghost.id} yet`);
+  if (clip.characterId !== ghost.characterId) throw new Error("newtype: pre-rendered character does not match ghost");
+  // TODO(T2, Ted): relative URLs need an agreed lib/types.ts change.
+  const base = (process.env.GHOSTREEL_BASE_URL ?? "http://localhost:3000").replace(/\/+$/, "");
+  const videoUrl = `${base}/prerender/${clip.file}`;
+  const posterUrl = clip.poster ? `${base}/prerender/${clip.poster}` : undefined;
+  if (!z.url({ protocol: /^https?$/ }).safeParse(videoUrl).success) {
+    throw new Error("newtype: GHOSTREEL_BASE_URL must be an absolute HTTP(S) URL");
+  }
+  return { provider: "prerender", status: "done", videoUrl, posterUrl, manifest: PrerenderManifest.parse(clip) };
 }
 
 export async function getJob(_providerJobId: string): Promise<ProviderJob> {
