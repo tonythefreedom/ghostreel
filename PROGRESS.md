@@ -2,6 +2,15 @@
 
 Newest first. Each entry: what is true now, what broke, what is next. Keep it short; long output goes in files.
 
+## 2026-10-24 · Lane A screens on the new design: landing, brief, ghost channel (A)
+
+- Landing: two-line display headline, one red "Make my ghost", the ghost's own picture with its AI label, bands.
+- Brief: the timed lines as a beat rail (arrow keys) with the selected beat's say/do card, what was kept as text,
+  outfit/scene/caption/hashtags under "More detail", docked Save + "Approve and render", render as ✓●○ steps.
+- Ghost channel `/ghost/[id]` (T13): violet head with the AI label, reels wall, this week's tape (briefs fill days in
+  the order written, one a day from today, said on the page), one red verb (approve the oldest draft, else teach a
+  new short), "We never promise views". The dev seed now lists its brief there.
+
 ## 2026-10-24 · Lane B screens on the new design (A, straight to master)
 
 Ted: "PR없이 그냥 메인으로 다이렉트로 해버려 충돌나도 어차피 토니 클로드코드가 해결하기 쉽다" · "토니 담당 화면 … 니가 직접해"

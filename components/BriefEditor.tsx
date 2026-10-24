@@ -1,36 +1,65 @@
 "use client";
-// The owner's last word before any GPU spend: edit the ghost's draft inline, then approve and render.
-// Approving locks the brief; the render route refuses anything unapproved.
+// The owner's last word before any GPU spend: the hook as the title, the beats on a rail with the chosen one opened,
+// the rest folded away, and one docked verb. Approving locks the brief; the render route refuses anything unapproved.
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { speechBudget, speechSeconds } from "@/lib/speech";
-import { prerenderMatches, type Brief, type RenderJob } from "@/lib/types";
+import { useEffect, useRef, useState } from "react";
+import { Button, ButtonLink, Rail, Verb, VerbSpacer, type Beat } from "@/components/ui";
+import type { Brief, BriefLine, KeepPart, RenderJob } from "@/lib/types";
 import { t, type UiLang, type WordKey } from "@/lib/words";
+import { BeatCard } from "./brief/BeatCard";
+import { BriefHead } from "./brief/BriefHead";
+import { KeptLine } from "./brief/KeptLine";
+import { MoreDetail } from "./brief/MoreDetail";
+import { RenderState } from "./brief/RenderState";
+import { SpeechMeter } from "./brief/SpeechMeter";
 import { UnlockForm } from "./UnlockForm";
 
-const field = "w-full rounded-[var(--radius-card)] border border-line bg-bg px-3 py-2 text-[15px] focus:border-accent focus:outline-none";
-const JOB_WORD: Record<RenderJob["status"], WordKey> = {
-  queued: "renderQueued",
-  running: "renderRunning",
-  done: "renderDone",
-  failed: "renderFailed",
-};
+type GhostFace = { id: string; name: string; portraitUrl?: string };
 
-export function BriefEditor({ initial, initialJob, lang = "en" }: { initial: Brief; initialJob: RenderJob | null; lang?: UiLang }) {
+// A beat's rail title: its first words, whole, never cut with an ellipsis.
+function beatTitle(line: BriefLine, i: number, lang: UiLang): string {
+  const say = line.say.trim();
+  if (!say) return `${t("beatWord", lang)} ${i + 1}`;
+  const words = say.split(/\s+/);
+  return words.length > 1 ? words.slice(0, 3).join(" ") : [...say].slice(0, 8).join("");
+}
+
+export function BriefEditor({ initial, initialJob, ghost, kept = [], lang = "en" }: {
+  initial: Brief;
+  initialJob: RenderJob | null;
+  ghost: GhostFace;
+  kept?: KeepPart[];
+  lang?: UiLang;
+}) {
   const [brief, setBrief] = useState(initial);
   const [dirty, setDirty] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<WordKey | null>(null);
   const [locked, setLocked] = useState<null | (() => void)>(null);
   const [job, setJob] = useState(initialJob);
+  const [selected, setSelected] = useState(0);
   const editable = brief.status === "draft";
+  const sel = Math.min(selected, brief.lines.length - 1);
+  const rail = useRef<HTMLDivElement>(null);
+
+  // The chosen beat stays in sight on a narrow rail, whether a finger, a key or "Add beat" chose it.
+  useEffect(() => {
+    rail.current?.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, [sel]);
 
   const edit = (patch: Partial<Brief>) => {
     setBrief({ ...brief, ...patch });
     setDirty(true);
   };
-  const editLine = (i: number, patch: Partial<Brief["lines"][number]>) =>
-    edit({ lines: brief.lines.map((l, j) => (j === i ? { ...l, ...patch } : l)) });
+  const editLine = (i: number, patch: Partial<BriefLine>) => edit({ lines: brief.lines.map((l, j) => (j === i ? { ...l, ...patch } : l)) });
+  const addLine = () => {
+    edit({ lines: [...brief.lines, { t: Math.min((brief.lines.at(-1)?.t ?? 0) + 2, brief.durationSec - 0.5), say: "", do: "" }] });
+    setSelected(brief.lines.length);
+  };
+  const removeLine = (i: number) => {
+    edit({ lines: brief.lines.filter((_, j) => j !== i) });
+    setSelected(Math.max(0, i - 1));
+  };
 
   // Poll while a render is in flight.
   useEffect(() => {
@@ -70,173 +99,100 @@ export function BriefEditor({ initial, initialJob, lang = "en" }: { initial: Bri
   }
 
   async function startRender() {
+    setError(null);
     const res = await call("render", "POST", { briefId: brief.id }, () => void startRender());
     if (!res) return;
     const body = (await res.json()) as { job?: RenderJob };
     if (body.job) setJob(body.job);
+    else setError("renderFailed");
   }
 
-  return (
-    <div className="flex flex-col gap-5 pb-28">
-      <label className="flex flex-col gap-1">
-        <span className="text-[13px] text-text-dim">{t("hookLabel", lang)}</span>
-        {editable ? (
-          <textarea rows={2} value={brief.hook} maxLength={160} onChange={(e) => edit({ hook: e.target.value })} className={`${field} text-[18px] font-extrabold`} />
-        ) : (
-          <p className="text-[24px] font-extrabold leading-tight tracking-[-0.02em]">{brief.hook}</p>
-        )}
-      </label>
+  const beats: Beat[] = brief.lines.map((l, i) => ({ at: l.t, title: beatTitle(l, i, lang) }));
+  const line = brief.lines[sel];
 
-      <div className="flex items-center gap-2">
-        {([10, 15] as const).map((d) => (
-          <button
-            key={d}
-            type="button"
-            disabled={!editable}
-            onClick={() => edit({ durationSec: d })}
-            className={`h-8 rounded-full px-3 font-mono text-[13px] ${brief.durationSec === d ? "bg-surface-2 text-text" : "text-text-dim"}`}
-          >
-            {d}s
-          </button>
-        ))}
-        <span className="font-mono text-[12px] text-text-dim">9:16 · {brief.lang.toUpperCase()}</span>
+  return (
+    <div className="flex flex-col gap-5">
+      <BriefHead name={ghost.name} status={brief.status} duration={brief.durationSec} editable={editable} onDuration={(d) => edit({ durationSec: d })} lang={lang} />
+
+      <div className="flex flex-col gap-2">
+        {editable ? (
+          <textarea
+            aria-label={t("hookLabel", lang)}
+            rows={2}
+            value={brief.hook}
+            maxLength={160}
+            onChange={(e) => edit({ hook: e.target.value })}
+            className="-mx-2 w-[calc(100%+16px)] resize-none rounded-[var(--radius-pic)] bg-transparent px-2 py-1 text-[22px] font-[720] leading-[1.25] tracking-[-0.02em] [field-sizing:content] hover:bg-surface focus:bg-surface"
+          />
+        ) : (
+          <h1 className="text-[22px] font-[720] leading-[1.25] tracking-[-0.02em]">{brief.hook}</h1>
+        )}
         <SpeechMeter brief={brief} lang={lang} />
+        <KeptLine intent={brief.intent} kept={kept} twist={brief.twist} lang={lang} />
       </div>
 
-      <ol className="flex flex-col gap-3">
-        {brief.lines.map((line, i) => (
-          <li key={i} className="grid grid-cols-[3.5rem_1fr] gap-3 rounded-[var(--radius-card)] border border-line bg-surface p-3">
-            {editable && i > 0 ? (
-              <input
-                type="number"
-                step={0.5}
-                min={0}
-                max={brief.durationSec - 0.5}
-                value={line.t}
-                onChange={(e) => editLine(i, { t: Number(e.target.value) })}
-                className="h-9 rounded-lg border border-line bg-bg px-2 font-mono text-[13px] text-accent"
-              />
-            ) : (
-              <span className="pt-1 font-mono text-[13px] text-accent">{line.t.toFixed(1)}s</span>
-            )}
-            <div className="flex flex-col gap-2">
-              {editable ? (
-                <>
-                  <input aria-label={t("say", lang)} value={line.say} maxLength={200} onChange={(e) => editLine(i, { say: e.target.value })} className={`${field} font-semibold`} />
-                  <textarea aria-label={t("doLabel", lang)} rows={2} value={line.do} maxLength={200} onChange={(e) => editLine(i, { do: e.target.value })} className={`${field} text-[13px] text-text-dim`} />
-                  {brief.lines.length > 2 ? (
-                    <button type="button" onClick={() => edit({ lines: brief.lines.filter((_, j) => j !== i) })} className="self-end text-[12px] text-danger">
-                      {t("remove", lang)}
-                    </button>
-                  ) : null}
-                </>
-              ) : (
-                <>
-                  <p className="text-[15px] font-semibold">“{line.say}”</p>
-                  <p className="text-[13px] text-text-dim">{line.do}</p>
-                </>
-              )}
-            </div>
-          </li>
-        ))}
-      </ol>
-      {editable && brief.lines.length < 6 ? (
-        <button
-          type="button"
-          onClick={() => edit({ lines: [...brief.lines, { t: Math.min((brief.lines.at(-1)?.t ?? 0) + 2, brief.durationSec - 0.5), say: "", do: "" }] })}
-          className="h-10 rounded-[var(--radius-card)] border border-dashed border-line text-[13px] text-text-dim"
-        >
-          {t("addLine", lang)}
-        </button>
-      ) : null}
-
-      {(
-        [
-          ["outfit", "outfit", 160],
-          ["scene", "scene", 200],
-          ["caption", "caption", 300],
-        ] as const
-      ).map(([key, label, max]) => (
-        <label key={key} className="flex flex-col gap-1">
-          <span className="text-[13px] text-text-dim">{t(label, lang)}</span>
-          {editable ? (
-            <textarea rows={key === "caption" ? 3 : 2} value={brief[key]} maxLength={max} onChange={(e) => edit({ [key]: e.target.value })} className={field} />
-          ) : (
-            <p className="text-[15px]">{brief[key]}</p>
-          )}
-        </label>
-      ))}
-      <label className="flex flex-col gap-1">
-        <span className="text-[13px] text-text-dim">{t("hashtags", lang)}</span>
-        {editable ? (
-          <input value={brief.hashtags.join(" ")} onChange={(e) => edit({ hashtags: e.target.value.split(/\s+/).slice(0, 8) })} className={`${field} text-accent`} />
-        ) : (
-          <p className="text-[15px] text-accent">{brief.hashtags.map((h) => `#${h}`).join(" ")}</p>
-        )}
-      </label>
-
-      <footer className="fixed inset-x-0 bottom-0 border-t border-line bg-bg/95 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-[430px] flex-col gap-2 px-4 py-3">
-          <Link href={`/storyboard/${brief.id}`} className="self-end text-[13px] font-semibold text-ghost underline-offset-4 hover:underline">
-            {t("storyboard", lang)} →
-          </Link>
-          {locked ? (
-            <UnlockForm
-              lang={lang}
-              onUnlocked={() => {
-                const retry = locked;
-                setLocked(null);
-                retry();
-              }}
-            />
-          ) : editable ? (
-            <>
-              <p className="text-[12px] text-text-dim">{t("approveNote", lang)}</p>
-              <div className="grid grid-cols-[auto_1fr] gap-2">
-                <button type="button" disabled={!dirty || busy} onClick={() => void save(false)} className="h-12 rounded-[var(--radius-card)] border border-line px-4 font-semibold disabled:opacity-40">
-                  {dirty ? t("save", lang) : t("saved", lang)}
-                </button>
-                <button type="button" disabled={busy} onClick={() => void save(true)} className="h-12 rounded-[var(--radius-card)] bg-accent font-extrabold disabled:opacity-60">
-                  {t("approveRender", lang)}
-                </button>
-              </div>
-            </>
-          ) : (
-            <div className="flex items-center justify-between gap-3">
-              <span className="rounded-full bg-ghost/15 px-3 py-1 text-[13px] font-semibold text-ghost">{t("approved", lang)}</span>
-              {job ? (
-                <span className={`text-[13px] font-semibold ${job.status === "failed" ? "text-danger" : "text-text"}`}>
-                  {job.provider === "prerender" ? (
-                    <span className="mr-1 rounded-full bg-warn/15 px-2 py-0.5 text-[11px] text-warn">
-                      {t("prerendered", lang)}
-                      {prerenderMatches(job, brief) ? "" : ` · ${t("prerenderOther", lang)}`}
-                    </span>
-                  ) : null}
-                  {t(JOB_WORD[job.status], lang)}
-                  {job.error ? ` · ${job.error}` : ""}
-                </span>
-              ) : null}
-              {!job || job.status === "failed" ? (
-                <button type="button" onClick={() => void startRender()} className="h-10 shrink-0 whitespace-nowrap rounded-[var(--radius-card)] bg-accent px-4 text-[13px] font-extrabold">
-                  {t("renderRetry", lang)}
-                </button>
-              ) : null}
-            </div>
-          )}
-          {error ? <p className="text-[13px] text-danger">{t(error, lang)}</p> : null}
+      <div className="flex flex-col gap-3">
+        <div ref={rail}>
+          <Rail beats={beats} selected={sel} onSelect={setSelected} length={brief.durationSec} label={t("beat", lang)} />
         </div>
-      </footer>
-    </div>
-  );
-}
+        {line ? (
+          <BeatCard
+            line={line}
+            index={sel}
+            editable={editable}
+            maxT={brief.durationSec - 0.5}
+            canRemove={brief.lines.length > 2}
+            onChange={(patch) => editLine(sel, patch)}
+            onRemove={() => removeLine(sel)}
+            lang={lang}
+          />
+        ) : null}
+        {editable && brief.lines.length < 6 ? (
+          <Button kind="quiet" size="m" onClick={addLine} className="self-start">
+            {t("addLine", lang)}
+          </Button>
+        ) : null}
+      </div>
 
-// Rough spoken length against the duration's budget, so the owner trims before a render does it for them.
-function SpeechMeter({ brief, lang }: { brief: Brief; lang: UiLang }) {
-  const used = speechSeconds(brief.lines, brief.lang);
-  const budget = speechBudget(brief.durationSec, brief.lang).seconds;
-  return (
-    <span className={`ml-auto font-mono text-[12px] ${used > budget ? "text-danger" : "text-text-dim"}`}>
-      {t("speech", lang)} ~{used.toFixed(1)}s / {budget.toFixed(0)}s
-    </span>
+      <MoreDetail brief={brief} editable={editable} onEdit={edit} lang={lang} />
+
+      {!editable && job ? <RenderState job={job} brief={brief} poster={ghost.portraitUrl} lang={lang} /> : null}
+
+      <Link href={`/storyboard/${brief.id}`} className="-my-2 inline-flex min-h-11 items-center self-end text-[13px] font-[560] text-text-dim underline-offset-4 hover:text-text hover:underline">
+        {t("storyboard", lang)} →
+      </Link>
+      <VerbSpacer />
+      <div aria-hidden className="h-10" />
+
+      <Verb note={error ? <span role="alert" className="text-danger">✕ {t(error, lang)}</span> : editable && !locked ? t("approveNote", lang) : undefined}>
+        {locked ? (
+          <UnlockForm
+            lang={lang}
+            onUnlocked={() => {
+              const retry = locked;
+              setLocked(null);
+              retry();
+            }}
+          />
+        ) : editable ? (
+          <>
+            <Button kind="secondary" size="xl" disabled={!dirty || busy} onClick={() => void save(false)}>
+              {dirty ? t("save", lang) : t("saved", lang)}
+            </Button>
+            <Button size="xl" disabled={busy} onClick={() => void save(true)}>
+              {t("approveRender", lang)}
+            </Button>
+          </>
+        ) : !job || job.status === "failed" ? (
+          <Button size="xl" onClick={() => void startRender()}>
+            {t(job ? "renderRetry" : "renderStart", lang)}
+          </Button>
+        ) : (
+          <ButtonLink size="xl" href={`/taste?ghost=${ghost.id}`}>
+            {t("nextShort", lang)}
+          </ButtonLink>
+        )}
+      </Verb>
+    </div>
   );
 }

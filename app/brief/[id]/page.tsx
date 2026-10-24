@@ -4,8 +4,7 @@ import { z } from "zod";
 import { BriefEditor } from "@/components/BriefEditor";
 import { getGhost } from "@/lib/newtype";
 import { store } from "@/lib/store";
-import type { Brief, RenderJob } from "@/lib/types";
-import { t } from "@/lib/words";
+import type { Brief, RenderJob, TastePick } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -14,27 +13,23 @@ export default async function BriefPage({ params }: { params: Promise<{ id: stri
   if (!z.string().uuid().safeParse(id).success) notFound();
   const brief = await store.get<Brief>(`brief:${id}`);
   if (!brief) notFound();
-  const ghost = await getGhost(brief.ghostId);
-  const jobId = await store.get<string>(`renderFor:${brief.id}`);
+  const [ghost, jobId, picks] = await Promise.all([
+    getGhost(brief.ghostId),
+    store.get<string>(`renderFor:${brief.id}`),
+    store.get<TastePick[]>(`taste:${brief.ghostId}`),
+  ]);
   const job = jobId ? await store.get<RenderJob>(`render:${jobId}`) : null;
+  // What the owner kept from the original in /taste, remembered here as words.
+  const kept = picks?.find((p) => p.videoId === brief.sourceVideoId && p.kept)?.keep ?? [];
 
   return (
-    <main className="flex min-h-dvh flex-col gap-4 py-6">
-      <header className="flex flex-col gap-2">
-        <div className="flex items-center gap-2 text-[13px] font-semibold text-text-dim">
-          <span className="grid size-6 place-items-center rounded-full bg-accent text-[11px] font-extrabold text-text">
-            {(ghost?.name ?? "?").slice(0, 1)}
-          </span>
-          {ghost?.name} · {t("briefTitle")}
-          <span className="rounded-full bg-surface-2 px-2 py-0.5 text-[11px]">{t(brief.status === "approved" ? "approved" : "draft")}</span>
-        </div>
-        {brief.twist ? (
-          <p className="text-[13px] text-ghost">
-            {t("twistUsed")} · {brief.twist}
-          </p>
-        ) : null}
-      </header>
-      <BriefEditor initial={brief} initialJob={job} />
+    <main className="flex min-h-dvh flex-col py-6">
+      <BriefEditor
+        initial={brief}
+        initialJob={job}
+        ghost={{ id: brief.ghostId, name: ghost?.name ?? brief.ghostId, portraitUrl: ghost?.portraitUrl }}
+        kept={kept}
+      />
     </main>
   );
 }
