@@ -70,6 +70,26 @@ export const FormatPlan = z.object({
 export type OpenSpot = z.infer<typeof OpenSpot>;
 export type FormatPlan = z.infer<typeof FormatPlan>;
 
+// ── The creator (T8; approved into T2 with works optional) ──────────────────
+export const Market = z.enum(["US", "KR", "JP", "Global"]);
+export type Market = z.infer<typeof Market>;
+
+export const CreatorInput = z.object({
+  name: z.string().trim().min(1).max(40),
+  bio: z.string().trim().max(600).default(""),
+  niche: z.string().trim().min(1).max(80),
+  market: Market.default("US"),
+  languages: z.array(Lang).min(1).max(4),
+  ghostId: z.string().regex(/^[a-z0-9-]{1,40}$/), // the virtual human who performs; never the creator's own face
+  works: z.array(z.string().trim().url().max(300)).max(10).default([]), // own past shorts; none is fine
+  plan: z.string().trim().max(4000).default(""), // a past plan or pitch, pasted as text
+  script: z.string().trim().max(4000).default(""), // a past script, pasted as text
+});
+export type CreatorInput = z.infer<typeof CreatorInput>;
+
+export const Creator = CreatorInput.extend({ id: z.string().uuid(), createdAt: z.string() });
+export type Creator = z.infer<typeof Creator>;
+
 // ── The person's taste ───────────────────────────────────────────────────────
 export const KeepPart = z.enum(["hook", "beat", "look", "sound"]);
 export const TastePick = z.object({

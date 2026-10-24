@@ -2,9 +2,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
-import { creatorKey, type Creator } from "@/lib/creator";
+import { creatorKey } from "@/lib/creator";
 import { getGhost } from "@/lib/newtype";
 import { store } from "@/lib/store";
+import type { Creator } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -42,8 +43,9 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
         </p>
       )}
 
+      {creator.works.length > 0 ? (
       <section className="flex flex-col gap-2">
-        {creator.works.length > 0 ? <h2 className="text-[15px] font-extrabold">올린 숏폼</h2> : null}
+        <h2 className="text-[15px] font-extrabold">올린 숏폼</h2>
         <ul className="flex flex-col gap-1">
           {creator.works.map((url) => (
             <li key={url} className="truncate font-mono text-[12px] text-text-dim">
@@ -57,6 +59,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
           </p>
         ) : null}
       </section>
+      ) : null}
 
       {ghost ? (
         <section className="flex items-center gap-3 rounded-[var(--radius-card)] border border-line bg-surface p-4">

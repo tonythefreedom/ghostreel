@@ -31,7 +31,7 @@ export function OnboardForm({ ghosts }: { ghosts: Ghost[] }) {
   const [error, setError] = useState<string | null>(null);
 
   const links = urls(works);
-  const ready = name.trim() && niche.trim() && languages.length > 0 && ghostId;
+  const ready = name.trim() && niche.trim() && languages.length > 0 && links.length <= 10 && ghostId;
 
   async function submit() {
     setBusy(true);
@@ -40,7 +40,7 @@ export function OnboardForm({ ghosts }: { ghosts: Ghost[] }) {
       const res = await fetch("/api/creator", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ name, bio, niche, market, languages, ghostId, works: links.slice(0, 10), plan, script }),
+        body: JSON.stringify({ name, bio, niche, market, languages, ghostId, works: links, plan, script }),
       });
       if (res.status === 401) return setLocked(true);
       const body = (await res.json()) as { creator?: { id: string }; error?: string };
@@ -105,9 +105,11 @@ export function OnboardForm({ ghosts }: { ghosts: Ghost[] }) {
       <section className="flex flex-col gap-3">
         <h2 className="text-[18px] font-extrabold">내가 만든 것</h2>
         <label className="flex flex-col gap-1">
-          <span className={label}>내가 올린 숏폼 링크 (선택 · 한 줄에 하나, 최대 10개)</span>
+          <span className={label}>내가 올린 숏폼 링크 (선택, 한 줄에 하나, 최대 10개)</span>
           <textarea value={works} onChange={(e) => setWorks(e.target.value)} rows={4} placeholder="내 틱톡·릴스·쇼츠 링크를 붙여 넣으세요" className={`${field} py-2 font-mono text-[13px]`} />
-          <span className="font-mono text-[11px] text-text-dim">{links.length} / 10</span>
+          <span className={`font-mono text-[11px] ${links.length > 10 ? "text-danger" : "text-text-dim"}`}>
+            {links.length} / 10{links.length === 0 ? " · 없으면 이번 주 트렌드에서 감각을 배웁니다" : ""}
+          </span>
         </label>
         <label className="flex flex-col gap-1">
           <span className={label}>기획안 (선택)</span>

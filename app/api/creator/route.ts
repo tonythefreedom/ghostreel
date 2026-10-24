@@ -2,10 +2,11 @@
 // the analysis that spends money is T21's route, behind the spend guard.
 import { randomUUID } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
-import { Creator, CREATOR_TTL, CreatorInput, creatorKey } from "@/lib/creator";
+import { CREATOR_TTL, creatorKey } from "@/lib/creator";
 import { requireOwner } from "@/lib/guard";
 import { getGhost } from "@/lib/newtype";
 import { store } from "@/lib/store";
+import { Creator, CreatorInput } from "@/lib/types";
 
 const MAX_BYTES = 16_000;
 

@@ -2,6 +2,12 @@
 
 Newest first. Each entry: what is true now, what broke, what is next. Keep it short; long output goes in files.
 
+## 2026-10-24 · T2 (B) — Creator in the contract, confirm step confirmed
+
+- `Creator` / `CreatorInput` / `Market` now live in `lib/types.ts`; `works` is 0–10 (registering with no catalog
+  goes straight to the trend step). `tests/creator.test.mjs`: 3 tests. Verified at 375 px: no links → profile.
+- Lane B answers in `docs/lane-b-answers-2026-10-24.md`: 1, 2, 8 covered (an `Origin` check on cookie writes is the
+  one optional extra), the `needs_confirm` proposal accepted, T3/T7 waiting on the Nexus reconnect.
 ## 2026-10-24 · Ted's decisions landed — one front door
 
 Ted: "테드가 정할것 전부 니 추천대로 가자. 마저 마무리해서 올려줘"
