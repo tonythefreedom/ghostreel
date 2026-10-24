@@ -8,6 +8,8 @@ function optional(name: string): string | undefined {
 
 export const env = {
   anthropicKey: () => optional("ANTHROPIC_API_KEY"),
+  // A key not scoped to one workspace must name the workspace on every request (anthropic-workspace-id).
+  anthropicWorkspace: () => optional("ANTHROPIC_WORKSPACE_ID"),
   newtypeUrl: () => optional("NEWTYPE_MCP_URL"),
   newtypeToken: () => optional("NEWTYPE_TOKEN"),
   redisUrl: () => optional("UPSTASH_REDIS_REST_URL"),

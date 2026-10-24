@@ -11,7 +11,15 @@ import type { Brief } from "./types.ts";
 export const BRIEF_MODEL = "claude-haiku-5-5";
 
 let client: Anthropic | null = null;
-const anthropic = () => (client ??= new Anthropic({ apiKey: env.anthropicKey(), timeout: 45_000, maxRetries: 1 }));
+const anthropic = () => {
+  const workspace = env.anthropicWorkspace();
+  return (client ??= new Anthropic({
+    apiKey: env.anthropicKey(),
+    timeout: 45_000,
+    maxRetries: 1,
+    defaultHeaders: workspace ? { "anthropic-workspace-id": workspace } : undefined,
+  }));
+};
 
 export class BriefRefused extends Error {}
 export const modelReady = () => Boolean(env.anthropicKey());
