@@ -2,6 +2,19 @@
 
 Newest first. Each entry: what is true now, what broke, what is next. Keep it short; long output goes in files.
 
+## 2026-10-24 · T23 (B) — storyboard board
+
+Done
+- `/storyboard/[id]`: one scene per timed beat of a brief (time, line, action), two columns at phone width, the
+  AI label on every frame. A scene shows its image when one exists, else the English prompt CineSynth's
+  `cinesynth_cf_keyframe` will take (action first, then look and place), with a copy button.
+- `lib/storyboard.ts`: `framePrompt`, `buildStoryboard`; scene images are listed in `public/prerender/keyframes.json`
+  (empty for now) and attach by ghost and beat, newest first, tagged "미리 만든 장면".
+- `tests/storyboard.test.mjs`: 4 tests. Verified at 375 px on a `[dev]` seeded brief.
+
+Open
+- Nothing links here yet: a "콘티 보기" link on `/brief/[id]` is Lane A's (one line, Ted's call).
+- Scene images need an owner-run CineSynth session (T7 together with the sample render).
 ## 2026-10-24 · review 311a8a4 answered — fixes and T2
 
 Done
