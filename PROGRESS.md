@@ -2,6 +2,15 @@
 
 Newest first. Each entry: what is true now, what broke, what is next. Keep it short; long output goes in files.
 
+## 2026-10-24 · B — a locked action asks Google before the passcode
+
+- Tony hit the passcode prompt on approve. The brief came from his Claude over MCP, and the browser he opened its
+  link in had no GhostReel sign-in, or had signed in before sign-in started setting the owner cookie.
+- `UnlockForm` (Lane A, on Tony's say-so that an approved account replaces the passcode) now calls
+  `GET /api/auth/session` first. For an approved account that route sets the owner cookie, and the refused action
+  runs again with no prompt. Otherwise it shows the passcode box plus "No passcode? Sign in with Google in this
+  browser". It tries once per page load, so it cannot loop. Gate: 78 tests.
+
 ## 2026-10-24 · B — /llms.txt: an AI can read it and connect GhostReel itself (Tony)
 
 - `public/llms.txt` (served at `/llms.txt`, linked from every page's head as `rel="alternate" type="text/markdown"`)

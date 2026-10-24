@@ -28,3 +28,12 @@ test("onboarding starts with Google sign-in", () => {
   assert.match(form, /<GoogleSignIn /);
   assert.match(form, /const STEPS = 4/);
 });
+
+test("a locked action checks the Google sign-in before asking for the passcode", () => {
+  const form = src("../components/UnlockForm.tsx");
+  assert.match(form, /fetch\("\/api\/auth\/session"\)/);
+  assert.match(form, /status === "approved"/);
+  assert.match(form, /Sign in with Google/);
+  const session = src("../app/api/auth/session/route.ts");
+  assert.match(session, /ownerCookieFor\(account\)/);
+});
