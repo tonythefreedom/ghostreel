@@ -2,9 +2,15 @@
 // Lane B (T23). One beat of the storyboard: the scene image when one was made, else the prompt it will be made from.
 // The AI label sits on every image and is never optional.
 import { useState } from "react";
+import { LinePicker } from "@/components/LinePicker";
+import type { LineOption } from "@/lib/lineSuggestions";
 import type { Frame } from "@/lib/storyboard";
+import type { BriefLine } from "@/lib/types";
 
-export function StoryboardFrame({ frame }: { frame: Frame }) {
+export function StoryboardFrame({ frame, pick }: {
+  frame: Frame;
+  pick?: { briefId: string; lines: BriefLine[]; options: LineOption[]; locked: boolean };
+}) {
   const [copied, setCopied] = useState(false);
 
   async function copy() {
@@ -40,7 +46,11 @@ export function StoryboardFrame({ frame }: { frame: Frame }) {
         <span className="font-mono text-[12px] text-accent">{frame.t.toFixed(1)}s</span>
         <span className="text-[11px] text-text-dim">#{frame.index + 1}</span>
       </div>
-      <p className="text-[13px] font-semibold leading-snug">“{frame.say}”</p>
+      {pick && pick.options.length > 0 ? (
+        <LinePicker briefId={pick.briefId} lines={pick.lines} index={frame.index} options={pick.options} locked={pick.locked} />
+      ) : (
+        <p className="text-[13px] font-semibold leading-snug">“{frame.say}”</p>
+      )}
       <p className="text-[12px] leading-snug text-text-dim">{frame.do}</p>
       <div className="flex gap-2">
         {frame.image ? (

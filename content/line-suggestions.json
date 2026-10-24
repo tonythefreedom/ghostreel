@@ -1,0 +1,30 @@
+{
+  "formats": {
+    "fam_way-be186ab1c0a4": {
+      "readAt": "2026-10-24T00:28:58Z",
+      "note": "Shorti gave the format's hook and its open spots; GhostReel wrote the lines from them. No creator's words are reused.",
+      "beats": [
+        [
+          { "say": "Zero percent. Watch this.", "basis": "포맷 훅: 0%에서 시작" },
+          { "say": "Getting ready: twenty percent.", "basis": "포맷 훅: 단계마다 % 상승" },
+          { "say": "Ten seconds to a hundred percent.", "basis": "포맷 흐름: 100% 완성으로 끝남" }
+        ],
+        [
+          { "say": "Serum on: sixty.", "basis": "포맷 훅: 단계마다 % 상승" },
+          { "say": "Skin first. Forty percent.", "basis": "포맷 흐름: 피부부터" },
+          { "say": "Eyeliner slip. Back to forty.", "basis": "빈자리: 번짐으로 % 하락" }
+        ],
+        [
+          { "say": "One swipe of tint: a hundred.", "basis": "포맷 흐름: 100% 완성" },
+          { "say": "Fixed it. A hundred percent.", "basis": "빈자리: 번짐 뒤 회복" },
+          { "say": "Ninety-nine. Plans canceled. Zero.", "basis": "빈자리: 99%에서 취소" }
+        ],
+        [
+          { "say": "Done. Your turn.", "basis": "포맷 끝: 카메라에 인사" },
+          { "say": "That's the whole routine.", "basis": "포맷 끝: 완성 공개" },
+          { "say": "Now back to zero. Sheet mask on.", "basis": "빈자리: 100%에서 0%로" }
+        ]
+      ]
+    }
+  }
+}

@@ -2,6 +2,16 @@
 
 Newest first. Each entry: what is true now, what broke, what is next. Keep it short; long output goes in files.
 
+## 2026-10-24 · T23 (B) — pick each beat's line on the storyboard
+
+- Shorti returns no spoken lines (its public tools give the format's hook, beats and open spots), and creators' words
+  are never reused. So GhostReel wrote three options per beat from this week's beauty format (hook + its three open
+  spots), each naming its Shorti basis, in `content/line-suggestions.json`.
+- `/storyboard/[id]` shows "Shorti 추천 대사" under each beat: the current line first, then the options. Picking one
+  saves through the owner-only `PATCH /api/brief`; an approved brief is locked (409). `tests/line-suggestions.test.mjs`.
+- Verified at 375 px: beat 2 picked "Serum on: sixty." and the brief read back with it.
+- T7 voice take: `cinesynth_cf_take` → `tts_fb1746eb`, 7.5 s of audio, about 32 s (03:48:00 → 03:48:32 UTC).
+
 ## 2026-10-24 · T7 (B) — first CineSynth scene, from this week's Shorti pick
 
 - Shorti radar (beauty, read 2026-10-24 00:28 UTC): top "New format" is a makeup routine with an on-screen

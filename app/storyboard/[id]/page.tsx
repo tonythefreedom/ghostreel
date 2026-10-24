@@ -4,14 +4,17 @@ import { notFound } from "next/navigation";
 import { z } from "zod";
 import { StoryboardFrame } from "@/components/StoryboardFrame";
 import { getGhost } from "@/lib/newtype";
+import { LineSuggestions, suggestionsFor } from "@/lib/lineSuggestions";
 import { buildStoryboard, KeyframeManifest } from "@/lib/storyboard";
 import { store } from "@/lib/store";
 import type { Brief } from "@/lib/types";
+import lineData from "@/content/line-suggestions.json";
 import keyframes from "@/public/prerender/keyframes.json";
 
 export const dynamic = "force-dynamic";
 
 const manifest = KeyframeManifest.parse(keyframes);
+const lineSuggestions = LineSuggestions.parse(lineData);
 
 export default async function StoryboardPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -22,6 +25,8 @@ export default async function StoryboardPage({ params }: { params: Promise<{ id:
   if (!ghost) notFound();
   const frames = buildStoryboard(brief, ghost, manifest);
   const made = frames.filter((f) => f.image).length;
+  const lines = suggestionsFor(brief, lineSuggestions);
+  const locked = brief.status === "approved";
 
   return (
     <main className="flex min-h-dvh flex-col gap-5 py-6 pb-28">
@@ -37,11 +42,18 @@ export default async function StoryboardPage({ params }: { params: Promise<{ id:
         <p className="text-[13px] text-text-dim">
           비트 {frames.length}개 · 장면 {made}개 준비됨. 장면은 CineSynth 로 만들고, 만들기 전에는 쓸 프롬프트를 보여 줍니다.
         </p>
+        {lines.readAt ? (
+          <p className="text-[12px] text-text-dim">
+            대사 후보는 Shorti 가 {lines.readAt.slice(5, 10).replace("-", "/")} 에 읽은 이번 주 포맷(훅과 빈자리)을 바탕으로 GhostReel 이 썼어요.
+            {locked ? " 승인된 브리프라 바꿀 수 없어요." : " 고르면 브리프에 바로 반영돼요."}
+          </p>
+        ) : null}
       </header>
 
       <ol className="grid grid-cols-2 gap-3">
         {frames.map((f) => (
-          <StoryboardFrame key={f.index} frame={f} />
+          <StoryboardFrame key={f.index} frame={f}
+            pick={{ briefId: brief.id, lines: brief.lines, options: lines.beats[f.index] ?? [], locked }} />
         ))}
       </ol>
 
