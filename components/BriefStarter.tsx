@@ -15,7 +15,7 @@ export interface KeptItem {
 
 const INTENTS: Array<[Intent, WordKey]> = [["keep", "intentKeep"], ["adapt", "intentAdapt"], ["twist", "intentTwist"]];
 
-export function BriefStarter({ ghostId, items, lang = "en" }: { ghostId: string; items: KeptItem[]; lang?: UiLang }) {
+export function BriefStarter({ ghostId, creatorId, items, lang = "en" }: { ghostId: string; creatorId?: string; items: KeptItem[]; lang?: UiLang }) {
   const router = useRouter();
   const [intent, setIntent] = useState<Record<string, Intent>>({});
   const [busy, setBusy] = useState<string | null>(null);
@@ -38,7 +38,7 @@ export function BriefStarter({ ghostId, items, lang = "en" }: { ghostId: string;
       const res = await fetch("/api/brief", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ ghostId, videoId, intent: intent[videoId] ?? "adapt" }),
+        body: JSON.stringify({ ghostId, videoId, intent: intent[videoId] ?? "adapt", creatorId }),
       });
       if (res.status === 401) return setLocked(videoId);
       const body = (await res.json()) as { brief?: { id: string }; error?: string };

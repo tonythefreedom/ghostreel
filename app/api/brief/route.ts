@@ -2,13 +2,15 @@
 import { NextResponse, type NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
-import { applyEdits, BriefEdit, BriefLocked } from "@/lib/brief";
+import { applyEdits, BriefEdit, BriefLocked, type CreatorBlock } from "@/lib/brief";
+import { creatorKey } from "@/lib/creator";
+import { summarize } from "@/lib/creatorStyle";
 import { guardSpend, requireOwner } from "@/lib/guard";
 import { BriefRefused, ModelKeyMissing, modelReady, writeBrief } from "@/lib/claude";
 import { getGhost } from "@/lib/newtype";
 import { formatPlan, reading, recipeEdit } from "@/lib/shorti";
 import { store } from "@/lib/store";
-import { Intent, type Brief, type TastePick } from "@/lib/types";
+import { Intent, type Brief, type Creator, type TastePick } from "@/lib/types";
 
 export const maxDuration = 60;
 
@@ -17,12 +19,30 @@ const Body = z.object({
   videoId: z.string().min(1).max(160),
   intent: Intent.default("adapt"),
   spot: z.number().int().min(0).max(5).optional(),
+  creatorId: z.string().uuid().optional(), // from /onboard via /profile → /taste; the brief then sounds like them
 });
+
+// The creator's own words and the style Shorti read from their shorts (keyless, cached). Only a creator who chose this
+// ghost counts; anything missing just leaves the block out.
+async function creatorBlock(id: string | undefined, ghostId: string): Promise<CreatorBlock | undefined> {
+  if (!id) return undefined;
+  const c = await store.get<Creator>(creatorKey(id));
+  if (!c || c.ghostId !== ghostId) return undefined;
+  const style = c.works.length
+    ? summarize(await Promise.all(c.works.map(async (url) => ({ url, reading: await reading(url, url), recipe: await recipeEdit(url) }))))
+    : null;
+  return {
+    bio: c.bio || undefined,
+    plan: c.plan || undefined,
+    script: c.script || undefined,
+    style: style?.read ? { hooks: style.hooks, moves: style.moves.map((m) => ({ cue: m.cue, do: m.do })), makeItYours: style.makeItYours, bpm: style.bpm, lengthSec: style.lengthSec } : undefined,
+  };
+}
 
 export async function POST(req: NextRequest) {
   const parsed = Body.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "bad_body" }, { status: 400 });
-  const { ghostId, videoId, intent, spot } = parsed.data;
+  const { ghostId, videoId, intent, spot, creatorId } = parsed.data;
 
   const ghost = await getGhost(ghostId);
   if (!ghost) return NextResponse.json({ error: "no_ghost" }, { status: 404 });
@@ -34,10 +54,11 @@ export async function POST(req: NextRequest) {
   const refused = await guardSpend(req, "brief"); // after cheap checks, so bad requests never count against the cap
   if (refused) return refused;
 
-  const [read, moves, plan] = await Promise.all([
+  const [read, moves, plan, creator] = await Promise.all([
     pick.url ? reading(videoId, pick.url) : Promise.resolve(null),
     pick.url ? recipeEdit(pick.url) : Promise.resolve(null),
     pick.formatId ? formatPlan(pick.formatId) : Promise.resolve(null),
+    creatorBlock(creatorId, ghostId),
   ]);
   if (!read && !plan) return NextResponse.json({ error: "no_reading", hint: "Shorti had nothing on this short" }, { status: 424 });
   const openSpot = plan?.open[spot ?? 0];
@@ -54,6 +75,7 @@ export async function POST(req: NextRequest) {
       plan,
       moves,
       spot: openSpot ? { label: openSpot.label, what: openSpot.what, how: openSpot.how } : undefined,
+      creator,
     });
     await store.set(`brief:${brief.id}`, brief, 60 * 60 * 24 * 7);
     await store.push(`briefs:${ghostId}`, brief.id, 50, 60 * 60 * 24 * 7);

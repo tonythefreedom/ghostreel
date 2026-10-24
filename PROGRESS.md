@@ -2,6 +2,14 @@
 
 Newest first. Each entry: what is true now, what broke, what is next. Keep it short; long output goes in files.
 
+## 2026-10-24 · Lane B's flow asks 1 and 2 done (A)
+
+- Brief → storyboard: "See the storyboard" sits above the brief's bottom buttons, before and after approval.
+- The creator in the brief: `/taste?creator=` reaches `POST /api/brief` as `creatorId`; the route loads the
+  `Creator` (only one who chose this ghost) and adds a `<creator>` block (bio, past plan and script, the style
+  `summarize` reads from their shorts), escaped JSON like every input. No `creatorId`, no block. Tested.
+- Ask 3 (the demo host's `.env.local`) stays Tony's, by hand.
+
 ## 2026-10-24 · UI kit for Lane B (a gift from Lane A)
 
 Ted: "[private] 구레포를 보면 [private] 관련 미학보다는 ux 적인 요소들 추출해놓은게 있는데 … 맨 처음 [private]의 ux ui

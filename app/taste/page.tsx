@@ -7,12 +7,13 @@ import { shortDate, t } from "@/lib/words";
 
 export const dynamic = "force-dynamic";
 
-export default async function TastePage({ searchParams }: { searchParams: Promise<{ ghost?: string; field?: string }> }) {
+export default async function TastePage({ searchParams }: { searchParams: Promise<{ ghost?: string; field?: string; creator?: string }> }) {
   const sp = await searchParams;
   const ghost = await getGhost(sp.ghost ?? "yuna");
   if (!ghost) notFound();
   const field: Field = (FIELDS as readonly string[]).includes(sp.field ?? "") ? (sp.field as Field) : "beauty";
   const { data, provenance } = await trending(field);
+  const creatorId = /^[0-9a-f-]{36}$/i.test(sp.creator ?? "") ? sp.creator : undefined; // the route checks it is real
 
   return (
     <main className="flex min-h-dvh flex-col gap-5 py-6">
@@ -31,7 +32,7 @@ export default async function TastePage({ searchParams }: { searchParams: Promis
           </DemoTag>
         ) : null}
       </header>
-      <TasteSwipe cards={data.cards} ghostId={ghost.id} />
+      <TasteSwipe cards={data.cards} ghostId={ghost.id} creatorId={creatorId} />
     </main>
   );
 }

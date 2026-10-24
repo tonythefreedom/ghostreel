@@ -1,6 +1,7 @@
 "use client";
 // The owner's last word before any GPU spend: edit the ghost's draft inline, then approve and render.
 // Approving locks the brief; the render route refuses anything unapproved.
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { speechBudget, speechSeconds } from "@/lib/speech";
 import { prerenderMatches, type Brief, type RenderJob } from "@/lib/types";
@@ -176,6 +177,9 @@ export function BriefEditor({ initial, initialJob, lang = "en" }: { initial: Bri
 
       <footer className="fixed inset-x-0 bottom-0 border-t border-line bg-bg/95 backdrop-blur">
         <div className="mx-auto flex w-full max-w-[430px] flex-col gap-2 px-4 py-3">
+          <Link href={`/storyboard/${brief.id}`} className="self-end text-[13px] font-semibold text-ghost underline-offset-4 hover:underline">
+            {t("storyboard", lang)} →
+          </Link>
           {locked ? (
             <UnlockForm
               lang={lang}

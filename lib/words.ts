@@ -35,6 +35,7 @@ export const words = {
   saved: { ko: "저장됨", en: "Saved" },
   approveRender: { ko: "승인하고 렌더", en: "Approve and render" },
   approved: { ko: "승인됨", en: "Approved" },
+  storyboard: { ko: "콘티 보기", en: "See the storyboard" },
   hookLabel: { ko: "훅 (첫 1초)", en: "Hook (first second)" },
   say: { ko: "대사", en: "Say" },
   doLabel: { ko: "동작", en: "Do" },
