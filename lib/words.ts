@@ -63,6 +63,28 @@ export const words = {
   scene: { ko: "장면", en: "Scene" },
   caption: { ko: "캡션", en: "Caption" },
   twistUsed: { ko: "비튼 지점", en: "Twist" },
+  // The ghost's channel (/ghost/[id], T13).
+  channelTrust: { ko: "고스트 숏폼 · AI 생성 · 내가 승인한 브리프로 만들어요", en: "Ghost reels · AI-generated · made from briefs you approved" },
+  reels: { ko: "숏폼", en: "Reels" },
+  noReels: { ko: "아직 완성된 숏폼이 없어요", en: "No reels yet" },
+  noReelsLine: { ko: "승인한 브리프가 여기서 숏폼이 돼요.", en: "An approved brief becomes a reel here." },
+  findShort: { ko: "배울 숏폼 고르기", en: "Find a short to learn from" },
+  week: { ko: "이번 주", en: "This week" },
+  weekNote: {
+    ko: "브리프는 쓴 순서대로 오늘부터 하루에 하나씩 놓여요.",
+    en: "Briefs fill the days in the order they were written, one a day from today.",
+  },
+  written: { ko: "작성", en: "written" },
+  briefOne: { ko: "브리프 쓰기", en: "Brief one" },
+  open: { ko: "열기", en: "Open" },
+  approve: { ko: "승인", en: "Approve" },
+  ready: { ko: "완성", en: "Ready" },
+  today: { ko: "오늘", en: "today" },
+  laterBriefs: { ko: "개의 브리프가 이번 주 다음을 기다려요", en: "more briefs wait after this week" },
+  approveDraft: { ko: "가장 오래된 초안 승인하기", en: "Approve the oldest draft" },
+  teachShort: { ko: "새 숏폼 가르치기", en: "Teach a new short" },
+  noViewsPromise: { ko: "조회수는 절대 약속하지 않아요.", en: "We never promise views." },
+  reelOf: { ko: "숏폼 열기", en: "Open reel" },
 } as const satisfies Record<string, Record<UiLang, string>>;
 
 export type WordKey = keyof typeof words;
