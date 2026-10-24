@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { briefCues, hitCues } from "../lib/cues.ts";
 import { ring, seeded, through, underline } from "../components/ui/pencil.ts";
-import { seconds, toVideoReading } from "../lib/shorti/read.ts";
+import { seconds, toFilmCues, toVideoReading } from "../lib/shorti/read.ts";
 import { langFromAccept } from "../lib/words.ts";
 
 test("a hit's cues come in clock order with what to look at; a reel's beats say their line over what they do", () => {
@@ -44,7 +44,7 @@ test("Shorti's cue times read as seconds; a video read carries its clip, cues an
     video: { video_id: "v1", hook: "h", cues: [{ at: "0:02", cue: "Look up", do: "d", look_at: ["Stick", "Mirror", "Hand", "Fourth"] }, { at: "x", cue: "no time" }] },
     context: { hit: { clip: "https://shorti.ai/public/media?video=v1&r=h264_720.mp4", clock: { cuts_s: [0.4, 0.8, "x"] } } },
   });
-  assert.deepEqual(reading.cues, [{ t: 2, cue: "Look up", do: "d", look: ["Stick", "Mirror", "Hand"] }]);
+  assert.deepEqual(reading.cues, [{ t: 2, cue: "Look up", do: "d", look: ["Stick", "Mirror", "Hand"], marks: [] }]);
   assert.deepEqual(reading.cuts, [0.4, 0.8]);
   assert.equal(card.clipUrl, "https://shorti.ai/public/media?video=v1&r=h264_720.mp4");
 });
@@ -54,4 +54,28 @@ test("every video wears the same keys in the same place, and the pencil is drawn
   for (const key of ['t("play")', 't("pause")', 't("soundOn")', 't("soundOff")', 't("coachOn")', 't("coachOff")', 't("nextCue")']) assert.ok(player.includes(key), key);
   assert.match(player, /var\(--pencil\)/);
   assert.match(player, /const \[muted, setMuted\] = useState\(true\)/, "sound starts off");
+});
+
+test("a film's cues carry their marks on the frame, in the page's language; a bad mark is dropped, never guessed", () => {
+  const film = { cues: { cues: [
+    { t: 200, title: { ko: "머리 위에 퍼센트", en: "Percent overhead" }, say: { ko: "숫자를 띄워요", en: "Float the numbers" },
+      marks: [
+        { shape: "box", label: { ko: "남자 진행률", en: "His progress" }, box: [0.3, 0.14, 0.5, 0.19] },
+        { shape: "outline", pts: [[0.39, 0.31], [0.5, 0.35], [0.69, 0.36]] },
+        { shape: "box", box: [0.3, 2, 0.5, 0.19] },
+        { shape: "spiral", box: [0, 0, 1, 1] },
+      ] },
+    { title: { en: "no time" } },
+  ] } };
+  const ko = toFilmCues(film, "ko");
+  assert.equal(ko.length, 1);
+  assert.equal(ko[0].t, 0.2);
+  assert.equal(ko[0].cue, "머리 위에 퍼센트");
+  assert.deepEqual(ko[0].marks.map((m) => m.shape), ["box", "outline"]);
+  assert.deepEqual(ko[0].look, ["남자 진행률"]);
+  assert.equal(toFilmCues(film, "en")[0].marks[0].label, "His progress");
+  // a cue whose marks are drawn on the frame keeps only the undrawn names as words under it
+  const cues = hitCues({ cues: ko });
+  assert.equal(cues[0].tags, undefined);
+  assert.equal(cues[0].marks.length, 2);
 });

@@ -365,6 +365,10 @@ export const words = {
   unlockNoPass: { ko: "패스코드가 없나요?", en: "No passcode?" },
   unlockSignIn: { ko: "Google로 로그인", en: "Sign in with Google" },
   unlockThen: { ko: "(승인된 계정, 이 브라우저) 후 돌아오세요.", en: "in this browser with an approved account, then come back." },
+  castReady: { ko: "CineSynth 캐릭터 준비됨", en: "Ready in CineSynth" },
+  castIncomplete: { ko: "CineSynth 3면 이미지 일부 없음", en: "CineSynth views incomplete" },
+  castMissing: { ko: "내 CineSynth에 아직 없음", en: "Not in your CineSynth yet" },
+  orClaude: { ko: "내 Claude로 쓰고 싶다면:", en: "Rather write it with your own Claude?" },
 } as const satisfies Record<string, Record<UiLang, string>>;
 
 export type WordKey = keyof typeof words;

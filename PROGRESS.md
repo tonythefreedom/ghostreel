@@ -2,6 +2,21 @@
 
 Newest first. Each entry: what is true now, what broke, what is next. Keep it short; long output goes in files.
 
+## 2026-10-24 · A — the pencil draws where it points; onboarding shows CineSynth's own characters
+
+Ted, 10-24: «코칭 색연필이 … 화면 구도나 미쟝센 그 좌표에 그려지지않는데», «온보딩시 캐릭터 고르는 것도 CineSynth로».
+- Shorti's MCP says each cue in words only; where it points is published with the video's public page as its film
+  (`/v/<slug>/film`, keyless). lib/shorti/read.ts `readFilm`/`withFilm` read it (cue time in ms, title and say in
+  KO/EN, marks in shares of the frame). The Player maps each mark onto the covered picture and draws it by hand: a box
+  with turned corners, a ring, an outline, a line or arrow, a bracket; a frame-wide box is a viewfinder's corners;
+  each mark's name is lettered by it, clear of the keys; the cue's words move to the top when the marks sit low.
+  Fixtures re-recorded in both languages (decks written compact to stay under 64 KB).
+- Onboarding's "who performs" asks CineSynth for the signed-in account's characters (`GET /api/characters` with the
+  session, through `/api/newtype/characters`, thumbnails streamed back through it) and shows each ghost's real
+  picture with the AI label and whether its character is ready, incomplete or missing in that account.
+- Also: the top bar spans the window; the brief starter offers "write it with your own Claude".
+- Gate: 90 tests, typecheck, build. Not verified: the CineSynth character list with a real session.
+
 ## 2026-10-24 · B — every ghost has a face on "Who performs for you"
 - Only Yuna had a keyframe, so Rina, Jihyun and Miyeon showed empty tiles. `withFace` (lib/ghostFace.ts) now falls back
   to the CineSynth character portraits in `public/ghosts/` (768×960 webp, from the CineSynth landing). A keyframe still

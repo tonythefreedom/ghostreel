@@ -63,3 +63,51 @@ export function ring(w: number, h: number, seed: string): string {
   }
   return through(pts);
 }
+
+/** A box drawn by hand round [x0, y0, x1, y1]: four strokes, each corner turned a little past its line. */
+export function handBox(x0: number, y0: number, x1: number, y1: number, seed: string): string {
+  const rnd = seeded(`b:${seed}`);
+  const j = () => (rnd() - 0.5) * 3;
+  const over = Math.min(8, Math.max(3, Math.min(x1 - x0, y1 - y0) * 0.08));
+  const side = (a: Pt, b: Pt) => {
+    const dx = b[0] - a[0];
+    const dy = b[1] - a[1];
+    const len = Math.hypot(dx, dy) || 1;
+    const ux = (dx / len) * over;
+    const uy = (dy / len) * over;
+    return through([[a[0] - ux * 0.4 + j(), a[1] - uy * 0.4 + j()], [(a[0] + b[0]) / 2 + j(), (a[1] + b[1]) / 2 + j()], [b[0] + ux + j(), b[1] + uy + j()]]);
+  };
+  return [side([x0, y0], [x1, y0]), side([x1, y0], [x1, y1]), side([x1, y1], [x0, y1]), side([x0, y1], [x0, y0])].join("");
+}
+
+/** A frame-wide box as a viewfinder's four corners, never a cage round the picture. */
+export function corners(x0: number, y0: number, x1: number, y1: number): string {
+  const k = Math.min(28, (x1 - x0) * 0.16, (y1 - y0) * 0.16);
+  return [
+    `M${r1(x0)} ${r1(y0 + k)}L${r1(x0)} ${r1(y0)}L${r1(x0 + k)} ${r1(y0)}`,
+    `M${r1(x1 - k)} ${r1(y0)}L${r1(x1)} ${r1(y0)}L${r1(x1)} ${r1(y0 + k)}`,
+    `M${r1(x1)} ${r1(y1 - k)}L${r1(x1)} ${r1(y1)}L${r1(x1 - k)} ${r1(y1)}`,
+    `M${r1(x0 + k)} ${r1(y1)}L${r1(x0)} ${r1(y1)}L${r1(x0)} ${r1(y1 - k)}`,
+  ].join("");
+}
+
+/** A closed outline through the points, round and back to where it started. */
+export function closedThrough(pts: readonly Pt[]): string {
+  if (pts.length < 3) return through(pts);
+  return through([...pts, pts[0]!, pts[1]!]);
+}
+
+/** An arrow's head at the end of a run from `a` to `b`. */
+export function arrowHead(a: Pt, b: Pt, size = 9): string {
+  const ang = Math.atan2(b[1] - a[1], b[0] - a[0]);
+  const wing = (s: number) => [b[0] - Math.cos(ang + s) * size, b[1] - Math.sin(ang + s) * size] as const;
+  const [l, r] = [wing(0.5), wing(-0.5)];
+  return `M${r1(l[0])} ${r1(l[1])}L${r1(b[0])} ${r1(b[1])}L${r1(r[0])} ${r1(r[1])}`;
+}
+
+/** A bracket along a run (a height, a gap): the run and a tick across each end. */
+export function bracket(a: Pt, b: Pt, tick = 7): string {
+  const ang = Math.atan2(b[1] - a[1], b[0] - a[0]) + Math.PI / 2;
+  const t = (p: Pt) => `M${r1(p[0] - Math.cos(ang) * tick)} ${r1(p[1] - Math.sin(ang) * tick)}L${r1(p[0] + Math.cos(ang) * tick)} ${r1(p[1] + Math.sin(ang) * tick)}`;
+  return `M${r1(a[0])} ${r1(a[1])}L${r1(b[0])} ${r1(b[1])}${t(a)}${t(b)}`;
+}

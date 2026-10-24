@@ -10,7 +10,7 @@
 import { useCallback, useEffect, useId, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode, type RefObject } from "react";
 import { useT } from "../Lang";
 import { clock } from "../kit/logic";
-import { ring, underline } from "./pencil";
+import { arrowHead, bracket, closedThrough, corners, handBox, ring, through, underline } from "./pencil";
 import { AiLabel } from "./Vellum";
 
 const VOICE = "gr-voice"; // one voice per page: a reel that unmutes tells the others to hush
@@ -26,7 +26,10 @@ export type Cue = {
   line?: string;
   /** what to look at in the frame, each ringed */
   tags?: string[];
+  /** where on the frame the pencil draws, in shares of the frame (0–1) */
+  marks?: ReadonlyArray<{ shape: string; box?: readonly [number, number, number, number]; pts?: ReadonlyArray<readonly [number, number]>; label?: string }>;
 };
+type Size = { w: number; h: number };
 
 type Props = {
   src?: string;
@@ -57,7 +60,10 @@ export function Player({
   const t = useT();
   const id = useId();
   const video = useRef<HTMLVideoElement>(null);
+  const root = useRef<HTMLDivElement>(null);
   const fill = useRef<HTMLSpanElement>(null);
+  const [stage, setStage] = useState<Size | null>(null); // the box on screen, px
+  const [frame, setFrame] = useState<Size>({ w: 9, h: 16 }); // the clip's own frame, once known
   const [muted, setMuted] = useState(true);
   const [playing, setPlaying] = useState(false);
   const [byHand, setByHand] = useState(false); // a person paused it: ▶ in the middle
@@ -73,6 +79,20 @@ export function Player({
   sorted.current = cues;
   const coachOn = useRef(coach);
   coachOn.current = coach;
+
+  // The marks are placed on the clip's frame as the box shows it (covered), so they need both sizes.
+  useEffect(() => {
+    const el = root.current;
+    if (!el) return;
+    const measure = () => {
+      const r = el.getBoundingClientRect();
+      if (r.width > 0 && r.height > 0) setStage({ w: r.width, h: r.height });
+    };
+    measure();
+    const seen = new ResizeObserver(measure);
+    seen.observe(el);
+    return () => seen.disconnect();
+  }, []);
 
   // One voice per page.
   useEffect(() => {
@@ -195,6 +215,7 @@ export function Player({
 
   return (
     <div
+      ref={root}
       className={`@container relative isolate aspect-[9/16] w-full overflow-hidden bg-surface-2 bg-cover bg-center ${radius} ${className}`}
       style={poster ? { backgroundImage: `url("${poster}")` } : undefined}
       aria-label={label}
@@ -213,7 +234,11 @@ export function Player({
           onClick={play}
           onPlay={() => setPlaying(true)}
           onPause={() => setPlaying(false)}
-          onLoadedMetadata={(e) => setDuration(e.currentTarget.duration || 0)}
+          onLoadedMetadata={(e) => {
+            const v = e.currentTarget;
+            setDuration(v.duration || 0);
+            if (v.videoWidth > 0 && v.videoHeight > 0) setFrame({ w: v.videoWidth, h: v.videoHeight });
+          }}
           onEnded={onEnded}
           onError={() => setFailed(true)}
           className="size-full cursor-pointer object-cover"
@@ -248,7 +273,11 @@ export function Player({
         </span>
       ) : null}
 
-      {cue ? <CueCard key={shown} cue={cue} small={mode === "card"} hasNext={cues.length > 1} onNext={nextCue} raised={showScrub} /> : null}
+      {cue?.marks?.length && stage ? <Marks key={`m${shown}`} marks={cue.marks} stage={stage} frame={frame} seed={cue.title} /> : null}
+      {cue ? (
+        <CueCard key={shown} cue={cue} small={mode === "card"} hasNext={cues.length > 1} onNext={nextCue} raised={showScrub}
+          top={Boolean(cue.marks?.length) && lowMarks(cue.marks!)} />
+      ) : null}
 
       {showScrub ? <Scrub fill={fill} duration={duration} cuts={cuts} cues={coach ? cues : []} onSeek={seekTo} label={t("seek")} /> : null}
     </div>
@@ -296,7 +325,7 @@ function Glyph({ name }: { name: "play" | "pause" | "sound" | "muted" | "pencil"
 }
 
 /** The cue as the pencil writes it: the instant and the craft point, underlined; what to do; what to look at, ringed. */
-function CueCard({ cue, small, hasNext, onNext, raised }: { cue: Cue; small: boolean; hasNext: boolean; onNext: () => void; raised: boolean }) {
+function CueCard({ cue, small, hasNext, onNext, raised, top }: { cue: Cue; small: boolean; hasNext: boolean; onNext: () => void; raised: boolean; top: boolean }) {
   const t = useT();
   const title = useRef<HTMLSpanElement>(null);
   const [w, setW] = useState(0);
@@ -306,7 +335,7 @@ function CueCard({ cue, small, hasNext, onNext, raised }: { cue: Cue; small: boo
   const tags = (cue.tags ?? []).slice(0, 3);
   return (
     <div
-      className={`gr-cue pointer-events-none absolute inset-x-2 z-[7] flex flex-col ${raised ? "bottom-9" : "bottom-2"}`}
+      className={`gr-cue pointer-events-none absolute inset-x-2 z-[7] flex flex-col ${top ? "top-14" : raised ? "bottom-9" : "bottom-2"}`}
       aria-live="polite"
     >
       {tags.length && !small ? (
@@ -359,6 +388,82 @@ function RingedTag({ text, delay }: { text: string; delay: number }) {
       ) : null}
     </span>
   );
+}
+
+/** Whether a cue's marks sit low on the frame, so its words go to the top where they hide less of the drawing. */
+function lowMarks(marks: NonNullable<Cue["marks"]>): boolean {
+  const ys = marks.flatMap((m) => (m.box ? [(m.box[1] + m.box[3]) / 2] : (m.pts ?? []).map((p) => p[1])));
+  return ys.length > 0 && ys.reduce((a, b) => a + b, 0) / ys.length > 0.56;
+}
+
+/**
+ * The cue drawn on the frame: each mark where Shorti read it, mapped from shares of the clip's frame to the box as
+ * it covers the picture. A box or ring by its box, an outline, line, arrow or bracket by its points; a box over most
+ * of the frame becomes a viewfinder's corners. Each stroke has a dark halo under its ink; its name is lettered by it,
+ * kept clear of the keys at the top.
+ */
+function Marks({ marks, stage, frame, seed }: { marks: NonNullable<Cue["marks"]>; stage: Size; frame: Size; seed: string }) {
+  const k = Math.max(stage.w / frame.w, stage.h / frame.h);
+  const ox = (stage.w - frame.w * k) / 2;
+  const oy = (stage.h - frame.h * k) / 2;
+  const at = (x: number, y: number) => [ox + x * frame.w * k, oy + y * frame.h * k] as const;
+  const drawn = marks.map((m, i) => {
+    const key = `${seed}:${i}`;
+    let d = "";
+    let anchor: readonly [number, number] = [stage.w / 2, stage.h / 2];
+    let below = 0;
+    if (m.box) {
+      const [x0, y0] = at(m.box[0], m.box[1]);
+      const [x1, y1] = at(m.box[2], m.box[3]);
+      const wide = (m.box[2] - m.box[0]) * (m.box[3] - m.box[1]) > 0.75
+        || [m.box[0] < 0.02, m.box[1] < 0.02, m.box[2] > 0.98, m.box[3] > 0.98].filter(Boolean).length >= 3;
+      if (m.shape === "circle") {
+        const pad = 6;
+        d = ring(x1 - x0 + pad * 2, y1 - y0 + pad * 2, key);
+        d = `${shift(d, x0 - pad, y0 - pad)}`;
+      } else d = wide ? corners(x0 + 6, y0 + 6, x1 - 6, y1 - 6) : handBox(x0, y0, x1, y1, key);
+      anchor = [x0, y0];
+      below = y1;
+    } else if (m.pts?.length) {
+      const pts = m.pts.map(([x, y]) => at(x, y));
+      if (m.shape === "outline") d = closedThrough(pts);
+      else if (m.shape === "bracket" && pts.length >= 2) d = bracket(pts[0]!, pts[pts.length - 1]!);
+      else {
+        d = through(pts);
+        if (m.shape === "arrow" && pts.length >= 2) d += arrowHead(pts[pts.length - 2]!, pts[pts.length - 1]!);
+      }
+      const xs = pts.map((p) => p[0]);
+      const ys = pts.map((p) => p[1]);
+      anchor = [Math.min(...xs), Math.min(...ys)];
+      below = Math.max(...ys);
+    }
+    // the name above its mark, or under it where the top is the keys' and the AI label's
+    const lx = Math.min(Math.max(8, anchor[0]), stage.w - 8 - Math.min(160, (m.label?.length ?? 0) * 8));
+    const ly = anchor[1] - 8 < 64 ? Math.min(stage.h - 12, below + 18) : anchor[1] - 8;
+    return { d, label: m.label, lx, ly, delay: 120 + i * 180 };
+  });
+  return (
+    <svg aria-hidden className="pointer-events-none absolute inset-0 z-[5] overflow-visible" width={stage.w} height={stage.h} viewBox={`0 0 ${stage.w} ${stage.h}`}>
+      {drawn.map((m, i) => (
+        <g key={i}>
+          <path d={m.d} pathLength={1} className="gr-stroke" style={{ animationDelay: `${m.delay}ms` }} stroke="rgba(10,10,10,.55)" strokeWidth={5} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <path d={m.d} pathLength={1} className="gr-stroke" style={{ animationDelay: `${m.delay}ms` }} stroke="var(--pencil)" strokeWidth={2.4} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          {m.label ? (
+            <text x={m.lx} y={m.ly} className="gr-mark-label" style={{ animationDelay: `${m.delay + 300}ms` }} fill="var(--pencil)" fontSize={12} fontWeight={720}
+              stroke="rgba(10,10,10,.7)" strokeWidth={3} paintOrder="stroke" strokeLinejoin="round">
+              {m.label}
+            </text>
+          ) : null}
+        </g>
+      ))}
+    </svg>
+  );
+}
+
+/** A path's absolute commands moved by (dx, dy). */
+function shift(d: string, dx: number, dy: number): string {
+  let i = 0;
+  return d.replace(/-?\d+(\.\d+)?/g, (n) => String(Math.round((Number(n) + (i++ % 2 === 0 ? dx : dy)) * 10) / 10));
 }
 
 /** The foot of the picture: where the clip is, its measured cuts as ticks, its cues as pencil dots; a finger seeks. */

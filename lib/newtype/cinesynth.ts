@@ -81,3 +81,38 @@ export async function fetchMedia(url: string, token: string): Promise<Response> 
   if (!res.ok) throw new CinesynthAuthError(res.status, `media HTTP ${res.status}`);
   return res;
 }
+
+// The signed-in user's CineSynth characters (their 3-view sets), so onboarding shows each performer's real picture.
+// CineSynth lists every set and says which are complete; only a complete one can perform.
+const CharacterRow = z.object({
+  name: z.string().min(1),
+  complete: z.boolean().optional(),
+  thumbnail: z.string().nullish(),
+});
+export type AccountCharacter = { name: string; complete: boolean; thumbnail: string | null };
+
+/** The account's characters, thumbnails as CineSynth URLs (on its own host only). */
+export async function accountCharacters(token: string): Promise<AccountCharacter[]> {
+  const body = z.object({ characters: z.array(z.unknown()).default([]) }).parse(await call("/api/characters", { token }));
+  return body.characters.flatMap((raw) => {
+    const row = CharacterRow.safeParse(raw);
+    if (!row.success) return [];
+    let thumbnail: string | null = null;
+    try {
+      const url = row.data.thumbnail ? new URL(row.data.thumbnail, CINESYNTH_URL) : null;
+      thumbnail = url && url.origin === CINESYNTH_URL ? url.href : null;
+    } catch {
+      thumbnail = null;
+    }
+    return [{ name: row.data.name, complete: row.data.complete ?? false, thumbnail }];
+  });
+}
+
+/** One character's thumbnail, fetched with the user's session: only a thumbnail the account's own list names. */
+export async function characterThumb(name: string, token: string): Promise<Response> {
+  const own = (await accountCharacters(token)).find((c) => c.name === name);
+  if (!own?.thumbnail) throw new CinesynthAuthError(404, "no such character thumbnail");
+  const res = await fetch(own.thumbnail, { headers: { authorization: `Bearer ${token}` }, cache: "no-store", signal: AbortSignal.timeout(15_000) });
+  if (!res.ok) throw new CinesynthAuthError(res.status, `thumbnail HTTP ${res.status}`);
+  return res;
+}

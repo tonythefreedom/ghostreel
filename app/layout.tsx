@@ -43,10 +43,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang={lang} className={`${pretendard.variable} ${geist.variable}`}>
       <body className="min-h-dvh">
         <LangProvider lang={lang}>
-          <div className="mx-auto w-full max-w-[430px] px-5">
-            <TopBar />
-            {children}
-          </div>
+          <TopBar />
+          <div className="mx-auto w-full max-w-[430px] px-5">{children}</div>
         </LangProvider>
       </body>
     </html>

@@ -49,8 +49,24 @@ export const TrendCard = z.object({
 export type TrendCard = z.infer<typeof TrendCard>;
 
 export const Beat = z.object({ at: z.string(), do: z.string() });
-// A coaching moment Shorti read in a hit: when (s), the craft point, what to do, and what in the frame to look at.
-export const HitCue = z.object({ t: z.number(), cue: z.string(), do: z.string().default(""), look: z.array(z.string()).default([]) });
+// Where a coaching mark sits on the hit's frame, in shares of the frame (0–1): a box or a ring by its box, an outline,
+// a line, an arrow or a bracket by its points. Its label is in the reading's language.
+export const PencilMark = z.object({
+  shape: z.enum(["box", "circle", "outline", "line", "arrow", "bracket"]),
+  box: z.tuple([z.number(), z.number(), z.number(), z.number()]).optional(),
+  pts: z.array(z.tuple([z.number(), z.number()])).optional(),
+  label: z.string().optional(),
+});
+export type PencilMark = z.infer<typeof PencilMark>;
+// A coaching moment Shorti read in a hit: when (s), the craft point, what to do, what in the frame to look at, and
+// where on the frame the pencil draws it.
+export const HitCue = z.object({
+  t: z.number(),
+  cue: z.string(),
+  do: z.string().default(""),
+  look: z.array(z.string()).default([]),
+  marks: z.array(PencilMark).default([]),
+});
 export type HitCue = z.infer<typeof HitCue>;
 export const VideoReading = z.object({
   videoId: z.string(),

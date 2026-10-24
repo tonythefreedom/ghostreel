@@ -3,7 +3,7 @@
 // one screen per step.
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
-import { GhostCard } from "@/components/GhostCard";
+import { GhostCard, type CastState } from "@/components/GhostCard";
 import { GoogleSignIn } from "@/components/GoogleSignIn";
 import { useT } from "@/components/Lang";
 import { FunnelProgress } from "@/components/kit";
@@ -39,6 +39,20 @@ export function OnboardForm({ ghosts, initialAccount, notice }: { ghosts: Ghost[
   const [error, setError] = useState<string | null>(null);
 
   const links = urls(works);
+  // The account's CineSynth characters, once it is approved: each ghost's picture and whether it can perform.
+  const [cast, setCast] = useState<Array<{ name: string; complete: boolean; thumb: string | null }> | null>(null);
+  useEffect(() => {
+    if (account?.status !== "approved" || cast) return;
+    fetch("/api/newtype/characters")
+      .then((r) => (r.ok ? r.json() : { characters: [] }))
+      .then((b: { characters?: Array<{ name: string; complete: boolean; thumb: string | null }> }) => setCast(b.characters ?? []))
+      .catch(() => setCast([]));
+  }, [account, cast]);
+  const castOf = (g: Ghost): { picture: string | null; state: CastState } => {
+    if (!cast) return { picture: null, state: "unknown" };
+    const c = cast.find((x) => x.name === g.characterId);
+    return { picture: c?.thumb ?? null, state: !c ? "missing" : c.complete ? "ready" : "incomplete" };
+  };
   // Signing in on the first screen moves straight on once CineSynth has approved the account.
   useEffect(() => {
     if (account?.status === "approved" && step === 1) setStep(2);
@@ -162,7 +176,9 @@ export function OnboardForm({ ghosts, initialAccount, notice }: { ghosts: Ghost[
         <h2 className={title}>{t("obWho")}</h2>
         <div role="radiogroup" aria-label={t("obWho")} className="grid grid-cols-2 gap-3">
           {ghosts.map((g) => (
-            <GhostCard key={g.id} ghost={g} selected={ghostId === g.id} onSelect={() => setGhostId(g.id)} />
+            <GhostCard key={g.id} ghost={g} selected={ghostId === g.id} onSelect={() => setGhostId(g.id)}
+              picture={castOf(g).picture} cast={castOf(g).state}
+              castWord={cast ? t(castOf(g).state === "ready" ? "castReady" : castOf(g).state === "incomplete" ? "castIncomplete" : "castMissing") : undefined} />
           ))}
         </div>
         <p className="text-[13px] leading-snug text-text-3">

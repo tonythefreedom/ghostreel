@@ -1,6 +1,6 @@
 "use client";
 // Lane A. The one bar on every page: the brand home on the left; on the right the way to connect your own Claude and
-// the KO/EN key. It stays at the top as the page scrolls, over the page's own colour, and never over a picture.
+// the KO/EN key. It spans the window and stays at the top as the page scrolls, its contents in the page's column.
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LangToggle, useT } from "./Lang";
@@ -10,21 +10,23 @@ export function TopBar() {
   const path = usePathname();
   const connect = path === "/connect";
   return (
-    <header className="sticky top-0 z-30 -mx-5 flex h-14 items-center justify-between gap-3 bg-bg/88 px-5 backdrop-blur-md [backdrop-filter:blur(16px)_saturate(1.3)]">
-      <Link href="/" className="-ml-2 flex h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-[var(--radius-control)] px-2 text-[15px] font-[720] tracking-[-0.01em]">
-        <span aria-hidden className="size-2.5 rounded-full bg-accent shadow-[0_0_12px_var(--accent)]" />
-        {t("brand")}
-      </Link>
-      <nav aria-label={t("navLabel")} className="flex items-center gap-1">
-        <Link href="/connect" aria-current={connect ? "page" : undefined} aria-label={t("navConnect")}
-          className={`flex h-10 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-[13px] font-[560] transition-colors duration-[125ms] ${
-            connect ? "bg-accent-soft text-text" : "text-text-dim hover:text-text"
-          }`}>
-          <ClaudeGlyph />
-          {t("navConnectShort")}
+    <header className="sticky top-0 z-30 w-full border-b border-line/60 bg-bg/88 [backdrop-filter:blur(16px)_saturate(1.3)]">
+      <div className="mx-auto flex h-14 w-full max-w-[430px] items-center justify-between gap-3 px-5">
+        <Link href="/" className="-ml-2 flex h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-[var(--radius-control)] px-2 text-[15px] font-[720] tracking-[-0.01em]">
+          <span aria-hidden className="size-2.5 rounded-full bg-accent shadow-[0_0_12px_var(--accent)]" />
+          {t("brand")}
         </Link>
-        <LangToggle />
-      </nav>
+        <nav aria-label={t("navLabel")} className="flex items-center gap-1">
+          <Link href="/connect" aria-current={connect ? "page" : undefined} aria-label={t("navConnect")}
+            className={`flex h-10 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-[13px] font-[560] transition-colors duration-[125ms] ${
+              connect ? "bg-accent-soft text-text" : "text-text-dim hover:text-text"
+            }`}>
+            <ClaudeGlyph />
+            {t("navConnectShort")}
+          </Link>
+          <LangToggle />
+        </nav>
+      </div>
     </header>
   );
 }

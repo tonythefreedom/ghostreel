@@ -1,14 +1,20 @@
 // Lane A. What the coaching pencil writes over a video (components/ui/Player.tsx `Cue`): a hit's cues as Shorti read
 // them, or a ghost reel's own beats from its brief. Pure, so tests run it.
-import type { Brief, VideoReading } from "./types.ts";
+import type { Brief, PencilMark, VideoReading } from "./types.ts";
 
-export type PencilCue = { t: number; title: string; line?: string; tags?: string[] };
+export type PencilCue = { t: number; title: string; line?: string; tags?: string[]; marks?: PencilMark[] };
 
 /** A hit's cues, in its clock's order; none when Shorti read none. */
 export function hitCues(reading: Pick<VideoReading, "cues"> | null | undefined): PencilCue[] {
   return (reading?.cues ?? [])
     .filter((c) => Number.isFinite(c.t) && c.cue)
-    .map((c) => ({ t: c.t, title: c.cue, line: c.do || undefined, tags: c.look.length ? c.look : undefined }))
+    // A mark drawn on the frame carries its own label there; the words under the cue name only what is not drawn.
+    .map((c) => {
+      const marks = c.marks ?? [];
+      const drawn = new Set(marks.flatMap((m) => (m.label ? [m.label] : [])));
+      const tags = c.look.filter((l) => !drawn.has(l));
+      return { t: c.t, title: c.cue, line: c.do || undefined, tags: tags.length ? tags : undefined, marks: marks.length ? marks : undefined };
+    })
     .sort((a, b) => a.t - b.t);
 }
 

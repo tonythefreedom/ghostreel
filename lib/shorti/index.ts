@@ -7,7 +7,7 @@ import beautyKo from "@/fixtures/shorti/trending-beauty.ko.json";
 import fashionKo from "@/fixtures/shorti/trending-fashion.ko.json";
 import recordedFormats from "@/fixtures/shorti/formats.json";
 import recordedRecipes from "@/fixtures/shorti/recipes.json";
-import { enrich, readCameraSetups, readFind, readFormatPlan, readOpenSpots, readRecipeEdit, readTrending, readVideo, type ReadLang } from "./read.ts";
+import { enrich, readCameraSetups, readFind, readFormatPlan, readOpenSpots, readRecipeEdit, readTrending, readVideo, withFilm, type ReadLang } from "./read.ts";
 import { FormatPlan, RecipeEdit, TrendCard, VideoReading, type CameraSetup, type FindMatch, type OpenSpot, type Sourced } from "../types.ts";
 import { z } from "zod";
 
@@ -69,8 +69,9 @@ export async function reading(videoId: string, url: string, lang: ReadLang = "en
   const known = readingsByVideo.get(`${lang}:${videoId}`);
   if (known || offline()) return known ?? null;
   try {
-    const { reading } = await cached(`video:${lang}:${url}`, () => readVideo(url, lang));
-    readingsByVideo.set(`${lang}:${videoId}`, { ...reading, videoId });
+    const { reading: words, card } = await cached(`video:${lang}:${url}`, () => readVideo(url, lang));
+    const reading = await cached(`film:${lang}:${url}`, () => withFilm({ ...words, videoId }, card.page, lang));
+    readingsByVideo.set(`${lang}:${videoId}`, reading);
     return { ...reading, videoId };
   } catch {
     return null;

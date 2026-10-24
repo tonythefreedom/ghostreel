@@ -3,6 +3,7 @@
 import { callTool, type ToolResult } from "../mcp.ts";
 import {
   CameraSetup,
+  PencilMark,
   FindMatch,
   FormatPlan,
   OpenSpot,
@@ -152,6 +153,7 @@ export function toVideoReading(structured: unknown): { reading: VideoReadingT; c
     viewsAsOf: str(v.views_as_of),
     posterUrl: str(v.poster),
     clipUrl: str(hit.clip),
+    page: str(v.page),
     hook: str(v.hook),
     whatHappens: str(v.what_happens),
     lengthS: num(v.length_s),
@@ -167,6 +169,57 @@ export function toFormatPlan(structured: unknown): FormatPlanT {
     open: arr(s.open).map((o) => ({ label: str(obj(o).label) ?? "", what: str(obj(o).what) ?? "", how: str(obj(o).how) })),
     page: str(s.link),
   });
+}
+
+// ── the coaching film: a hit's cues with their marks on the frame ──
+
+// Shorti's MCP says each cue in words; where on the frame it points is published with the video's public page, as
+// its film (`/v/<slug>/film`, keyless, the same data Shorti's own pencil draws from). A plain GET on that page's
+// host; nothing else is read from it.
+export const SHORTI_SITE = new URL(SHORTI_MCP).origin;
+
+const share = (v: unknown) => typeof v === "number" && Number.isFinite(v) && v >= -0.05 && v <= 1.05;
+const SHAPES = new Set(["box", "circle", "outline", "line", "arrow", "bracket"]);
+
+/** A film's cues as GhostReel reads them, in one language; the slug is the video page's last segment. */
+export function toFilmCues(film: unknown, lang: ReadLang): VideoReadingT["cues"] {
+  const word = (v: unknown) => str(obj(v)[lang]) ?? str(obj(v).en) ?? str(v);
+  return arr(obj(obj(film).cues).cues).flatMap((raw) => {
+    const c = obj(raw);
+    const t = num(c.t);
+    const cue = word(c.title);
+    if (t === undefined || !cue) return [];
+    const marks = arr(c.marks).flatMap((m) => {
+      const k = obj(m);
+      const shape = str(k.shape);
+      if (!shape || !SHAPES.has(shape)) return [];
+      const box = arr(k.box);
+      const pts = arr(k.pts).filter((p) => Array.isArray(p) && p.length === 2 && share(p[0]) && share(p[1])) as [number, number][];
+      const parsed = PencilMark.safeParse({
+        shape,
+        box: box.length === 4 && box.every(share) ? box : undefined,
+        pts: pts.length >= 2 ? pts.map(([x, y]) => [x, y]) : undefined,
+        label: word(k.label),
+      });
+      return parsed.success && (parsed.data.box || parsed.data.pts) ? [parsed.data] : [];
+    });
+    return [{ t: t / 1000, cue, do: word(c.say) ?? "", look: marks.flatMap((m) => (m.label ? [m.label] : [])).slice(0, 3), marks: marks.slice(0, 4) }];
+  });
+}
+
+/** The film of a video by its Shorti page; empty when the page has none or Shorti is unreachable. */
+export async function readFilm(page: string | undefined, lang: ReadLang): Promise<VideoReadingT["cues"]> {
+  const slug = page?.split("?")[0]?.split("/").filter(Boolean).pop();
+  if (!slug || !/^[a-z]+_[A-Za-z0-9_-]+$/.test(slug)) return [];
+  const res = await fetch(`${SHORTI_SITE}/v/${slug}/film`, { headers: { accept: "application/json" }, signal: AbortSignal.timeout(10_000) });
+  if (!res.ok) return [];
+  return toFilmCues(await res.json(), lang);
+}
+
+/** A reading whose cues carry their marks: the film's cues when it has them, else the words-only cues. */
+export async function withFilm(reading: VideoReadingT, page: string | undefined, lang: ReadLang): Promise<VideoReadingT> {
+  const film = await readFilm(page, lang).catch(() => []);
+  return film.length ? { ...reading, cues: film } : reading;
 }
 
 // ── live reads ──
@@ -195,9 +248,9 @@ export async function enrich(cards: TrendCardT[], lang: ReadLang = "en"): Promis
       out.slice(i, i + 4).map(async (c, j) => {
         try {
           const { reading, card } = await readVideo(c.url, lang);
-          const merged = { ...c, ...Object.fromEntries(Object.entries(card).filter(([, v]) => v !== undefined)) };
-          out[i + j] = TrendCard.parse(merged);
-          readings.set(c.videoId, { ...reading, videoId: c.videoId });
+          const merged = TrendCard.parse({ ...c, ...Object.fromEntries(Object.entries(card).filter(([, v]) => v !== undefined)) });
+          out[i + j] = merged;
+          readings.set(c.videoId, await withFilm({ ...reading, videoId: c.videoId }, merged.page, lang));
         } catch {
           // keep the bare card; a missing poster is drawn as a plain tile
         }

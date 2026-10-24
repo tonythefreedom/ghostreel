@@ -2,6 +2,7 @@
 // After the game: the kept shorts as one choice. The chosen one picks how close the ghost stays (keep / adapt / twist)
 // and the docked verb writes its brief: one red verb a screen, however many were kept. A locked deploy asks for the
 // owner passcode once, then retries.
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import type { Intent, KeepPart } from "@/lib/types";
@@ -132,10 +133,15 @@ export function BriefStarter({ ghostId, creatorId, items, lang: langProp, back }
                     />
                   ) : null}
                   {failed?.startsWith(`${item.videoId}:`) ? (
-                    <p role="alert" className="text-[13px] text-danger">
+                    <p role="alert" className="text-[13px] leading-snug text-danger">
                       ✕ {t(failed.endsWith(":model_key_missing") ? "noModelKey" : "briefFailed", lang)}
                     </p>
                   ) : null}
+                  {/* The other way to write it: the person's own Claude, through GhostReel's MCP server. */}
+                  <p className="text-[12px] leading-snug text-text-3">
+                    {t("orClaude", lang)}{" "}
+                    <Link href="/connect" className="font-[640] text-text-dim underline decoration-accent/60 underline-offset-2 hover:text-text">{t("navConnect", lang)} →</Link>
+                  </p>
                 </>
               ) : null}
             </div>

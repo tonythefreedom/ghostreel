@@ -172,6 +172,9 @@ p {
 .gr-tag {
   animation: gr-arrive 250ms var(--ease-out) var(--d, 0ms) both;
 }
+.gr-mark-label {
+  animation: gr-arrive 250ms var(--ease-out) both;
+}
 @keyframes gr-arrive {
   from {
     opacity: 0;

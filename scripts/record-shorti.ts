@@ -8,8 +8,9 @@ const OUT = new URL("../fixtures/shorti/", import.meta.url);
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
 
+// Decks are written compact (their marks' points would double the size indented); the small files stay readable.
 const write = (name: string, data: unknown) =>
-  writeFileSync(new URL(`${name}.json`, OUT), JSON.stringify(data, null, 2) + "\n");
+  writeFileSync(new URL(`${name}.json`, OUT), (name.startsWith("trending-") ? JSON.stringify(data) : JSON.stringify(data, null, 2)) + "\n");
 
 const formats: Record<string, unknown> = {};
 // A deck round is eight cards; ten keeps a spare or two and each file under the fixture size limit.
