@@ -1,12 +1,15 @@
 "use client";
-// Lane B (T8). The creator registers their own background and past work, and picks the virtual human who performs.
+// Lane B (T8). The creator registers their own background and past work, and picks the virtual human who performs,
+// one screen per step.
 // Copy stays here until lib/words.ts (Lane A) takes it.
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { GhostCard } from "@/components/GhostCard";
+import { FunnelProgress } from "@/components/kit";
 import { UnlockForm } from "@/components/UnlockForm";
 import type { Ghost, Lang } from "@/lib/types";
 
+const STEPS = 3; // about me · what I made · who performs: one question per screen (kit FunnelProgress)
 const MARKETS = ["US", "KR", "JP", "Global"] as const;
 const LANGS: Array<[Lang, string]> = [["en", "English"], ["ko", "한국어"], ["ja", "日本語"], ["es", "Español"]];
 const field = "w-full rounded-[var(--radius-card)] border border-line bg-bg px-3 text-[15px]";
@@ -26,12 +29,14 @@ export function OnboardForm({ ghosts }: { ghosts: Ghost[] }) {
   const [plan, setPlan] = useState("");
   const [script, setScript] = useState("");
   const [ghostId, setGhostId] = useState(ghosts[0]?.id ?? "");
+  const [step, setStep] = useState(1);
   const [busy, setBusy] = useState(false);
   const [locked, setLocked] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const links = urls(works);
-  const ready = name.trim() && niche.trim() && languages.length > 0 && links.length <= 10 && ghostId;
+  const stepOk = [Boolean(name.trim() && niche.trim() && languages.length > 0), links.length <= 10, Boolean(ghostId)];
+  const ready = stepOk.every(Boolean);
 
   async function submit() {
     setBusy(true);
@@ -61,10 +66,13 @@ export function OnboardForm({ ghosts }: { ghosts: Ghost[] }) {
       className="flex flex-col gap-6 pb-28"
       onSubmit={(e) => {
         e.preventDefault();
-        if (ready) void submit();
+        if (step < STEPS) {
+          if (stepOk[step - 1]) setStep(step + 1);
+        } else if (ready) void submit();
       }}
     >
-      <section className="flex flex-col gap-3">
+      <FunnelProgress step={step} total={STEPS} onBack={() => setStep(Math.max(1, step - 1))} />
+      <section hidden={step !== 1} className="flex flex-col gap-3">
         <h2 className="text-[18px] font-extrabold">나에 대해</h2>
         <label className="flex flex-col gap-1">
           <span className={label}>이름 또는 채널명</span>
@@ -102,7 +110,7 @@ export function OnboardForm({ ghosts }: { ghosts: Ghost[] }) {
         </div>
       </section>
 
-      <section className="flex flex-col gap-3">
+      <section hidden={step !== 2} className="flex flex-col gap-3">
         <h2 className="text-[18px] font-extrabold">내가 만든 것</h2>
         <label className="flex flex-col gap-1">
           <span className={label}>내가 올린 숏폼 링크 (선택, 한 줄에 하나, 최대 10개)</span>
@@ -122,7 +130,7 @@ export function OnboardForm({ ghosts }: { ghosts: Ghost[] }) {
         <p className="text-[12px] text-text-dim">내가 권리를 가진 영상과 글만 올려 주세요. 분석에만 쓰고, 그대로 베끼지 않습니다.</p>
       </section>
 
-      <section className="flex flex-col gap-3">
+      <section hidden={step !== 3} className="flex flex-col gap-3">
         <h2 className="text-[18px] font-extrabold">대신 출연할 가상 인물</h2>
         <div role="radiogroup" className="grid grid-cols-2 gap-3">
           {ghosts.map((g) => (
@@ -138,10 +146,17 @@ export function OnboardForm({ ghosts }: { ghosts: Ghost[] }) {
         <div className="mx-auto flex w-full max-w-[430px] flex-col gap-2 px-4">
           {locked ? <UnlockForm onUnlocked={() => { setLocked(false); void submit(); }} /> : null}
           {error ? <p className="text-[13px] text-danger">저장하지 못했어요 ({error}). 입력을 확인해 주세요.</p> : null}
-          <button type="submit" disabled={!ready || busy}
-            className="h-14 w-full rounded-[var(--radius-card)] bg-ghost text-[15px] font-extrabold text-bg disabled:opacity-40">
-            {busy ? "저장하는 중…" : "등록하고 내 스타일 분석하기"}
-          </button>
+          {step < STEPS ? (
+            <button key="next" type="button" disabled={!stepOk[step - 1]} onClick={() => setStep(step + 1)}
+              className="h-14 w-full rounded-[var(--radius-card)] bg-ghost text-[15px] font-extrabold text-bg disabled:opacity-40">
+              다음
+            </button>
+          ) : (
+            <button key="submit" type="submit" disabled={!ready || busy}
+              className="h-14 w-full rounded-[var(--radius-card)] bg-ghost text-[15px] font-extrabold text-bg disabled:opacity-40">
+              {busy ? "저장하는 중…" : "등록하고 내 스타일 분석하기"}
+            </button>
+          )}
         </div>
       </div>
     </form>

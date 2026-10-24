@@ -2,7 +2,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
+import { StepStrip } from "@/components/kit";
 import { StyleSummary } from "@/components/StyleSummary";
+import { CREATOR_FLOW, FLOW_STEP } from "@/lib/flow";
 import { creatorKey } from "@/lib/creator";
 import { summarize } from "@/lib/creatorStyle";
 import { getGhost } from "@/lib/newtype";
@@ -73,6 +75,11 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
           </div>
         </section>
       ) : null}
+
+      <section className="flex flex-col gap-2">
+        <h2 className="text-[15px] font-extrabold">다음은 이렇게 돼요</h2>
+        <StepStrip steps={CREATOR_FLOW} current={FLOW_STEP.profile} />
+      </section>
 
       <Link href={`/taste?ghost=${creator.ghostId}`}
         className="grid h-14 w-full place-items-center rounded-[var(--radius-card)] bg-ghost text-[15px] font-extrabold text-bg">

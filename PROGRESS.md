@@ -32,6 +32,17 @@ Ted: "토니가 대사 MCP 툴 등을 데모에 사용하려고하니까 로그�
   or the new `recipeEdit` cues for `LinePicker`. (2) a recipe-edit reader in `lib/shorti/`: done (`recipeEdit`);
   Lane B may call it from server code.
 
+## 2026-10-24 · B — Ted's UI kit placed: step-by-step onboarding, flow strip, full AI label
+
+- `/onboard` asks one thing per screen with the kit's `FunnelProgress` (about me → what I made → who performs);
+  "다음" moves on only when that screen is complete, back keeps every answer. The next and submit buttons carry
+  separate keys: sharing one DOM node made the click that reached step 3 also submit the form.
+- `/profile/[id]` shows the creator loop as the kit's `StepStrip` (등록 ✓ · 고르기 now · 승인하기 · 받기), from
+  `lib/flow.ts`.
+- `ReelGrid` thumbnails now carry the full "AI-generated · Virtual human" label (was "AI"), as RULES asks for every
+  thumbnail. `tests/flow-kit.test.mjs`: 3 tests.
+- Verified at 375 px: three onboarding screens, register → profile with the strip, `/kit` grid labels.
+
 ## 2026-10-24 · T22 (B) — the creator's style from their own shorts
 
 - `/profile/[id]` reads each registered short with keyless Shorti (`reading` + `recipeEdit`, cached) and sums them up

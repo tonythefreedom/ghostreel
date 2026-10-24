@@ -46,7 +46,9 @@ export function ReelGrid({ jobs, onOpen, empty, lang = "ko" }: Props) {
               <span className={`absolute left-1.5 top-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold ${TONE[job.status]}`}>
                 {STATE[lang][job.status]}
               </span>
-              <span className="absolute bottom-1.5 left-1.5 rounded-full bg-bg/80 px-1.5 py-0.5 text-[10px] font-semibold text-text">AI</span>
+              <span className="absolute inset-x-1.5 bottom-1.5 rounded-[6px] bg-bg/80 px-1.5 py-0.5 text-center text-[9px] font-semibold leading-tight text-text">
+                AI-generated · Virtual human
+              </span>
             </span>
             <span className="flex items-center justify-between px-0.5 pt-1 text-[11px] text-text-dim">
               <span className={job.provider === "prerender" ? "text-warn" : ""}>{job.provider === "prerender" ? "prerender" : "live"}</span>
