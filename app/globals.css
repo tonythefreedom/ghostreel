@@ -2,17 +2,46 @@
 
 /* DESIGN.md › Colour is the home of these values; tests/tokens.test.mjs keeps them equal. */
 :root {
-  --bg: #0D0B1A;
-  --surface: #16132A;
-  --surface-2: #211C3B;
-  --line: #2E2850;
-  --text: #F4F2FF;
-  --text-dim: #A39DC4;
+  --bg: #0B0B0C;
+  --surface: #121214;
+  --surface-2: #18181B;
+  --pressed: #222226;
+  --line: #2A2A2F;
+  --line-strong: #6E6E76;
+  --text: #F5F5F7;
+  --text-dim: #C9C9CE;
+  --text-3: #9D9DA2;
+  --action: #D41B2A;
+  --action-hover: #E0202F;
+  --action-text: #FF6B75;
   --accent: #8B5CF6;
   --accent-soft: #8B5CF61F;
-  --ghost: #7CF5D4;
-  --warn: #FFB547;
-  --danger: #FF5C7A;
+  --ghost: #3DD68C;
+  --warn: #F5B942;
+  --danger: #FF6B75;
+
+  /* Over a picture (DESIGN.md › Colour). */
+  --vellum: rgba(11, 11, 12, 0.38);
+  --vellum-solid: rgba(11, 11, 12, 0.62);
+  --vellum-edge: rgba(255, 255, 255, 0.1);
+  --scrim: rgba(11, 11, 12, 0.4);
+
+  /* Moves and springs (DESIGN.md › Shape, space, motion). */
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --move-press: 125ms var(--ease-out);
+  --move-arrive: 125ms var(--ease-out);
+  --move-leave: 125ms var(--ease-in);
+  --move-lift: 250ms var(--ease-out);
+  --move-beat: 500ms var(--ease-out);
+  --spring-snap: linear(0, 0.055, 0.179, 0.332, 0.484, 0.621, 0.736, 0.827, 0.895, 0.944, 0.978, 0.998, 1.01, 1.016, 1.018, 1.017, 1.015, 1.012, 1.009, 1.007, 1.005, 1.003, 1.002, 1);
+  --spring-snap-ms: 367ms;
+  --spring-sheet: linear(0, 0.04, 0.132, 0.245, 0.361, 0.471, 0.569, 0.654, 0.725, 0.784, 0.831, 0.87, 0.9, 0.923, 0.942, 0.956, 0.967, 0.975, 0.982, 0.986, 0.99, 0.993, 0.995, 0.996, 0.997, 0.998, 0.999, 1);
+  --spring-sheet-ms: 434ms;
+  --spring-fan: linear(0, 0.035, 0.122, 0.236, 0.361, 0.485, 0.599, 0.7, 0.785, 0.855, 0.91, 0.952, 0.982, 1.003, 1.017, 1.024, 1.028, 1.028, 1.026, 1.024, 1.02, 1.017, 1.013, 1.01, 1.008, 1.005, 1.003, 1.002, 1);
+  --spring-fan-ms: 462ms;
+
+  --verb-h: calc(52px + 16px + env(safe-area-inset-bottom));
 
   color-scheme: dark;
 }
@@ -21,19 +50,30 @@
   --color-bg: var(--bg);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
+  --color-pressed: var(--pressed);
   --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
   --color-text: var(--text);
   --color-text-dim: var(--text-dim);
+  --color-text-3: var(--text-3);
+  --color-action: var(--action);
+  --color-action-hover: var(--action-hover);
+  --color-action-text: var(--action-text);
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
   --color-ghost: var(--ghost);
   --color-warn: var(--warn);
   --color-danger: var(--danger);
 
-  --font-sans: var(--font-pretendard), system-ui, sans-serif;
-  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+  --font-sans: var(--font-pretendard), "Apple SD Gothic Neo", system-ui, sans-serif;
+  /* Every number: Geist's tabular digits, Hangul units fall through to Pretendard. */
+  --font-mono: var(--font-geist), var(--font-pretendard), system-ui, sans-serif;
 
-  --radius-card: 12px;
+  --radius-badge: 6px;
+  --radius-pic: 10px;
+  --radius-card: 14px;
+  --radius-control: 14px;
+  --radius-sheet: 22px;
 }
 
 html,
@@ -45,7 +85,49 @@ body {
 body {
   font-family: var(--font-sans);
   word-break: keep-all;
+  overflow-wrap: anywhere;
   -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+.font-mono {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+/* Words over a picture. */
+.vellum {
+  background: var(--vellum-solid);
+  border: 1px solid var(--vellum-edge);
+  color: var(--text);
+}
+@supports (backdrop-filter: blur(1px)) {
+  .vellum {
+    background: var(--vellum);
+    backdrop-filter: blur(20px) saturate(1.4);
+  }
+}
+
+/* The display step. */
+.text-display {
+  font-size: clamp(36px, 1.6vw + 28px, 56px);
+  line-height: 1.12;
+  letter-spacing: -0.032em;
+  font-weight: 760;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -53,6 +135,25 @@ body {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Sheet (components/ui/Sheet.tsx): rises on the sheet spring, leaves on `leave`. */
+.gr-sheet {
+  translate: 0 100%;
+  transition: translate 125ms var(--ease-in), display 434ms allow-discrete, overlay 434ms allow-discrete;
+}
+.gr-sheet[open] {
+  translate: 0 0;
+  transition: translate var(--spring-sheet-ms) var(--spring-sheet), display 434ms allow-discrete, overlay 434ms allow-discrete;
+}
+@starting-style {
+  .gr-sheet[open] {
+    translate: 0 100%;
+  }
+}
+.gr-sheet::backdrop {
+  background: var(--scrim);
 }

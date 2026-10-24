@@ -2,6 +2,19 @@
 
 Newest first. Each entry: what is true now, what broke, what is next. Keep it short; long output goes in files.
 
+## 2026-10-24 · design language ported: foundation (A)
+
+Ted: "우리 [private] 프로젝트의 디자인이나 미학 감각 그리고 ux ui에서 가져올 코드들이 엄청많다 … 각 페이지나 프론트 코드들을
+다 보고 우리에게 완벽하고 이상적으로 전부 이식해야한다. 우리도 토니를 힘껏도와보자. 우리는 프론트에 집중한다"
+
+- Studied every consumer page and the design system of the team's private short-form app; rewrote, never copied.
+- Foundation (shared): DESIGN.md laws and the Screen palette (near-black, cool greys, one red verb, violet = the
+  ghost, green = kept, gold = fix), Geist tabular digits behind `font-mono`, radii 6/10/14/22, moves and springs,
+  Vellum, a 20 px gutter. Every screen restyles from the tokens at once.
+- `components/ui/` (shared): Button, Verb (docked one-verb bar), Chip, Vellum + AiLabel, Player (poster first, tap
+  to pause, one voice), Rail, Sheet (native dialog), Progress (✓●○), Empty.
+- Next: the screens, Lane A here; Lane B's as a PR to Tony.
+
 ## 2026-10-24 · Lane B's flow asks 1 and 2 done (A)
 
 - Brief → storyboard: "See the storyboard" sits above the brief's bottom buttons, before and after approval.

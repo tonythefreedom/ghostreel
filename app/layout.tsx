@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
-import { JetBrains_Mono } from "next/font/google";
+import { Geist } from "next/font/google";
 import "./globals.css";
 
 const pretendard = localFont({
@@ -10,10 +10,12 @@ const pretendard = localFont({
   display: "swap",
 });
 
-const jetbrains = JetBrains_Mono({
+// Digits only (DESIGN.md › Type): every number is Geist with tabular figures.
+const geist = Geist({
   subsets: ["latin"],
-  variable: "--font-jetbrains",
+  variable: "--font-geist",
   display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -22,15 +24,15 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0D0B1A",
+  themeColor: "#0B0B0C",
   colorScheme: "dark",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${pretendard.variable} ${jetbrains.variable}`}>
+    <html lang="en" className={`${pretendard.variable} ${geist.variable}`}>
       <body className="min-h-dvh">
-        <div className="mx-auto w-full max-w-[430px] px-4">{children}</div>
+        <div className="mx-auto w-full max-w-[430px] px-5">{children}</div>
       </body>
     </html>
   );

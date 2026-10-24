@@ -1,46 +1,84 @@
 # GhostReel — Design
 
-Working proposal so the build can start; Ted decides the brand and can replace any of it.
+The look is the team's own short-form design language, rewritten here for a product that only watches and makes:
+GhostReel lives in its dark **Screen** light, always (Ted 10-24, PROGRESS.md). `components/ui/` holds the primitives;
+a screen names roles, never values.
 
-## Vibe
+## Laws
 
-A ghost that works the night shift for you. Calm, dark, a little uncanny, never spooky-cute. The ghost's reels are
-the brightest thing on every screen; the chrome around them stays quiet. Phone first, because the product is 9:16.
+1. **Sight before words.** The reel is whole and plays; words over a picture sit on Vellum, never a plate or gradient.
+   Outside a sheet a state carries at most two lines.
+2. **One verb.** One filled button a screen, red (`--action`), moving the person one step along the loop; beside it at
+   most one quiet secondary. On a phone it is docked at the bottom (`Verb`). Everything else is quiet.
+3. **The ghost is violet.** Violet marks what the ghost makes or is (its avatar, the AI label, generated frames); green
+   is kept or approved; gold is a fix or a demo notice; red is only the verb. Red never means wrong.
+4. **Honest numbers.** Every count says its source and date; no score, percent, forecast or countdown.
+5. **Fewer, truer.** Three, not twelve; an empty slot over a filler; a block whose data is missing leaves the page.
+6. **A poster, never a shimmer.** A picture's own poster (blurred when tiny) stands in until the first frame.
 
 ## Colour
 
-Night base with one violet accent, so NEWTYPE's purple-lit characters sit naturally on it, and one "ghost" mint for
-the human's own actions (keep, approve).
+One light, Screen: near-black with cool greys. The table is the single source; `tests/tokens.test.mjs` holds
+`app/globals.css` to it.
 
 | Token | Hex | Use |
 | --- | --- | --- |
-| `--bg` | `#0D0B1A` | page background |
-| `--surface` | `#16132A` | cards, sheets |
-| `--surface-2` | `#211C3B` | raised, hover |
-| `--line` | `#2E2850` | borders, dividers |
-| `--text` | `#F4F2FF` | primary text |
-| `--text-dim` | `#A39DC4` | secondary text |
-| `--accent` | `#8B5CF6` | ghost, render, brand moments |
-| `--accent-soft` | `#8B5CF61F` | accent backgrounds |
-| `--ghost` | `#7CF5D4` | the person's actions: keep, approve, post |
-| `--warn` | `#FFB547` | demo tags, fallback notices |
-| `--danger` | `#FF5C7A` | failed render, skip |
+| `--bg` | `#0B0B0C` | page |
+| `--surface` | `#121214` | a quiet section, cards |
+| `--surface-2` | `#18181B` | raised: inputs, a tile waiting for its picture |
+| `--pressed` | `#222226` | hover and pressed |
+| `--line` | `#2A2A2F` | hairlines |
+| `--line-strong` | `#6E6E76` | control outlines (3:1) |
+| `--text` | `#F5F5F7` | primary text |
+| `--text-dim` | `#C9C9CE` | secondary text |
+| `--text-3` | `#9D9DA2` | the floor for any text: meta, captions |
+| `--action` | `#D41B2A` | the one filled verb (white text) |
+| `--action-hover` | `#E0202F` | the verb under a finger |
+| `--action-text` | `#FF6B75` | red used as text (a rise, the moment) |
+| `--accent` | `#8B5CF6` | the ghost: avatar, AI label, generated marks |
+| `--accent-soft` | `#8B5CF61F` | violet backgrounds |
+| `--ghost` | `#3DD68C` | kept, approved, done |
+| `--warn` | `#F5B942` | a fix, demo and fallback notices |
+| `--danger` | `#FF6B75` | an error line (with ✕, never colour alone) |
 
-Light theme is out of scope for the hackathon; the app sets `color-scheme: dark`.
+Over a picture: Vellum is `rgba(11,11,12,.38)` with `blur(20px) saturate(1.4)` and a 1 px `rgba(255,255,255,.1)` edge
+(`rgba(11,11,12,.62)` without backdrop-filter).
 
 ## Type
 
-- **Pretendard Variable** for everything (Korean first, Latin covered), loaded with `next/font/local` or the
-  jsDelivr build.
-- **JetBrains Mono** only for timestamps, durations, and counts.
-- Scale: 32 / 24 / 18 / 15 / 13 px. Weights 400, 600, 800. Headlines 800 with −0.02em tracking.
+- **Pretendard Variable** for words: 400 text, 560 labels and chips, 720 titles, 760 display.
+- **Geist** with tabular digits for every number (`font-mono` maps to it), the unit beside it in Pretendard.
+- Steps 12 · 13 · 15 · 18 · 22 · 28 and display `clamp(36px, 1.6vw + 28px, 56px)`; titles −0.02em, display −0.032em.
+  Nothing under 12 px. Hangul `keep-all`; titles `text-wrap: balance`; never an ellipsis on a name or fact.
+
+## Shape, space, motion
+
+- Radius 6 badge · 10 picture · 14 control and card · 22 sheet · pill for chips. No shadow on a card.
+- 4 px base; 20 px phone gutter; 12 px between cards; 40 px between sections. Targets 44 × 44; a 2 px focus ring.
+- Moves: press and arrive 125 ms, lift 250 ms, the beat 500 ms, on `cubic-bezier(0.2, 0, 0, 1)` (leaving uses
+  `cubic-bezier(0.4, 0, 1, 1)`). What a finger moves settles on a spring: snap (chips), sheet, fan (the deck).
+- Reduced motion: no transitions or loops; every word stays.
 
 ## Layout
 
-- Base width 390 px, 16 px side gutter, 12 px card radius, 8 px spacing grid.
-- On desktop the app sits in a centred 430 px column; the ghost channel page gets a right-hand panel for the queue.
-- Bottom action bar on every flow screen: one primary button, full width, `--ghost` fill for the person's action,
-  `--accent` fill for the ghost's action (render).
+- Phone first in a centred 430 px column. A flow screen ends in the docked `Verb` bar (52 px buttons, safe-area
+  padding); the page pads its foot by the bar's height.
+- A video stage is full bleed: keys as bare glyphs at the top, a tap is play/pause with ▶ in the middle when paused,
+  sound off until one tap, one voice per page.
+
+## Primitives (`components/ui/`)
+
+| Primitive | What it is |
+| --- | --- |
+| `Button` | primary (red), secondary (1 px ring), quiet; sizes 52 · 44 · 36; an `<a>` when it has `href` |
+| `Verb` | the docked action bar: one primary at flex 1, at most one secondary, an optional one-line note |
+| `Chip`, `ChipRow` | 32 px pill in a 44 px target; pressed is a white fill; a row scrolls sideways |
+| `Vellum` | words over a picture |
+| `Player` | 9:16 reel: poster first, tap to pause (▶), sound key, AI label always on |
+| `Rail` | a reel's beats as chips (tablist, arrow keys), a playhead on a hairline |
+| `Sheet` | native dialog bottom sheet (22 px top radius, sheet spring, Esc and scrim close) |
+| `Progress` | steps as ✓ done · ● now · ○ next, with figures |
+| `Empty` | a head, one line, one secondary action |
 
 ## Components
 
@@ -48,7 +86,7 @@ Light theme is out of scope for the hackathon; the app sets `color-scheme: dark`
 | --- | --- |
 | `GhostCard` | portrait, name, niche, market, languages; selected state with accent ring |
 | `TasteSwipe` | one 9:16 trend card at a time, platform count and "read by Shorti at HH:MM", keep / skip, then keep-chips |
-| `KeepChips` | hook · beat · look · sound, multi-select, mint when on |
+| `KeepChips` | hook · beat · look · sound, multi-select, green when on |
 | `FormatChip` | format name and its lineage size from Shorti |
 | `BriefSheet` | hook, timed lines (say / do), outfit, scene, caption; each line editable inline; Approve |
 | `RenderJob` | queued → running → done, elapsed time in mono, provider tag (`live` or `prerender`) |
@@ -61,18 +99,18 @@ Light theme is out of scope for the hackathon; the app sets `color-scheme: dark`
 | `ReelGrid` | 9:16 tiles: poster, state pill, `AI` mark, `live`/`prerender`, age in mono; done tiles open the lightbox |
 | `ReelLightbox` | full-screen reel: play/pause, m:ss, seek, sound (starts muted), download, copy link; AI label always on |
 | `StepStrip` | the loop's three steps (고르기 · 승인하기 · 받기) as cards: done ✓, current in accent, ahead dimmed |
-| `FunnelProgress` | back arrow, one segment per step (mint done, violet current), `n/total` in mono |
+| `FunnelProgress` | back arrow, one segment per step (green done, violet current), `n/total` in mono |
 | `SpendMeter` | today's cap left as `left / cap` and a bar; amber at a fifth left |
 
 ## Copy
 
-- Korean first, English toggle in the header. The ghost's content (scripts, captions) is in the market's language,
-  English first.
-- Plain verbs on buttons: 고르기, 남기기, 넘기기, 승인하고 렌더, 게시 승인.
-- Counts read "조회수 1.2M · 플랫폼 집계 · 10/24 Shorti 읽음", never "예상", "보장", or a forecast.
+- English by default (Tony 10-24), Korean kept for the toggle; Korean in 해요체. The ghost's content is in the
+  market's language.
+- Plain verbs: Keep, Skip, Write the brief, Approve and render. One line says why, a second may say what to do.
+- Counts read "1.2M views · platform count · Oct 24", never a forecast, "guaranteed", or a percent. No em dash in copy.
 
-## Motion
+## Motion on screens
 
-- Swipe card exits 180 ms ease-out; keep flies up-right in mint, skip drops left in dim.
-- Render progress is a slow violet shimmer across the reel frame, no spinners.
-- Respect `prefers-reduced-motion`: fades only.
+- The taste deck fans (22 px right, 7 px down, 0.96) on the fan spring; a kept card leaves up-right, a skipped one
+  drops left, on `leave`.
+- Render waiting shows the ghost's poster and a `Progress` list, never a spinner or shimmer.
