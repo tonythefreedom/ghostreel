@@ -17,6 +17,18 @@ Ted: "토니가 대사 MCP 툴 등을 데모에 사용하려고하니까 로그�
   or the new `recipeEdit` cues for `LinePicker`. (2) a recipe-edit reader in `lib/shorti/`: done (`recipeEdit`);
   Lane B may call it from server code.
 
+## 2026-10-24 · T23 (B) — line options rest on Shorti's live moves; T7 lip-sync blocked
+
+- Each line option now points at a Shorti read (a hit's move, an opening fact, what the take may change, an open
+  spot) instead of a hand-written note. The storyboard reads `recipeEdit` (keyless, Lane A) for the brief's source
+  post and `formatPlan` for its open spots, and shows Shorti's own words with its share ("More than half do this");
+  an option whose read is missing is not offered. Source post: the owner's kept pick, else this week's deck.
+- Verified at 375 px on a `[dev]` brief: moves with shares, and the source's 91 BPM, 10.8 s, in the header.
+- T7 lip-sync (`cinesynth_cf_create`, job 62daa3b1) failed `feature_unavailable`: Wan S2V-14B needs 104 GiB and
+  GB10-2's local cap is 85 GiB while the LLM ring holds memory; the MI250 worker has no S2V path. It fails the same
+  from the web. The GPU job stays counted. Unblocking it is Tony's call; the demo uses the scene and voice take
+  without lip-sync, labelled, until then.
+
 ## 2026-10-24 · T23 (B) — pick each beat's line on the storyboard
 
 - Shorti returns no spoken lines (its public tools give the format's hook, beats and open spots), and creators' words

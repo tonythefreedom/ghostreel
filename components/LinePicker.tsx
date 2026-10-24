@@ -50,7 +50,10 @@ export function LinePicker({ briefId, lines, index, options, locked }: {
               o.current ? "border-ghost bg-ghost/10" : "border-line"
             } disabled:cursor-default`}>
             <span className="text-[12px] font-semibold leading-snug">{busy === o.say ? "바꾸는 중…" : o.say}</span>
-            <span className="text-[10px] text-text-dim">{o.basis}</span>
+            <span className="text-[10px] leading-snug text-text-dim">
+              {o.basis}
+              {o.share ? <span className="text-ghost"> · {o.share}</span> : null}
+            </span>
           </button>
         ))}
       </div>

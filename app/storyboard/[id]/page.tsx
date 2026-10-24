@@ -5,9 +5,10 @@ import { z } from "zod";
 import { StoryboardFrame } from "@/components/StoryboardFrame";
 import { getGhost } from "@/lib/newtype";
 import { LineSuggestions, suggestionsFor } from "@/lib/lineSuggestions";
+import { FIELDS, formatPlan, recipeEdit, trending } from "@/lib/shorti";
 import { buildStoryboard, KeyframeManifest } from "@/lib/storyboard";
 import { store } from "@/lib/store";
-import type { Brief } from "@/lib/types";
+import type { Brief, TastePick } from "@/lib/types";
 import lineData from "@/content/line-suggestions.json";
 import keyframes from "@/public/prerender/keyframes.json";
 
@@ -15,6 +16,18 @@ export const dynamic = "force-dynamic";
 
 const manifest = KeyframeManifest.parse(keyframes);
 const lineSuggestions = LineSuggestions.parse(lineData);
+
+// The post the brief was written from: the owner's kept pick first, else this week's deck.
+async function sourceUrl(brief: Brief): Promise<string | null> {
+  const picks = (await store.get<TastePick[]>(`taste:${brief.ghostId}`)) ?? [];
+  const kept = picks.find((p) => p.videoId === brief.sourceVideoId && p.url)?.url;
+  if (kept) return kept;
+  for (const field of FIELDS) {
+    const card = (await trending(field)).data.cards.find((c) => c.videoId === brief.sourceVideoId);
+    if (card) return card.url;
+  }
+  return null;
+}
 
 export default async function StoryboardPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -25,7 +38,13 @@ export default async function StoryboardPage({ params }: { params: Promise<{ id:
   if (!ghost) notFound();
   const frames = buildStoryboard(brief, ghost, manifest);
   const made = frames.filter((f) => f.image).length;
-  const lines = suggestionsFor(brief, lineSuggestions);
+  const url = await sourceUrl(brief);
+  const [recipe, plan] = await Promise.all([
+    url ? recipeEdit(url) : Promise.resolve(null),
+    brief.formatId ? formatPlan(brief.formatId) : Promise.resolve(null),
+  ]);
+  const lines = suggestionsFor(brief, lineSuggestions, { recipe, spots: plan?.open ?? [] });
+  const offered = lines.some((b) => b.length > 0);
   const locked = brief.status === "approved";
 
   return (
@@ -42,9 +61,10 @@ export default async function StoryboardPage({ params }: { params: Promise<{ id:
         <p className="text-[13px] text-text-dim">
           비트 {frames.length}개 · 장면 {made}개 준비됨. 장면은 CineSynth 로 만들고, 만들기 전에는 쓸 프롬프트를 보여 줍니다.
         </p>
-        {lines.readAt ? (
+        {offered ? (
           <p className="text-[12px] text-text-dim">
-            대사 후보는 Shorti 가 {lines.readAt.slice(5, 10).replace("-", "/")} 에 읽은 이번 주 포맷(훅과 빈자리)을 바탕으로 GhostReel 이 썼어요.
+            대사 후보는 GhostReel 이 썼고, 근거는 Shorti 가 이 원본에서 읽은 move·오프닝·빈자리를 그대로 보여 줘요
+            {recipe?.bpm ? ` (원본 ${Math.round(recipe.bpm)} BPM, ${((recipe.lengthMs ?? 0) / 1000).toFixed(1)}초)` : ""}.
             {locked ? " 승인된 브리프라 바꿀 수 없어요." : " 고르면 브리프에 바로 반영돼요."}
           </p>
         ) : null}
@@ -53,7 +73,7 @@ export default async function StoryboardPage({ params }: { params: Promise<{ id:
       <ol className="grid grid-cols-2 gap-3">
         {frames.map((f) => (
           <StoryboardFrame key={f.index} frame={f}
-            pick={{ briefId: brief.id, lines: brief.lines, options: lines.beats[f.index] ?? [], locked }} />
+            pick={{ briefId: brief.id, lines: brief.lines, options: lines[f.index] ?? [], locked }} />
         ))}
       </ol>
 
