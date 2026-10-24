@@ -2,6 +2,17 @@
 
 Newest first. Each entry: what is true now, what broke, what is next. Keep it short; long output goes in files.
 
+## 2026-10-24 · T7 (B) — a labelled preview clip until lip-sync is back
+
+- `public/prerender/yuna-percent-ready-preview.mp4` (720×1280, 7.76 s, 463 KB) + poster: the four storyboard scenes
+  cut to the pauses of a CineSynth voice take (`tts_a576d5e0`, "Getting ready — twenty percent. Serum on: sixty. One
+  swipe of tint: a hundred. Done."). Burned in: "AI-generated · Virtual human" and "Not lip-synced · scene + voice
+  preview". Listed in `public/prerender/manifest.json` with the keyframe and take ids.
+- The take came straight from its MCP result link after CineSynth's fix (no session needed for an hour).
+- Verified: a `[dev]` brief approved → `/api/render` returns `provider: prerender`, `done`, the clip and poster;
+  `/brief/[id]` plays it with the AI label and "rendered from a different script" (the clip's lines differ).
+- Swap for a lip-synced `cf_create` render once CineSynth can run it; the keyframe and take ids are reusable.
+
 ## 2026-10-24 · B — sign in with Google as the CineSynth user (Tony's decision)
 
 - Tony: Nexus and CineSynth need Google sign-in, so GhostReel onboarding uses CineSynth's own Google sign-in. This

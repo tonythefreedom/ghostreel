@@ -1,1 +1,21 @@
-{ "clips": [] }
+{
+  "clips": [
+    {
+      "ghostId": "yuna",
+      "lang": "en",
+      "file": "yuna-percent-ready-preview.mp4",
+      "poster": "yuna-percent-ready-preview.jpg",
+      "characterId": "default",
+      "script": [
+        "Getting ready — twenty percent.",
+        "Serum on: sixty.",
+        "One swipe of tint: a hundred.",
+        "Done."
+      ],
+      "durationSec": 7.76,
+      "renderedBy": "Tony (owner CineSynth session)",
+      "renderedAt": "2026-10-24T05:06:00Z",
+      "source": "Preview, not lip-synced: CineSynth keyframes kf_58cd559c, kf_4f05e354, kf_226b227a, kf_d34cf918 cut to CineSynth voice take tts_a576d5e0 (cinesynth_tts); labels burned in. Lip-sync (cf_create) is unavailable today."
+    }
+  ]
+}
