@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>GhostReel Pitch</title>
+<!-- The 3-minute pitch, two slides (Ted 10-24). Printed to GhostReel-pitch.pdf by scripts/pitch-pdf.sh; colours and
+     type follow DESIGN.md. Screens are real captures of the app at 390 px. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;560;700&family=Geist+Mono:wght@400;560&display=swap" rel="stylesheet">
+<style>
+  @font-face {
+    font-family: "Pretendard Variable";
+    src: url("../node_modules/pretendard/dist/web/variable/woff2/PretendardVariable.woff2") format("woff2-variations");
+    font-weight: 45 920;
+  }
+  :root {
+    --bg: #0B0B0C; --surface: #121214; --surface-2: #18181B; --line: #2A2A2F; --line-strong: #6E6E76;
+    --text: #F5F5F7; --text-dim: #C9C9CE; --text-3: #9D9DA2;
+    --action: #D41B2A; --accent: #8B5CF6; --ghost: #3DD68C; --warn: #F5B942; --pencil: #6CC6FF;
+  }
+  @page { size: 1920px 1080px; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--text); }
+  body { font-family: "Pretendard Variable", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  .num, code, .mono { font-family: "Geist", "Pretendard Variable", sans-serif; font-variant-numeric: tabular-nums; }
+  .slide { width: 1920px; height: 1080px; padding: 52px 72px 48px; display: flex; flex-direction: column; gap: 30px;
+    page-break-after: always; break-after: page; overflow: hidden; position: relative; }
+  .slide:last-child { page-break-after: auto; break-after: auto; }
+
+  /* top bar */
+  .bar { display: flex; align-items: center; justify-content: space-between; height: 44px; }
+  .brand { display: flex; align-items: center; gap: 14px; font-size: 26px; font-weight: 760; letter-spacing: -0.02em; }
+  .brand i { width: 18px; height: 18px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 18px #8B5CF6aa; }
+  .brand small { font-size: 20px; font-weight: 560; color: var(--text-3); letter-spacing: 0; }
+  .bar-right { display: flex; align-items: center; gap: 14px; }
+  .pill { display: inline-flex; align-items: center; gap: 10px; height: 44px; padding: 0 20px; border-radius: 999px;
+    box-shadow: inset 0 0 0 1px var(--line); font-size: 19px; font-weight: 560; color: var(--text-dim); }
+  .pill b { color: var(--text); font-weight: 700; }
+  .pill.live::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--ghost); }
+  .page { font-size: 18px; color: var(--text-3); width: 52px; text-align: right; }
+
+  .eyebrow { font-size: 18px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--pencil); }
+  h1 { font-size: 64px; line-height: 1.04; font-weight: 780; letter-spacing: -0.04em; }
+  h1 em, h2 em { font-style: normal; color: var(--accent); }
+  h2 { font-size: 64px; line-height: 1.02; font-weight: 780; letter-spacing: -0.035em; }
+  .lede { font-size: 24px; line-height: 1.45; color: var(--text-dim); }
+  .lede b { color: var(--text); font-weight: 680; }
+
+  /* slide 1 */
+  .s1 { display: grid; grid-template-columns: 660px minmax(0, 1fr); gap: 52px; flex: 1; min-height: 0; }
+  .s1-left { display: flex; flex-direction: column; gap: 24px; justify-content: center; }
+  .engines { display: grid; gap: 12px; }
+  .engine { display: grid; grid-template-columns: 120px 1fr; gap: 12px; align-items: baseline; padding: 14px 20px;
+    border-radius: 14px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); }
+  .engine b { font-size: 19px; font-weight: 720; }
+  .engine span { font-size: 18px; line-height: 1.4; color: var(--text-dim); }
+  .engines-label { font-size: 17px; color: var(--text-3); font-weight: 560; }
+  .proof { display: flex; flex-wrap: wrap; gap: 10px; }
+  .proof span { height: 40px; display: inline-flex; align-items: center; gap: 8px; padding: 0 16px; border-radius: 999px;
+    background: var(--surface-2); font-size: 17px; color: var(--text-dim); font-weight: 560; }
+  .proof span b { font-family: "Geist", sans-serif; color: var(--text); font-weight: 700; font-size: 19px; }
+
+  .phones { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 26px; align-content: center; }
+  .phone { display: flex; flex-direction: column; gap: 16px; }
+  .shot { position: relative; border-radius: 26px; overflow: hidden; box-shadow: inset 0 0 0 1px var(--line), 0 0 0 1px var(--line);
+    aspect-ratio: 810 / 1504; background: var(--surface); }
+  .shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .step { display: flex; align-items: baseline; gap: 10px; }
+  .step .n { font-family: "Geist", sans-serif; font-size: 18px; font-weight: 700; }
+  .step h3 { font-size: 22px; line-height: 1.2; font-weight: 740; letter-spacing: -0.01em; }
+  .phone p { font-size: 18px; line-height: 1.42; color: var(--text-dim); }
+  .c-pencil { color: var(--pencil); } .c-accent { color: var(--accent); } .c-ghost { color: var(--ghost); } .c-warn { color: var(--warn); }
+  .arrow { position: absolute; }
+
+  /* slide 2 */
+  .head2 { display: grid; grid-template-columns: 1fr 760px; gap: 60px; align-items: end; }
+  .head2 .lede { font-size: 23px; }
+  .cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; flex: 1; min-height: 0; }
+  .col { display: flex; flex-direction: column; gap: 13px; }
+  .visual { height: 268px; border-radius: 18px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line);
+    overflow: hidden; display: grid; place-items: center; position: relative; }
+  .visual img { position: absolute; inset: 14px; width: calc(100% - 28px); height: calc(100% - 28px); object-fit: contain; display: block; }
+  .visual.pair { display: flex; gap: 12px; padding: 12px; align-items: center; justify-content: center; }
+  .visual.pair img { position: static; height: 100%; width: auto; border-radius: 10px; }
+  .try { display: flex; align-items: center; gap: 14px; height: 60px; padding: 0 24px; border-radius: 16px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line); font-size: 19px; color: var(--text-dim); white-space: nowrap; }
+  .try b { color: var(--text); font-weight: 700; }
+  .try .lbl { font-size: 15px; font-weight: 720; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ghost); }
+  .try .sep { color: var(--line-strong); }
+  .try .claude { margin-left: auto; color: var(--text); font-weight: 680; }
+  .tagrow { display: flex; align-items: center; gap: 10px; }
+  .tag { height: 28px; display: inline-flex; align-items: center; padding: 0 12px; border-radius: 999px; font-size: 14px;
+    font-weight: 720; letter-spacing: 0.06em; text-transform: uppercase; }
+  .tag.live { background: #3DD68C1f; color: var(--ghost); }
+  .tag.next { background: #8B5CF61f; color: #B79CFF; }
+  .col h3 { font-size: 27px; line-height: 1.15; font-weight: 760; letter-spacing: -0.02em; }
+  .col p { font-size: 18.5px; line-height: 1.44; color: var(--text-dim); }
+  .col p b { color: var(--text); font-weight: 660; }
+
+  pre { font-family: "Geist Mono", ui-monospace, monospace; font-size: 15px; line-height: 1.6; color: var(--text-dim);
+    padding: 22px 26px; width: 100%; height: 100%; white-space: pre; overflow: hidden; }
+  .k { color: #B79CFF; } .v { color: var(--pencil); } .cm { color: var(--text-3); } .s { color: var(--ghost); }
+
+  .band { display: grid; grid-template-columns: 1fr 1.25fr 1fr; gap: 0; border-radius: 18px; background: var(--surface);
+    box-shadow: inset 0 0 0 1px var(--line); }
+  .cell { padding: 18px 26px; display: flex; flex-direction: column; gap: 8px; }
+  .cell + .cell { box-shadow: inset 1px 0 0 var(--line); }
+  .cell h4 { font-size: 15px; font-weight: 720; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); }
+  .cell p { font-size: 18.5px; line-height: 1.42; color: var(--text-dim); }
+  .cell p b { color: var(--text); font-weight: 680; }
+  .foot { display: flex; justify-content: space-between; font-size: 16px; color: var(--text-3); }
+  .foot b { color: var(--text-dim); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- ───────────────────────── 1 · What it is ───────────────────────── -->
+<section class="slide">
+  <div class="bar">
+    <div class="brand"><i></i>GhostReel <small>고스트릴</small></div>
+    <div class="bar-right">
+      <span class="pill live">Live demo <b>ghost.newtype-ai.com</b></span>
+      <span class="page num">1 / 2</span>
+    </div>
+  </div>
+
+  <div class="s1">
+    <div class="s1-left">
+      <p class="eyebrow">For the 10 million whose jobs go to AI</p>
+      <h1>AI took the shoot.<br><em>Your taste still earns.</em></h1>
+      <p class="lede">Pick the shorts you would keep. A <b>twin creator</b>, a virtual human, performs your next one in any
+        language: no face, no camera. <b>Your own Claude</b> rewrites it over MCP, so every version comes back better.</p>
+      <div class="engines">
+        <p class="engines-label">On two engines we already run</p>
+        <div class="engine"><b class="c-pencil">Shorti</b><span>Reads what goes viral, format by format: hooks, beats, cues, where the camera stood, lineage.</span></div>
+        <div class="engine"><b class="c-accent">CineSynth</b><span>One consistent virtual human in every format, lip-synced, with the AI label burned in.</span></div>
+      </div>
+      <div class="proof">
+        <span><b>48</b> commits in one day</span>
+        <span><b>8</b> MCP tools</span>
+        <span><b>20</b> live trends</span>
+        <span><b>KO · EN</b></span>
+      </div>
+    </div>
+
+    <div class="phones">
+      <div class="phone">
+        <div class="shot"><img src="img/1-taste.jpg" alt="Taste deck with the coaching pencil on a Halloween hit"></div>
+        <div class="step"><span class="n c-pencil">01</span><h3>Teach your taste</h3></div>
+        <p>This week's rising shorts, Halloween included. The <b>coaching pencil</b> draws each hit's mise-en-scène on the frame.</p>
+      </div>
+      <div class="phone">
+        <div class="shot"><img src="img/2-brief-ko.jpg" alt="The brief in English with Korean beside every line"></div>
+        <div class="step"><span class="n c-pencil">02</span><h3>The brief, twice</h3></div>
+        <p>The ghost performs in English; you read Korean beside every line. Edit anything.</p>
+      </div>
+      <div class="phone">
+        <div class="shot"><img src="img/3-storyboard.jpg" alt="Yuna, the virtual human, scene by scene"></div>
+        <div class="step"><span class="n c-accent">03</span><h3>Your twin performs</h3></div>
+        <p>Approve, and CineSynth shoots it scene by scene, on the hit's own camera setups.</p>
+      </div>
+      <div class="phone">
+        <div class="shot"><img src="img/4-loop.jpg" alt="Version 2 written by the owner's Claude over MCP"></div>
+        <div class="step"><span class="n c-ghost">04</span><h3>Your Claude closes the loop</h3></div>
+        <p>Leave a note. Opus 5.5 reads it over MCP and writes <b>v2</b> to the same link.</p>
+      </div>
+    </div>
+  </div>
+  <div class="try">
+    <span class="lbl">Try it</span>
+    <b>ghost.newtype-ai.com</b><span class="sep">→</span>Sign in with Google (judges are auto-approved)<span class="sep">→</span>keep 2–3 shorts<span class="sep">→</span>approve the brief
+    <span class="claude">✳ Make with Claude: connect in 1 minute, then ask Opus 5.5</span>
+  </div>
+</section>
+
+<!-- ───────────────────────── 2 · Why it wins ───────────────────────── -->
+<section class="slide">
+  <div class="bar">
+    <div class="brand"><i></i>GhostReel <small>고스트릴</small></div>
+    <div class="bar-right">
+      <span class="pill">Connect your Claude <b>ghost.newtype-ai.com/connect</b></span>
+      <span class="page num">2 / 2</span>
+    </div>
+  </div>
+
+  <div class="head2">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <p class="eyebrow">Strategy</p>
+      <h2>Ride the dinosaur.<br><em>Feed it what it can't see.</em></h2>
+    </div>
+    <p class="lede">Frontier models get stronger every month. We don't race them. We give them what they lack:
+      <b>what goes viral, shot by shot</b>. Every upgrade to Claude or GPT upgrades every GhostReel creator,
+      and over MCP people <b>bring their own AI</b>: no model bill for us.</p>
+  </div>
+
+  <div class="cols">
+    <div class="col">
+      <div class="visual pair"><img src="img/6-pencil.jpg" alt="The coaching pencil drawing the tape line on a Halloween hit"><img src="img/5-camera.jpg" alt="Shorti's camera read: height 1.35 m, distance 2.1 m, tilt −2°, FOV 69°"></div>
+      <div class="tagrow"><span class="tag live">Live</span><span class="tag next">Next · smart glasses</span></div>
+      <h3>Viral mise-en-scène, drawn on the frame</h3>
+      <p>Shorti reads each hit: hook, beats, and where the phone stood. The <b>coaching pencil</b> draws it on the
+        frame, for the ghost and for anyone who films for real. Next, inside POV smart glasses.</p>
+    </div>
+
+    <div class="col">
+      <div class="visual">
+        <svg width="560" height="270" viewBox="0 0 560 270" fill="none" font-family="Pretendard Variable, sans-serif">
+          <defs>
+            <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 0L10 5L0 10z" fill="#C9C9CE"/></marker>
+            <marker id="ahv" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 0L10 5L0 10z" fill="#8B5CF6"/></marker>
+          </defs>
+          <!-- nodes -->
+          <rect x="18" y="22" width="200" height="64" rx="14" fill="#18181B" stroke="#2A2A2F"/>
+          <text x="38" y="50" fill="#F5F5F7" font-size="18" font-weight="720">① Your note</text>
+          <text x="38" y="72" fill="#9D9DA2" font-size="14">on the brief page</text>
+
+          <rect x="342" y="22" width="200" height="64" rx="14" fill="#18181B" stroke="#6CC6FF"/>
+          <text x="362" y="50" fill="#F5F5F7" font-size="18" font-weight="720">② Claude reads</text>
+          <text x="362" y="72" fill="#6CC6FF" font-size="14" font-family="Geist Mono, monospace">brief_get</text>
+
+          <rect x="342" y="184" width="200" height="64" rx="14" fill="#18181B" stroke="#8B5CF6"/>
+          <text x="362" y="212" fill="#F5F5F7" font-size="18" font-weight="720">③ Claude writes v2</text>
+          <text x="362" y="234" fill="#B79CFF" font-size="14" font-family="Geist Mono, monospace">brief_revise</text>
+
+          <rect x="18" y="184" width="200" height="64" rx="14" fill="#18181B" stroke="#3DD68C"/>
+          <text x="38" y="212" fill="#F5F5F7" font-size="18" font-weight="720">④ Approve → post</text>
+          <text x="38" y="234" fill="#9D9DA2" font-size="14">the twin renders it</text>
+          <!-- arrows -->
+          <path d="M226 54H334" stroke="#C9C9CE" stroke-width="2" marker-end="url(#ah)"/>
+          <path d="M442 94V176" stroke="#C9C9CE" stroke-width="2" marker-end="url(#ah)"/>
+          <path d="M334 216H226" stroke="#C9C9CE" stroke-width="2" marker-end="url(#ah)"/>
+          <path d="M118 176V94" stroke="#8B5CF6" stroke-width="2" stroke-dasharray="6 6" marker-end="url(#ahv)"/>
+          <!-- centre -->
+          <text x="280" y="128" text-anchor="middle" fill="#F5F5F7" font-size="17" font-weight="720">✳ your Claude · GPT</text>
+          <text x="280" y="150" text-anchor="middle" fill="#9D9DA2" font-size="14">its memory learns your taste</text>
+          <text x="130" y="140" fill="#B79CFF" font-size="13" font-weight="600">results</text>
+          <text x="130" y="156" fill="#B79CFF" font-size="13" font-weight="600">flow back</text>
+        </svg>
+      </div>
+      <div class="tagrow"><span class="tag live">Live · read → write</span><span class="tag next">Next · post results</span></div>
+      <h3>A closed loop, not a lookup</h3>
+      <p>Your own Claude reads the brief and your note, then <b>writes the next version back</b> to the same link.
+        Next, each post's results flow in, so your AI's memory learns your taste post by post: <b>your craft compounds</b>.</p>
+    </div>
+
+    <div class="col">
+      <div class="visual" style="place-items:stretch">
+<pre><span class="cm">// GhostReel's MCP context: Shorti's camera read</span>
+<span class="k">const</span> { height, distance, tilt, fov } =
+  context.camera[<span class="v">0</span>]; <span class="cm">// 1.35 m · 2.1 m · −2° · 69°</span>
+<span class="k">const</span> cam = <span class="k">new</span> THREE.PerspectiveCamera(fov, <span class="v">9</span>/<span class="v">16</span>);
+cam.position.set(<span class="v">0</span>, height, distance);
+cam.rotation.x = deg(tilt);
+
+<span class="k">for</span> (<span class="k">const</span> b <span class="k">of</span> brief.lines)
+  timeline.at(b.t, b.say, b.do);
+<span class="cm">// the model writes the rest, in code</span></pre>
+      </div>
+      <div class="tagrow"><span class="tag next">Next · months ahead</span></div>
+      <h3>Code-native video, built for the next model</h3>
+      <p>Our MCP context (beats, camera setups, cues, lineage) is a <b>shot list a model can execute</b>. Today it
+        directs CineSynth's virtual human; as Opus-class models grow, the same tools let them compose 2D and 3D shorts
+        in pure code, like three.js.</p>
+    </div>
+  </div>
+
+  <div class="band">
+    <div class="cell">
+      <h4>North star</h4>
+      <p><b>Posts each creator approves per week.</b> Ten minutes of taste a day becomes a channel that posts daily, in any language.</p>
+    </div>
+    <div class="cell">
+      <h4>Two markets</h4>
+      <p><b>① US and English-speaking</b> TikTok · Reels · Shorts: faceless side-income creators (first ghost: K-beauty for the US).
+        <b>② POV smart-glasses creators</b>: the pencil coaches the shot in the lens.</p>
+    </div>
+    <div class="cell">
+      <h4>Business</h4>
+      <p><b>Bring your own AI</b>: no inference bill for us, frontier quality for them. Revenue from render credits and seller deals, where the ghost wears the product.</p>
+    </div>
+  </div>
+  <div class="foot">
+    <span>Every ghost frame carries <b>AI-generated · Virtual human</b>. We never promise views.</span>
+    <span>Claude Code: <b class="mono">claude --model opus --effort max</b> · Claude Desktop · any MCP client</span>
+  </div>
+</section>
+
+</body>
+</html>

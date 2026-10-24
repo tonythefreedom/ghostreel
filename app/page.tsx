@@ -30,8 +30,8 @@ export default async function Home() {
           <span className="block text-accent">{t("landingH1b", lang)}</span>
         </h1>
         <p className="text-[15px] leading-[1.5] text-text-dim">{t("landingLede", lang)}</p>
-        <div className="flex items-center gap-3 pt-1">
-          <ButtonLink size="xl" href="/onboard" className="flex-1">
+        <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:items-center">
+          <ButtonLink size="xl" href="/onboard" className="sm:flex-1">
             {t("landingGo", lang)}
           </ButtonLink>
           <ButtonLink kind="secondary" size="xl" href="/connect">
