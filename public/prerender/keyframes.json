@@ -1,1 +1,12 @@
-{ "frames": [] }
+{
+  "frames": [
+    {
+      "ghostId": "yuna",
+      "beat": 0,
+      "file": "default-percent-ready-0.jpg",
+      "prompt": "Vertical 9:16 shot from slightly above eye level at a bright home bathroom vanity in soft morning light, round mirror and white tiles behind her. Hair loosely clipped up, fresh bare skin, she faces the camera holding a small glass serum dropper in one hand and a lip tint in the other, playful getting-ready mood.",
+      "source": "CineSynth cf_keyframe kf_58cd559c (character default), owner session; Shorti format fam_way-be186ab1c0a4",
+      "renderedAt": "2026-10-24T03:44:02Z"
+    }
+  ]
+}

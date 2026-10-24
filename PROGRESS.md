@@ -2,6 +2,17 @@
 
 Newest first. Each entry: what is true now, what broke, what is next. Keep it short; long output goes in files.
 
+## 2026-10-24 · T7 (B) — first CineSynth scene, from this week's Shorti pick
+
+- Shorti radar (beauty, read 2026-10-24 00:28 UTC): top "New format" is a makeup routine with an on-screen
+  completion percentage (`fam_way-be186ab1c0a4`). The sample turns it into a one-take talking short: the ghost
+  counts the percentage out loud while she gets ready, then waves, as the format ends.
+- This CineSynth account has one complete 3-view character, `default`; Yuna's `characterId` now points at it.
+- `cinesynth_cf_keyframe` → `kf_58cd559c` in about 44 s (03:43:18 → 03:44:02 UTC, request to done notice).
+  Saved as `public/prerender/keyframes/default-percent-ready-0.jpg` and listed for Yuna's beat 0; the storyboard
+  shows it tagged "미리 만든 장면", with a "장면 받기" download.
+- GPU budget: 30 jobs a day for this account (resets 00:00 UTC). Voice take and lip-sync are next.
+
 ## 2026-10-24 · T2 (B) — Creator in the contract, confirm step confirmed
 
 - `Creator` / `CreatorInput` / `Market` now live in `lib/types.ts`; `works` is 0–10 (registering with no catalog
