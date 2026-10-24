@@ -32,5 +32,6 @@ export async function POST() {
     },
   );
   await store.set(`brief:${brief.id}`, brief, 60 * 60 * 24);
+  await store.push(`briefs:${ghost.id}`, brief.id, 50, 60 * 60 * 24); // so the channel lists it
   return NextResponse.json({ briefId: brief.id });
 }
