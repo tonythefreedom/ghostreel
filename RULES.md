@@ -8,25 +8,37 @@ Two writers, split by folder so nobody edits the same file at the same time.
 
 | Lane | Owner | Owns |
 | --- | --- | --- |
-| A — loop and Shorti | Ted (+ his agents) | `lib/shorti.ts`, `lib/claude.ts`, `lib/store.ts`, `app/onboard`, `app/taste`, `app/brief`, `app/ghost`, `app/api/shorti`, `app/api/brief`, `app/api/queue`, `fixtures/shorti` |
-| B — ghost and render | NEWTYPE teammate (+ their agents) | `lib/newtype.ts`, `app/api/render`, `components/ReelPlayer.tsx`, `components/RenderJob.tsx`, `components/DealCard.tsx`, `fixtures/newtype`, `public/prerender` |
-| Shared | both, by agreement in chat first | `lib/types.ts`, `package.json`, `app/layout.tsx`, `app/globals.css`, the six docs |
+| A — loop and Shorti | Ted (+ his agents) | `lib/shorti/`, `lib/mcp.ts`, `lib/claude.ts`, `lib/store.ts`, `lib/words.ts`, `app/taste`, `app/brief`, `app/ghost`, `app/api/taste`, `app/api/brief`, `app/api/queue`, `components/TrendCard.tsx`, `components/TrustLine.tsx`, `components/TasteSwipe.tsx`, `fixtures/shorti`, `scripts/record-shorti.ts` |
+| B — ghost and render | NEWTYPE teammate (+ their agents) | `lib/newtype/`, `app/onboard`, `app/api/render`, `components/ReelPlayer.tsx`, `components/RenderJob.tsx`, `components/DealCard.tsx`, `fixtures/newtype`, `public/prerender` |
+| Shared | both, by agreement in chat first | `lib/types.ts`, `lib/env.ts`, `lib/guard.ts`, `tests/`, `scripts/deny.mjs`, `.githooks/`, `.github/`, `package.json`, `app/layout.tsx`, `app/globals.css`, the six docs |
 
 Touch another lane's file only after its owner says yes.
+
+## The public boundary (ARCHITECTURE.md › Heritage and the public boundary)
+
+- This repo is public, commit messages included. Private products are **called** through their public API or MCP,
+  never copied: no engine, measurement, scoring, prompt, corpus, schema, pipeline, or infra code, even rewritten.
+- Heritage comes in only as UI patterns and simple shapes, written fresh here, and smaller than the original.
+- A quote carried into a commit body names private repos or internals as `[private]`.
+- New private term to guard: `node scripts/deny.mjs hash "<term>" >> tests/deny.sha256`. Never write the term.
+- The hooks install themselves on `npm install` (`core.hooksPath .githooks`). Never `--no-verify`.
 
 ## Git
 
 - Trunk is `master`. Small commits, `git pull --rebase` before every push, never force-push `master`.
 - Commit message: `<lane>: <what changed>` (e.g. `A: taste swipe reads Shorti radar`).
-- Green `npm run gate` before push. Green `master` deploys to prod without asking.
+- Green `npm run gate` before push; CI runs the same gate on every push. Green `master` deploys to prod without asking.
 - After each task, update PROGRESS.md in the same commit.
 
 ## Code style
 
 - TypeScript strict. No `any`; use `unknown` and narrow. Types live in `lib/types.ts` only.
 - Server components by default; `'use client'` only for interaction (swipe, edit, poll).
-- External calls only inside `lib/shorti.ts`, `lib/newtype.ts`, `lib/claude.ts`. Pages and components never `fetch`
-  an outside host.
+- External calls only inside `lib/` adapters. Pages and components `fetch` only relative `/api/…` routes.
+- Every route that spends money (Claude, GPU) starts with `guardSpend()` from `lib/guard.ts`.
+- Secrets are read only through `lib/env.ts`.
+- Code under `lib/` that scripts or tests import uses relative imports with the `.ts` extension and erasable syntax
+  only (no enums, no parameter properties), so Node 24 runs it directly.
 - Every adapter function returns typed data or throws an `Error` with the provider name; a route turns that into
   `{ error }` with a status code. No silent empty arrays.
 - Fallbacks are explicit: a fixture or pre-rendered clip comes back marked (`provider: 'prerender'`, `offline: true`)

@@ -1,0 +1,8 @@
+{
+  "characters": [
+    { "id": "yuna", "name": "Yuna", "characterId": "yuna", "voiceId": "synthetic-yuna", "bio": "Talks and product intros", "niche": "K-beauty for the US", "market": "US", "languages": ["en", "ko"] },
+    { "id": "rina", "name": "Rina", "characterId": "rina", "voiceId": "synthetic-rina", "bio": "Dance shorts", "niche": "Dance trends", "market": "US", "languages": ["en"] },
+    { "id": "jihyun", "name": "Jihyun", "characterId": "jihyun", "voiceId": "synthetic-jihyun", "bio": "Singing", "niche": "Covers and vocal shorts", "market": "US", "languages": ["en", "ko"] },
+    { "id": "miyeon", "name": "Miyeon", "characterId": "miyeon", "voiceId": "synthetic-miyeon", "bio": "Fashion", "niche": "K-fashion styling", "market": "US", "languages": ["en"] }
+  ]
+}

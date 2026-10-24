@@ -1,0 +1,115 @@
+{
+  "recordedAt": "2026-10-24T01:58:06.374Z",
+  "formats": {
+    "fam_way-be186ab1c0a4": {
+      "formatId": "fam_way-be186ab1c0a4",
+      "line": "Starting bare-faced, each makeup and styling step jumps an on-screen percentage counter up on the beat until reaching a 100% full-glam reveal.",
+      "open": [
+        {
+          "label": "100% to 0% takedown",
+          "what": "Run the percentage counter backward from 100% full glam down to 0% bare-faced in a sheet mask.",
+          "how": "Start in full makeup at 100% and cut on each beat as lashes, lip tint, and base come off until the bar hits 0%."
+        },
+        {
+          "label": "smudge drops percentage",
+          "what": "A mascara or eyeliner smudge at 90% knocks the progress bar back down before recovering to 100%.",
+          "how": "Step the bar up to 90%, freeze on an eyeliner slip as the counter drops to 40%, then cut to the fixed 100% look."
+        },
+        {
+          "label": "99% cancel and stay home",
+          "what": "Build the makeup counter up to 99%, then a canceled-plans text drops it straight back to 0% in pajamas.",
+          "how": "Cut through every makeup step to 99%, flash a cancellation message on screen, and drop to 0% in a hair roller."
+        }
+      ],
+      "page": "https://shorti.ai/en/f/way-be186ab1c0a4#flow"
+    },
+    "fam_cur-6cedd3c94ec9": {
+      "formatId": "lin_4d42a13ad231",
+      "line": "They dance barefaced before transitioning into a fully styled glam look with a hand gesture.",
+      "open": [
+        {
+          "label": "makeup fail",
+          "what": "The hand swipe reveals an exaggerated, messy makeup fail instead of glamorous perfection.",
+          "how": "Swipe the hand to cut into smeared clownish lipstick, wonky eyeliner, and bewildered acting."
+        },
+        {
+          "label": "partner swap",
+          "what": "The person swiping stays bare-faced while their partner behind them transforms into full glam.",
+          "how": "Swipe on your tired face, but reveal yourself unchanged while your partner behind poses cute."
+        },
+        {
+          "label": "reverse glam",
+          "what": "Instead of turning glamorous, the swipe cuts to an even messier bedtime look with a sheet mask.",
+          "how": "Swipe forward expecting glam, then reveal yourself in an awkward sheet mask and oversized glasses."
+        }
+      ],
+      "page": "https://shorti.ai/en/l/4d42a13ad231"
+    },
+    "fam_cur-80ca955b9370": {
+      "formatId": "lin_551a3a9c2765",
+      "line": "Show the sequential stages of a hair routine from messy hair to the finished style.",
+      "open": [
+        {
+          "label": "split-screen products",
+          "what": "Style the left and right halves of the back of the head with two different routines across the cuts",
+          "how": "Part wet hair down the middle from behind, apply air-dry cream to one side and blow-dry the other across matching cuts"
+        },
+        {
+          "label": "humidity ruins mythic",
+          "what": "Build perfect curls up to the legendary tier, then step outside into humidity for a frizzy mythic tier.",
+          "how": "Cut through each styling step indoors, then film the final tier callout outside with brushed-out frizzy hair."
+        },
+        {
+          "label": "reverse washday",
+          "what": "Start in full glamorous hair and makeup at rare tier and strip away layers down to a bare face and bonnet.",
+          "how": "Film in reverse order from full glam to removing hair clips, wiping makeup, and putting on a satin bonnet."
+        }
+      ],
+      "page": "https://shorti.ai/en/l/551a3a9c2765"
+    },
+    "fam_cur-12194faefdb2": {
+      "formatId": "lin_376aef466ca9",
+      "line": "The camera frames walking feet first before tilting up to reveal the full outfit.",
+      "open": [
+        {
+          "label": "pajama top half",
+          "what": "Walk in full spooky boots and gothic skirt, then tilt up to cozy flannel pajamas and a sleep mask.",
+          "how": "Pair dramatic platform boots and a long dark skirt with a messy bun, a skincare sheet mask, and a bathrobe on top."
+        },
+        {
+          "label": "stilt legs reveal",
+          "what": "Start on the shoes under a floor-length gown and tilt up for an impossibly long time on stilts.",
+          "how": "Stand on stilts or a hidden curb under an extra-long cloak so the upward tilt takes the entire verse before the face."
+        },
+        {
+          "label": "crouching cameraperson",
+          "what": "Instead of tilting up to the walker's face, pan around to show the friend crab-walking backward.",
+          "how": "Start on the heels on the dark street, then flip the camera around on the beat to reveal the crouched operator."
+        }
+      ],
+      "page": "https://shorti.ai/en/l/376aef466ca9"
+    },
+    "fam_cur-a33c844464d0": {
+      "formatId": "lin_4b57a0d63ff0",
+      "line": "A person lying on the floor switches outfits each time a rotating ceiling fan blade passes over the view.",
+      "open": [
+        {
+          "label": "ceiling rig reveal",
+          "what": "Show the chaotic reality of taping a phone to the ceiling above a spinning fan to get the shot.",
+          "how": "Start with 3 fan-blade outfit cuts, then cut to a wide side angle showing the creator climbing a ladder to rescue the phone."
+        },
+        {
+          "label": "fan speeds up",
+          "what": "Click the fan speed from low to high so the blade wipes and outfit changes accelerate frantically.",
+          "how": "Press the remote to speed up the fan and shorten the clips between blade wipes until outfits flash by every few frames."
+        },
+        {
+          "label": "room decor wipe",
+          "what": "Keep the same pajamas on while each passing fan blade changes the rug, bedding, and floor items.",
+          "how": "Lie completely still in the same spot and swap the rug, pillows, and props around your body between each blade pass."
+        }
+      ],
+      "page": "https://shorti.ai/en/l/4b57a0d63ff0"
+    }
+  }
+}

@@ -2,6 +2,28 @@
 
 Newest first. Each entry: what is true now, what broke, what is next. Keep it short; long output goes in files.
 
+## 2026-10-24 · T0 T4 T5 T9 — public boundary hardened, taste game live
+
+Done
+- Heritage surveyed in both private repos. Decision: Shorti is **called** through its public MCP, never copied;
+  only UI patterns and simple shapes are ported, rewritten small (ARCHITECTURE.md › Heritage and the public boundary).
+- Boundary enforced by `tests/boundary.test.mjs` (gate + CI + pre-commit), private names held only as SHA-256;
+  proved by planting a private host and a fake key: both caught. `commit-msg` hook checks messages the same way.
+- Spend guard for future Claude/GPU routes: owner passcode cookie, per-IP burst, daily cap; prod with no passcode
+  spends nothing.
+- `lib/types.ts` draft (zod), `lib/mcp.ts`, `lib/shorti/` with reduced fixtures; `/taste` swipe deck on live data
+  (15 beauty cards with posters, hooks, counts read on 10.21), keep chips, undo, picks persist across reload.
+
+Broke / learned
+- Keyless `shorti_check` and `shorti_recipe kind: brief` need sign-in; `kind: remake` rejects every model name tried.
+  The brief will be written from `shorti_video` + `shorti_format` readings instead (T10).
+- Node strip-types rejects parameter properties: `erasableSyntaxOnly` is now on.
+
+Open (owner)
+- Upstash Redis for prod, or picks reset between serverless instances (A).
+- `GHOSTREEL_PASSCODE` in Vercel prod before any spend route ships (Ted).
+- T2 contract sign-off on `Ghost` / `RenderJob`; T3 NEWTYPE path (B).
+
 ## 2026-10-24 · T1 — scaffold live
 
 Done

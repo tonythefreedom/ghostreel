@@ -3,184 +3,111 @@
 One Next.js app on Vercel. It owns no models and no video pipeline: Shorti reads short-form, NEWTYPE renders the
 ghost, Claude writes the brief. GhostReel is the loop, the taste record, and the channel.
 
+## Heritage and the public boundary
+
+This repo is public. The team's private products have years of know-how; GhostReel shows their *output*, never
+their *insides*.
+
+- **Call, never copy.** Every reading of short-form (hooks, beats, cues, formats, open spots, counts) comes from
+  Shorti's public, keyless MCP at `https://shorti.ai/mcp` at run time. No engine, measurement, scoring, prompt,
+  corpus, schema, pipeline, or infra code from any private repo enters this one, rewritten or not.
+- **Port patterns, rewritten small.** What we take from the private repos is UI and simple shapes, re-written
+  from scratch here: the pick-the-breakout game as a swipe deck with hotkeys and undo; the 9:16 hit card; the
+  honest count line ("platform count · read on 10.21"); 만/억 and K/M with three significant digits; KO/EN words
+  side by side; a three-way "how close to the original" sheet (keep / adapt / twist); a persona avatar with a job
+  ring; timed say/do lines; a seven-part shot card (camera, subject, action, setting, lighting, audio, avoid).
+- **Fixtures are reduced.** `scripts/record-shorti.ts` stores only GhostReel's own types (fields on the allowlist
+  in `tests/boundary.test.mjs`), never raw answers, UI resources, or internal links.
+- **Enforced, not trusted.** `tests/boundary.test.mjs` runs in the gate, in CI, and as a pre-commit hook. It fails
+  on: a private name (held only as SHA-256 in `tests/deny.sha256`) in any file or commit message; secrets; private
+  file types; absolute local paths; a page or component calling an outside host; a provider host named outside its
+  adapter; a secret env name read outside `lib/env.ts`; a fixture field off the allowlist or over 64 KB.
+
 ## Stack
 
 | Layer | Choice | Why |
 | --- | --- | --- |
-| App | Next.js 16 (App Router), TypeScript strict, Node 24 | Same stack as Shorti's web; server routes keep keys off the client. |
-| Style | Tailwind CSS v4, CSS variables from DESIGN.md | Fastest path to a consistent mobile UI. |
-| Short-form data | Shorti public MCP, keyless, `https://shorti.ai/mcp` (streamable HTTP) via `@modelcontextprotocol/sdk` client | Verified 2026-10-24: `initialize` and `tools/list` return 200 from a server, no key. |
-| Ghost render | NEWTYPE CineSynth through Nexus (MCP `lic.newtype-ai.com/mcp`, or the CineSynth API the teammate exposes) | Already in production: characters, voice consent, AI label, v-seal watermark. |
-| Brief and captions | Claude via `@anthropic-ai/sdk`, model `claude-sonnet-5-5` | Fast enough for a live edit loop; writes multilingual captions. |
-| State | Upstash Redis (`@upstash/redis`, REST) when env is set; in-memory `Map` otherwise | JSON doc per ghost, no schema or migration in an 8-hour build; works on serverless. |
-| Deploy | `vercel deploy --prod` from a teammate's machine | Ted has push, not admin, on the repo; CLI deploy needs no Git integration. |
+| App | Next.js 16.4 (App Router), React 19, TypeScript strict (`erasableSyntaxOnly`), Node 24 | Server routes keep keys off the client; Node runs `lib/` TS directly for scripts and tests. |
+| Style | Tailwind CSS v4 on DESIGN.md tokens | Fastest consistent mobile UI. |
+| Contracts | zod 4 in `lib/types.ts` | Every outside answer and request body is parsed at the edge. |
+| Short-form data | Shorti public MCP, keyless (`lib/mcp.ts` ~90-line client, JSON or SSE) | Verified 2026-10-24: stateless, plain JSON; keyless limit 20 req/s per IP, so enrich 4 at a time with backoff. |
+| Ghost render | NEWTYPE CineSynth on Nexus, endpoint and token from env (`lib/newtype/`) | Production characters, voice consent, AI label, watermark. |
+| Brief and captions | Claude via `@anthropic-ai/sdk`, `claude-sonnet-5-5` (`lib/claude.ts`, T10) | Fast enough for a live edit loop; multilingual captions. |
+| State | Upstash Redis over REST when env is set, process memory otherwise (`lib/store.ts`) | No schema in an 8-hour build. Memory resets between serverless instances, so prod wants Redis. |
+| Deploy | `vercel deploy --prod` from a teammate machine; CI runs the gate on every push | Ted has push, not admin, on the repo. |
+
+## What Shorti answers keyless (and what it does not)
+
+| Tool | GhostReel use | Keyless |
+| --- | --- | --- |
+| `shorti_what_to_shoot` `lens: radar`, `field` | the swipe deck: rising shorts abroad, with format | yes |
+| `shorti_video` `url` | poster, hook, turn, beats, checklist, needs, props: the brief's raw material | yes |
+| `shorti_format` `part: flow` | the format's one-line move and its open spots (the "twist") | yes |
+| `shorti_format` `part: scene` `url` | camera setups of a hit | yes (not used yet) |
+| `shorti_arena` `view: spots` | open spots across formats | yes (not used yet) |
+| `shorti_check` | a take or post check | **no**: hands off to a Shorti page; show the link, promise nothing inline |
+| `shorti_recipe` `kind: brief` / `remake` | product brief, character remake | **no** (sign-in) / model name unresolved |
 
 ## Folders
 
 ```
-ghostreel/
-  app/
-    page.tsx                  landing → start
-    onboard/page.tsx          pick ghost, niche, market, language
-    taste/page.tsx            the daily game: swipe Shorti radar shorts
-    brief/[id]/page.tsx       read, edit, approve the brief → render
-    ghost/[id]/page.tsx       channel: reels, 7-day queue, deals, check results
-    api/
-      shorti/trending/route.ts    GET  → TrendCard[]
-      shorti/format/route.ts      GET  → FormatPlan
-      shorti/check/route.ts       POST → CheckResult
-      brief/route.ts              POST → Brief (Claude)
-      render/route.ts             POST → RenderJob, GET ?id= → RenderJob
-      queue/route.ts              GET/POST → QueueItem[]
-  components/                 UI pieces named in DESIGN.md
-  lib/
-    types.ts                  the contracts below; changed by agreement only
-    shorti.ts                 Lane A: the only file that talks to Shorti
-    newtype.ts                Lane B: the only file that talks to NEWTYPE
-    claude.ts                 brief and caption prompts
-    store.ts                  Redis or memory, same interface
-  fixtures/
-    shorti/*.json             recorded real Shorti answers; offline fallback and test input
-    newtype/*.json            recorded render job answers
-  public/prerender/           finished, AI-labelled ghost clips for stage fallback
-  tests/                      node --test against fixtures
+app/
+  page.tsx                    landing → /taste
+  taste/page.tsx              the daily game (live Shorti deck, fixture fallback)
+  brief/…  ghost/…            T11, T13
+  api/taste/route.ts          GET/PUT picks (cheap, size-capped)
+  api/unlock/route.ts         owner passcode → httpOnly cookie
+  api/brief, api/render, …    spend routes: always behind lib/guard.ts
+components/                   TrendCard, TrustLine, TasteSwipe, … (DESIGN.md names)
+lib/
+  types.ts                    contracts (zod); change by agreement
+  mcp.ts                      minimal MCP client
+  shorti/read.ts              Lane A: live reads + reducers (Node-safe, used by the recorder)
+  shorti/index.ts             Lane A: what pages call: cache, fixture fallback, provenance
+  newtype/index.ts            Lane B: roster, render, job status
+  claude.ts                   Lane A: brief and captions (T10)
+  env.ts                      the only reader of secrets (server-only)
+  guard.ts                    spend guard: owner cookie, per-IP burst, daily cap
+  store.ts                    Redis or memory
+  words.ts                    KO/EN copy, counts, KST dates
+fixtures/shorti/              reduced, recorded Shorti answers (offline + tests)
+fixtures/newtype/             roster and recorded jobs (Lane B)
+scripts/record-shorti.ts      re-record fixtures: npm run record:shorti
+scripts/deny.mjs              hashed denylist: hash a term, check a file
+tests/                        node --test: boundary, tokens, words, …
+.githooks/                    pre-commit (boundary), commit-msg (denylist); installed by npm install
+.github/workflows/gate.yml    CI: npm ci && npm run gate
 ```
 
 ## Data flow
 
 ```
- person                GhostReel (Next.js on Vercel)                       outside
- ──────                ─────────────────────────────                       ───────
- pick ghost ───────▶ /onboard ── listCharacters() ─────────────────────▶ NEWTYPE (characters)
- swipe keep/skip ──▶ /taste ──── GET /api/shorti/trending ── shorti_what_to_shoot(lens=radar, lang=en) ─▶ Shorti
-                         │        store TastePick[]
- approve brief ────▶ /brief ──── GET /api/shorti/format ── shorti_format(part=flow|scene), shorti_recipe ─▶ Shorti
-                         │        POST /api/brief ── Claude(taste + format + ghost) ──▶ Brief (draft)
-                         │        person edits, approves (no render before this)
-                         └──────▶ POST /api/render ── newtype.render(brief) ──────────────────────▶ CineSynth on Nexus
-                                  GET /api/render?id= (poll) ◀── status, videoUrl (AI label burned in)
- read fixes ───────▶ /ghost ──── POST /api/shorti/check ── shorti_check(url) ─────────────────────▶ Shorti
- approve post ─────▶ /ghost ──── POST /api/queue (state: approved; no real posting in the hackathon)
+ person               GhostReel (Next.js on Vercel)                              outside
+ swipe keep/skip ──▶ /taste ── shorti.trending(field) ── what_to_shoot(radar) + video(url)×n ──▶ Shorti
+                       │         picks ── PUT /api/taste ──▶ store
+ approve brief ────▶ /brief ── shorti.reading + formatPlan ──▶ Claude (guarded) ──▶ Brief draft → person edits, approves
+                       └────── POST /api/render (guarded) ── newtype.render(brief) ──────────────▶ CineSynth on Nexus
+                               GET /api/render?id= ◀── status, videoUrl (AI label burned in)
+ approve post ─────▶ /ghost ── POST /api/queue (state only; nothing is ever posted from GhostReel)
 ```
 
-## Contracts (`lib/types.ts`)
+## Contracts
 
-```ts
-type Lang = 'en' | 'ko' | 'ja' | 'es';
-type Platform = 'tiktok' | 'reels' | 'shorts';
-
-interface Ghost {
-  id: string;
-  name: string;               // e.g. "Yuna"
-  characterId: string;        // NEWTYPE character id
-  portraitUrl: string;
-  voiceId: string;            // synthetic, or the owner's voice with a NEWTYPE consent record
-  niche: string;              // "K-beauty for the US"
-  market: string;             // "US"
-  languages: Lang[];
-}
-
-interface TrendCard {         // one Shorti reading; counts are the platform's, as read
-  videoId: string;
-  url: string;
-  platform: Platform;
-  formatId: string;
-  title: string;
-  thumbnailUrl?: string;
-  views?: number;
-  readAt: string;             // ISO time Shorti read it
-}
-
-interface TastePick {
-  ghostId: string;
-  videoId: string;
-  formatId: string;
-  kept: boolean;
-  keep: Array<'hook' | 'beat' | 'look' | 'sound'>;
-  note?: string;
-  at: string;
-}
-
-interface Brief {
-  id: string;
-  ghostId: string;
-  formatId: string;
-  sourceVideoId: string;
-  lang: Lang;
-  durationSec: 10 | 15;
-  hook: string;
-  lines: Array<{ t: number; say: string; do: string }>;
-  outfit: string;
-  scene: string;
-  caption: string;
-  hashtags: string[];
-  status: 'draft' | 'approved';
-}
-
-interface RenderJob {
-  id: string;
-  briefId: string;
-  provider: 'newtype' | 'prerender';   // prerender is shown as such in the UI
-  status: 'queued' | 'running' | 'done' | 'failed';
-  videoUrl?: string;
-  error?: string;
-  startedAt: string;
-  finishedAt?: string;
-}
-
-interface CheckResult {
-  renderId: string;
-  fixes: string[];            // at most three
-  keep: string[];
-}
-
-interface QueueItem {
-  id: string;
-  ghostId: string;
-  renderId: string;
-  slot: string;               // ISO date
-  platform: Platform;
-  state: 'awaiting_approval' | 'approved';
-  deal?: { seller: string; product: string; demo: true };
-}
-```
-
-## Adapter interfaces
-
-`lib/shorti.ts` (Lane A) — wraps the keyless MCP; always passes `lang: 'en'`; returns typed values or throws.
-
-```ts
-trending(opts: { field?: string; platform?: Platform; limit?: number }): Promise<TrendCard[]>  // shorti_what_to_shoot lens=radar
-openSpots(): Promise<TrendCard[]>                                                             // shorti_arena
-formatPlan(formatId: string): Promise<FormatPlan>                                             // shorti_format part=flow + scene
-recipe(formatId: string, ghost: Ghost): Promise<RecipeRef>                                    // shorti_recipe kind=scene
-check(videoUrl: string): Promise<CheckResult>                                                 // shorti_check
-```
-
-`lib/newtype.ts` (Lane B) — the teammate fills the bodies against CineSynth/Nexus.
-
-```ts
-listCharacters(): Promise<Ghost[]>
-render(brief: Brief, ghost: Ghost): Promise<RenderJob>     // starts a GPU job only for an approved brief
-getJob(id: string): Promise<RenderJob>
-fitProduct(photoUrl: string, ghost: Ghost): Promise<RenderJob>   // seller deal (should-have)
-```
-
-Both adapters fall back to `fixtures/` when `GHOSTREEL_OFFLINE=1` or the call fails, and mark the result so the UI can
-say so.
+`lib/types.ts` is the single home: `Ghost`, `TrendCard`, `VideoReading`, `FormatPlan`, `OpenSpot`, `TastePick`,
+`Brief`, `RenderJob`, `QueueItem`, and `Sourced<T>` (data + provenance: `live` or `fixture`, and when it was read).
 
 ## Environment
 
-| Name | Where | Used by |
-| --- | --- | --- |
-| `ANTHROPIC_API_KEY` | server | `lib/claude.ts` |
-| `NEWTYPE_MCP_URL`, `NEWTYPE_TOKEN` | server | `lib/newtype.ts` (teammate supplies) |
-| `SHORTI_MCP_URL` | server, default `https://shorti.ai/mcp` | `lib/shorti.ts` |
-| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | server, optional | `lib/store.ts` |
-| `GHOSTREEL_OFFLINE` | server, optional | adapters use fixtures only |
-
-No key is ever read in a client component. `.env.local` is git-ignored; `.env.example` lists names only.
+| Name | Used by |
+| --- | --- |
+| `ANTHROPIC_API_KEY` | `lib/claude.ts` via `lib/env.ts` |
+| `NEWTYPE_MCP_URL`, `NEWTYPE_TOKEN` | `lib/newtype/` via `lib/env.ts` (teammate supplies) |
+| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | `lib/store.ts` |
+| `GHOSTREEL_PASSCODE` | `lib/guard.ts`; unset in prod = no spend at all |
+| `GHOSTREEL_DAILY_CAP` | spend calls per day, default 40 |
+| `SHORTI_MCP_URL` | defaults to the public MCP |
+| `GHOSTREEL_OFFLINE=1` | adapters serve fixtures only (CI, stage fallback) |
 
 ## Gate
 
-`npm run gate` = `tsc --noEmit` + `next build` + `node --test tests/`. Green gate on `master` → deploy to prod.
+`npm run gate` = `tsc --noEmit` + `node --test tests/**/*.test.mjs` + `next build`. Green `master` deploys to prod.

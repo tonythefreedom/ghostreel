@@ -1,0 +1,3 @@
+#!/bin/sh
+# Public-boundary guard: private names, secrets, file types, adapter boundaries. Fast (< 1 s).
+exec node --test tests/boundary.test.mjs

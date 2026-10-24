@@ -1,0 +1,171 @@
+"use client";
+// The daily taste game: one short at a time; drag or ←/→ to skip/keep, Z to undo. A keep asks what to keep.
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { KeepPart, TastePick, TrendCard as Card } from "@/lib/types";
+import { t, type UiLang } from "@/lib/words";
+import { TrendCard } from "./TrendCard";
+
+const PARTS: KeepPart[] = ["hook", "beat", "look", "sound"];
+const THRESHOLD = 96;
+
+export function TasteSwipe({ cards, ghostId, lang = "ko" }: { cards: Card[]; ghostId: string; lang?: UiLang }) {
+  const [picks, setPicks] = useState<TastePick[]>([]);
+  const [asking, setAsking] = useState<Card | null>(null);
+  const [parts, setParts] = useState<KeepPart[]>(["hook"]);
+  const [dx, setDx] = useState(0);
+  const [toast, setToast] = useState(false);
+  const drag = useRef<{ x: number; id: number } | null>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const index = picks.length;
+  const card = asking ? null : cards[index];
+
+  useEffect(() => {
+    fetch(`/api/taste?ghost=${ghostId}`)
+      .then((r) => r.json())
+      .then((d: { picks?: TastePick[] }) => setPicks((d.picks ?? []).filter((p) => cards.some((c) => c.videoId === p.videoId))))
+      .catch(() => {});
+  }, [ghostId, cards]);
+
+  const save = useCallback(
+    (next: TastePick[]) => {
+      setPicks(next);
+      void fetch("/api/taste", {
+        method: "PUT",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ ghostId, picks: next }),
+      });
+      setToast(true);
+      if (timer.current) clearTimeout(timer.current);
+      timer.current = setTimeout(() => setToast(false), 5000);
+    },
+    [ghostId],
+  );
+
+  const pick = (c: Card, kept: boolean, keep: KeepPart[] = []) =>
+    save([...picks, { ghostId, videoId: c.videoId, formatId: c.formatId, kept, keep, at: new Date().toISOString() }]);
+
+  const decide = useCallback(
+    (kept: boolean) => {
+      if (!card) return;
+      setDx(0);
+      if (kept) {
+        setAsking(card);
+        setParts(["hook"]);
+      } else pick(card, false);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [card, picks],
+  );
+
+  const confirmKeep = () => {
+    if (!asking) return;
+    pick(asking, true, parts);
+    setAsking(null);
+  };
+
+  const undo = useCallback(() => {
+    if (asking) return setAsking(null);
+    if (picks.length) save(picks.slice(0, -1));
+  }, [asking, picks, save]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight" || e.key === "k") decide(true);
+      else if (e.key === "ArrowLeft" || e.key === "j") decide(false);
+      else if (e.key === "z" || e.key === "Backspace") undo();
+      else if (e.key === "Enter" && asking) confirmKeep();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
+
+  const kept = picks.filter((p) => p.kept);
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between text-[13px] text-text-dim">
+        <span className="font-mono">
+          {Math.min(index + 1, cards.length)} / {cards.length}
+        </span>
+        <span>
+          {t("kept", lang)} <span className="font-mono font-semibold text-ghost">{kept.length}</span>
+        </span>
+      </div>
+
+      {card ? (
+        <div
+          className="mx-auto w-full max-w-[calc(56dvh*9/16)] touch-pan-y cursor-grab active:cursor-grabbing"
+          style={{ transform: `translateX(${dx}px) rotate(${dx / 24}deg)`, transition: drag.current ? "none" : "transform 180ms ease-out" }}
+          onPointerDown={(e) => {
+            drag.current = { x: e.clientX, id: e.pointerId };
+            e.currentTarget.setPointerCapture(e.pointerId);
+          }}
+          onPointerMove={(e) => drag.current && setDx(e.clientX - drag.current.x)}
+          onPointerUp={() => {
+            drag.current = null;
+            if (Math.abs(dx) > THRESHOLD) decide(dx > 0);
+            else setDx(0);
+          }}
+        >
+          <TrendCard card={card} lang={lang} />
+        </div>
+      ) : asking ? (
+        <section className="flex flex-col gap-4 rounded-[var(--radius-card)] border border-line bg-surface p-4">
+          <p className="text-[18px] font-extrabold">{t("keepWhat", lang)}</p>
+          <p className="text-[13px] text-text-dim">{asking.hook ?? asking.formatTitle}</p>
+          <div className="flex flex-wrap gap-2">
+            {PARTS.map((p) => {
+              const on = parts.includes(p);
+              return (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => setParts(on ? parts.filter((x) => x !== p) : [...parts, p])}
+                  className={`h-10 rounded-full border px-4 text-[15px] font-semibold ${on ? "border-ghost bg-ghost/15 text-ghost" : "border-line text-text-dim"}`}
+                >
+                  {t(p, lang)}
+                </button>
+              );
+            })}
+          </div>
+          <button type="button" onClick={confirmKeep} disabled={!parts.length} className="h-12 rounded-[var(--radius-card)] bg-ghost font-extrabold text-bg disabled:opacity-40">
+            {t("keep", lang)}
+          </button>
+        </section>
+      ) : (
+        <section className="flex flex-col gap-3 rounded-[var(--radius-card)] border border-line bg-surface p-4">
+          <p className="text-[18px] font-extrabold">{t("done", lang)}</p>
+          <ul className="flex flex-col gap-2 text-[13px]">
+            {kept.map((p) => {
+              const c = cards.find((x) => x.videoId === p.videoId);
+              return (
+                <li key={p.videoId} className="flex items-start justify-between gap-3">
+                  <span className="text-text">{c?.formatTitle ?? c?.hook ?? p.videoId}</span>
+                  <span className="shrink-0 text-ghost">{p.keep.map((k) => t(k, lang)).join(" · ")}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
+
+      {card ? (
+        <div className="grid grid-cols-2 gap-3">
+          <button type="button" onClick={() => decide(false)} className="h-14 rounded-[var(--radius-card)] border border-line font-extrabold text-text-dim">
+            ← {t("skip", lang)}
+          </button>
+          <button type="button" onClick={() => decide(true)} className="h-14 rounded-[var(--radius-card)] bg-ghost font-extrabold text-bg">
+            {t("keep", lang)} →
+          </button>
+        </div>
+      ) : null}
+
+      {toast && picks.length > 0 ? (
+        <button type="button" onClick={undo} className="self-center rounded-full bg-surface-2 px-4 py-2 text-[13px] font-semibold">
+          {t("undo", lang)} (Z)
+        </button>
+      ) : null}
+    </div>
+  );
+}

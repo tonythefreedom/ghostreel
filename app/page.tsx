@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Home() {
   return (
     <main className="flex min-h-dvh flex-col justify-between py-10">
@@ -19,13 +21,12 @@ export default function Home() {
       </section>
 
       <footer className="flex flex-col gap-4">
-        <button
-          type="button"
-          disabled
-          className="h-14 w-full rounded-[var(--radius-card)] bg-ghost text-[15px] font-extrabold text-bg disabled:opacity-40"
+        <Link
+          href="/taste?ghost=yuna&field=beauty"
+          className="grid h-14 w-full place-items-center rounded-[var(--radius-card)] bg-ghost text-[15px] font-extrabold text-bg"
         >
-          준비 중
-        </button>
+          내 감각 가르치기
+        </Link>
         <p className="text-[13px] text-text-dim">
           모든 고스트 영상에는 <span className="font-semibold text-text">AI-generated · Virtual human</span> 라벨이
           항상 붙습니다.
