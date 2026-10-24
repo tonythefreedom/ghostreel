@@ -1,27 +1,42 @@
 "use client";
-// After the game: for each kept short, pick how close the ghost stays (keep / adapt / twist) and write the brief.
-// A locked deploy asks for the owner passcode once, then retries.
+// After the game: the kept shorts as one choice. The chosen one picks how close the ghost stays (keep / adapt / twist)
+// and the docked verb writes its brief: one red verb a screen, however many were kept. A locked deploy asks for the
+// owner passcode once, then retries.
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import type { Intent, KeepPart } from "@/lib/types";
-import { t, type UiLang, type WordKey } from "@/lib/words";
+import { t, type UiLang } from "@/lib/words";
+import { Button, Verb } from "./ui";
+import { Segmented } from "./taste/Segmented";
 import { UnlockForm } from "./UnlockForm";
 
 export interface KeptItem {
   videoId: string;
   title: string;
   keep: KeepPart[];
+  poster?: string;
 }
 
-const INTENTS: Array<[Intent, WordKey]> = [["keep", "intentKeep"], ["adapt", "intentAdapt"], ["twist", "intentTwist"]];
+const INTENTS: Intent[] = ["keep", "adapt", "twist"];
+const INTENT_WORD = { keep: "intentKeep", adapt: "intentAdapt", twist: "intentTwist" } as const;
 
-export function BriefStarter({ ghostId, creatorId, items, lang = "en" }: { ghostId: string; creatorId?: string; items: KeptItem[]; lang?: UiLang }) {
+export function BriefStarter({ ghostId, creatorId, items, lang = "en", back }: {
+  ghostId: string;
+  creatorId?: string;
+  items: KeptItem[];
+  lang?: UiLang;
+  /** The one quiet secondary beside the verb (the way back to the deck). */
+  back?: ReactNode;
+}) {
   const router = useRouter();
+  const [selected, setSelected] = useState<string | null>(null);
   const [intent, setIntent] = useState<Record<string, Intent>>({});
   const [busy, setBusy] = useState<string | null>(null);
   const [seconds, setSeconds] = useState(0);
   const [locked, setLocked] = useState<string | null>(null);
   const [failed, setFailed] = useState<string | null>(null);
+  const refs = useRef<(HTMLButtonElement | null)[]>([]);
+  const current = items.find((i) => i.videoId === selected) ?? items[0];
 
   useEffect(() => {
     if (!busy) return;
@@ -51,61 +66,91 @@ export function BriefStarter({ ghostId, creatorId, items, lang = "en" }: { ghost
     }
   }
 
+  const choose = (i: number) => {
+    const item = items[i];
+    if (busy || !item) return;
+    setSelected(item.videoId);
+    setLocked(null);
+    setFailed(null);
+  };
+  const key = (e: KeyboardEvent, i: number) => {
+    const n = items.length;
+    const next = e.key === "ArrowDown" || e.key === "ArrowRight" ? (i + 1) % n : e.key === "ArrowUp" || e.key === "ArrowLeft" ? (i - 1 + n) % n : null;
+    if (next === null) return;
+    e.preventDefault();
+    choose(next);
+    refs.current[next]?.focus();
+  };
+
   return (
-    <ul className="flex flex-col gap-3">
-      {items.map((item) => {
-        const chosen = intent[item.videoId] ?? "adapt";
-        const isBusy = busy === item.videoId;
-        return (
-          <li key={item.videoId} className="flex flex-col gap-3 rounded-[var(--radius-card)] border border-line bg-surface p-4">
-            <div className="flex items-start justify-between gap-3">
-              <p className="text-[15px] font-semibold">{item.title}</p>
-              <span className="shrink-0 text-[12px] text-ghost">{item.keep.map((k) => t(k, lang)).join(" · ")}</span>
-            </div>
-            <div role="radiogroup" className="grid grid-cols-3 gap-1 rounded-full bg-bg p-1">
-              {INTENTS.map(([value, label]) => (
-                <button
-                  key={value}
-                  type="button"
-                  role="radio"
-                  aria-checked={chosen === value}
-                  onClick={() => setIntent({ ...intent, [item.videoId]: value })}
-                  className={`h-9 rounded-full text-[13px] font-semibold ${chosen === value ? "bg-surface-2 text-text" : "text-text-dim"}`}
-                >
-                  {t(label, lang)}
-                </button>
-              ))}
-            </div>
-            {locked === item.videoId ? (
-              <UnlockForm
-                lang={lang}
-                onUnlocked={() => {
-                  setLocked(null);
-                  void write(item.videoId);
-                }}
-              />
-            ) : (
+    <>
+      <div role="radiogroup" aria-label={t("keptTitle", lang)} className="flex flex-col gap-3">
+        {items.map((item, i) => {
+          const on = item.videoId === current?.videoId;
+          return (
+            <div key={item.videoId} className={`flex flex-col gap-3 rounded-[var(--radius-card)] bg-surface p-3 ${on ? "ring-1 ring-inset ring-line-strong" : ""}`}>
               <button
+                ref={(el) => { refs.current[i] = el; }}
                 type="button"
-                disabled={busy !== null}
-                onClick={() => void write(item.videoId)}
-                className="relative h-12 overflow-hidden rounded-[var(--radius-card)] bg-accent font-extrabold disabled:opacity-60"
+                role="radio"
+                aria-checked={on}
+                tabIndex={on ? 0 : -1}
+                onClick={() => choose(i)}
+                onKeyDown={(e) => key(e, i)}
+                className="flex min-h-11 items-start gap-3 text-left"
               >
-                {isBusy ? (
-                  <span className="font-mono">
-                    {t("writing", lang)} · {seconds}s
-                  </span>
+                {item.poster ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- poster URLs come from Shorti answers, not a fixed host
+                  <img src={item.poster} alt="" loading="lazy" referrerPolicy="no-referrer" className="aspect-[9/16] w-12 shrink-0 rounded-[var(--radius-badge)] bg-surface-2 object-cover" />
                 ) : (
-                  t("writeBrief", lang)
+                  <span aria-hidden className="aspect-[9/16] w-12 shrink-0 rounded-[var(--radius-badge)] bg-surface-2" />
                 )}
+                <span className="flex min-w-0 flex-1 flex-col gap-1">
+                  <span className="text-[15px] font-[560] leading-snug text-text">{item.title}</span>
+                  <span className="text-[13px] text-ghost">{item.keep.map((k) => t(k, lang)).join(" · ")}</span>
+                </span>
+                <span aria-hidden className={`w-4 text-center text-[15px] ${on ? "text-text" : "text-text-3"}`}>{on ? "●" : "○"}</span>
               </button>
-            )}
-            {failed?.startsWith(`${item.videoId}:`) ? (
-              <p className="text-[13px] text-danger">{t(failed.endsWith(":model_key_missing") ? "noModelKey" : "briefFailed", lang)}</p>
-            ) : null}
-          </li>
-        );
-      })}
-    </ul>
+              {on ? (
+                <>
+                  <Segmented
+                    label={t("intentLabel", lang)}
+                    options={INTENTS.map((v) => ({ value: v, label: t(INTENT_WORD[v], lang) }))}
+                    value={intent[item.videoId] ?? "adapt"}
+                    onChange={(v) => setIntent({ ...intent, [item.videoId]: v })}
+                  />
+                  {locked === item.videoId ? (
+                    <UnlockForm
+                      lang={lang}
+                      onUnlocked={() => {
+                        setLocked(null);
+                        void write(item.videoId);
+                      }}
+                    />
+                  ) : null}
+                  {failed?.startsWith(`${item.videoId}:`) ? (
+                    <p role="alert" className="text-[13px] text-danger">
+                      ✕ {t(failed.endsWith(":model_key_missing") ? "noModelKey" : "briefFailed", lang)}
+                    </p>
+                  ) : null}
+                </>
+              ) : null}
+            </div>
+          );
+        })}
+      </div>
+      <Verb>
+        {back}
+        <Button size="xl" aria-busy={busy !== null} disabled={!current || locked !== null} onClick={() => current && !busy && void write(current.videoId)}>
+          {busy ? (
+            <span className="font-mono">
+              {t("writing", lang)} · {seconds}s
+            </span>
+          ) : (
+            t("writeBrief", lang)
+          )}
+        </Button>
+      </Verb>
+    </>
   );
 }

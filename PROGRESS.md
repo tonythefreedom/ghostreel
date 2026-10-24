@@ -2,8 +2,11 @@
 
 Newest first. Each entry: what is true now, what broke, what is next. Keep it short; long output goes in files.
 
-## 2026-10-24 · Lane A screens on the new design: landing, brief, ghost channel (A)
+## 2026-10-24 · Lane A screens on the new design: landing, taste, brief, ghost channel (A)
 
+- Taste: the deck as a fan (fan spring; drag past 96 px decides, ← skip, → keep, Z undo), eight a round with
+  "2 / 8", real creators' posters with no AI label, docked Skip + Keep, what to keep in a sheet of chips, an end
+  screen with one red "Write the brief" for the chosen short.
 - Landing: two-line display headline, one red "Make my ghost", the ghost's own picture with its AI label, bands.
 - Brief: the timed lines as a beat rail (arrow keys) with the selected beat's say/do card, what was kept as text,
   outfit/scene/caption/hashtags under "More detail", docked Save + "Approve and render", render as ✓●○ steps.

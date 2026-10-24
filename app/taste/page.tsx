@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { TasteSwipe } from "@/components/TasteSwipe";
 import { DemoTag } from "@/components/TrustLine";
+import { VerbSpacer } from "@/components/ui";
 import { getGhost } from "@/lib/newtype";
 import { FIELDS, trending, type Field } from "@/lib/shorti";
 import { shortDate, t } from "@/lib/words";
@@ -16,23 +17,30 @@ export default async function TastePage({ searchParams }: { searchParams: Promis
   const creatorId = /^[0-9a-f-]{36}$/i.test(sp.creator ?? "") ? sp.creator : undefined; // the route checks it is real
 
   return (
-    <main className="flex min-h-dvh flex-col gap-5 py-6">
+    <main className="flex min-h-dvh flex-col gap-5 pt-6">
       <header className="flex flex-col gap-2">
-        <div className="flex items-center gap-2 text-[13px] font-semibold text-text-dim">
-          <span className="grid size-6 place-items-center rounded-full bg-accent text-[11px] font-extrabold text-text">
+        <p className="flex items-center gap-2 text-[13px] font-[560] text-text-dim">
+          {/* The ghost is violet: its monogram stands in for a portrait. */}
+          <span aria-hidden className="grid size-8 shrink-0 place-items-center rounded-full bg-accent text-[13px] font-[720] text-white">
             {ghost.name.slice(0, 1)}
           </span>
-          {ghost.name} · {ghost.niche}
-        </div>
-        <h1 className="text-[24px] font-extrabold tracking-[-0.02em]">{t("tasteTitle")}</h1>
+          <span>
+            {ghost.name}
+            {ghost.niche ? ` · ${ghost.niche}` : ""}
+          </span>
+        </p>
+        <h1 className="text-[28px] font-[720] leading-[1.15] tracking-[-0.02em]">{t("tasteTitle")}</h1>
         <p className="text-[15px] text-text-dim">{t("tasteSub")}</p>
         {provenance.source === "fixture" ? (
-          <DemoTag>
-            {t("fixture")} · {shortDate(provenance.readAt)}
-          </DemoTag>
+          <div>
+            <DemoTag>
+              {t("fixture")} · {shortDate(provenance.readAt)}
+            </DemoTag>
+          </div>
         ) : null}
       </header>
       <TasteSwipe cards={data.cards} ghostId={ghost.id} creatorId={creatorId} />
+      <VerbSpacer />
     </main>
   );
 }

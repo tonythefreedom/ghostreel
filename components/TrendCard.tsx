@@ -1,40 +1,46 @@
-// One short as Shorti read it: 9:16 poster, tag, hook, handle, the platform's count.
+"use client";
+// One short as Shorti read it: a real creator's post, so it never wears the AI label. A 9:16 picture (the poster;
+// a raised tile until it loads), its tag on Vellum, then at most three lines under it, never cut: what happens first,
+// who and where, and the platform's count with its date. One number a card.
+import { useState } from "react";
 import type { TrendCard as Card } from "@/lib/types";
 import { TrustLine } from "./TrustLine";
 import type { UiLang } from "@/lib/words";
 
 const PLATFORM: Record<string, string> = { instagram: "Reels", tiktok: "TikTok", youtube: "Shorts" };
 
-export function TrendCard({ card, lang = "en" }: { card: Card; lang?: UiLang }) {
+/** `behind` draws a card under the deck's top one: its picture's edge alone, its words hidden. */
+export function TrendCard({ card, lang = "en", behind = false }: { card: Card; lang?: UiLang; behind?: boolean }) {
+  const [loaded, setLoaded] = useState(false);
+  const title = card.hook ?? card.formatTitle ?? card.whatHappens ?? "";
+  const sound = card.formatKind === "sound" && card.formatTitle ? `♪ ${card.formatTitle}` : null;
+  const meta = [card.by, PLATFORM[card.platform] ?? card.platform, sound].filter(Boolean).join(" · ");
+
   return (
-    <article className="relative aspect-[9/16] w-full overflow-hidden rounded-[var(--radius-card)] border border-line bg-surface select-none">
-      {card.posterUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element -- poster URLs come from Shorti answers, not a fixed host
-        <img
-          src={card.posterUrl}
-          alt=""
-          draggable={false}
-          referrerPolicy="no-referrer"
-          className="absolute inset-0 size-full object-cover"
-        />
-      ) : (
-        <div className="absolute inset-0 bg-gradient-to-b from-surface-2 to-bg" />
-      )}
-      <div className="absolute inset-0 bg-gradient-to-b from-bg/70 via-transparent to-bg/95" />
-
-      <header className="absolute inset-x-0 top-0 flex items-center gap-2 p-3 text-[12px] font-semibold">
-        <span className="rounded-full bg-bg/70 px-2 py-0.5">{PLATFORM[card.platform] ?? card.platform}</span>
-        {card.tag ? <span className="rounded-full bg-accent/80 px-2 py-0.5">{card.tag}</span> : null}
-      </header>
-
-      <footer className="absolute inset-x-0 bottom-0 flex flex-col gap-2 p-4">
-        {card.formatTitle ? <p className="text-[12px] font-semibold text-ghost">{card.formatTitle}</p> : null}
-        <p className="text-[15px] font-semibold leading-snug">{card.hook ?? card.whatHappens ?? ""}</p>
-        <div className="flex items-center justify-between gap-2">
-          <TrustLine views={card.views} asOf={card.viewsAsOf} lang={lang} />
-          {card.by ? <span className="truncate text-[12px] text-text-dim">{card.by}</span> : null}
-        </div>
-      </footer>
+    <article className="flex flex-col gap-2 bg-bg select-none">
+      <div className="relative aspect-[9/16] w-full overflow-hidden rounded-[var(--radius-pic)] bg-surface-2">
+        {card.posterUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element -- poster URLs come from Shorti answers, not a fixed host
+          <img
+            src={card.posterUrl}
+            alt=""
+            draggable={false}
+            referrerPolicy="no-referrer"
+            decoding="async"
+            ref={(el) => { if (el?.complete && el.naturalWidth) setLoaded(true); }} // loaded before hydration
+            onLoad={() => setLoaded(true)}
+            className={`absolute inset-0 size-full object-cover transition-opacity duration-[125ms] ${loaded ? "opacity-100" : "opacity-0"}`}
+          />
+        ) : null}
+        {card.tag && !behind ? (
+          <span className="vellum absolute left-2 top-2 rounded-full px-2.5 py-1 text-[12px] font-[560]">{card.tag}</span>
+        ) : null}
+      </div>
+      <div className={`flex flex-col gap-1 ${behind ? "invisible" : ""}`} aria-hidden={behind || undefined}>
+        {title ? <p className="text-[15px] font-[560] leading-snug text-text">{title}</p> : null}
+        {meta ? <p className="text-[13px] text-text-3">{meta}</p> : null}
+        <TrustLine views={card.views} asOf={card.viewsAsOf} lang={lang} />
+      </div>
     </article>
   );
 }
