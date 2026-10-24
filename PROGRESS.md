@@ -32,6 +32,15 @@ Ted: "토니가 대사 MCP 툴 등을 데모에 사용하려고하니까 로그�
   or the new `recipeEdit` cues for `LinePicker`. (2) a recipe-edit reader in `lib/shorti/`: done (`recipeEdit`);
   Lane B may call it from server code.
 
+## 2026-10-24 · B — demo flow: profile → taste carries field and creator; asks for Lane A
+
+- `/profile/[id]` now opens `/taste?ghost=…&field=…&creator=…`: the deck follows the creator's niche (`fieldFor` in
+  `lib/flow.ts`, fashion words → fashion, else beauty), and the creator id rides along for the brief.
+- Three links stay open in Lane A files: a "콘티 보기" link on `/brief/[id]`, the creator (bio, plan, script, style)
+  fenced into the brief prompt, and the demo host's `.env.local` keys (Tony). Details in
+  `docs/lane-b-flow-asks-2026-10-24.md`.
+- Verified at 375 px: register → profile → taste on the beauty deck.
+
 ## 2026-10-24 · B — Ted's UI kit placed: step-by-step onboarding, flow strip, full AI label
 
 - `/onboard` asks one thing per screen with the kit's `FunnelProgress` (about me → what I made → who performs);

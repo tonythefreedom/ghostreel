@@ -1,7 +1,14 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { CREATOR_FLOW, FLOW_STEP } from "../lib/flow.ts";
+import { CREATOR_FLOW, FLOW_STEP, fieldFor } from "../lib/flow.ts";
+
+test("a creator's niche picks the matching trend deck", () => {
+  assert.equal(fieldFor("K-패션 코디"), "fashion");
+  assert.equal(fieldFor("OOTD styling"), "fashion");
+  assert.equal(fieldFor("K-뷰티 루틴"), "beauty");
+  assert.equal(fieldFor("홈카페"), "beauty");
+});
 
 const src = (p) => readFileSync(new URL(p, import.meta.url), "utf8");
 

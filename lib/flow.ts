@@ -6,5 +6,10 @@ export const CREATOR_FLOW: Array<{ title: string; body: string }> = [
   { title: "받기", body: "가상 인물이 출연한 숏폼을 받아 예약해요. 내 얼굴은 나오지 않아요." },
 ];
 
+/** Which trend deck fits a creator's niche: Shorti's fields are beauty and fashion; beauty when neither is named. */
+export function fieldFor(niche: string): "beauty" | "fashion" {
+  return /fashion|style|outfit|ootd|패션|코디|스타일|옷/i.test(niche) ? "fashion" : "beauty";
+}
+
 /** Where each screen sits in the loop (1-based, for StepStrip and FunnelProgress). */
 export const FLOW_STEP = { onboard: 1, profile: 2, taste: 2, brief: 3, storyboard: 3, channel: 4 } as const;

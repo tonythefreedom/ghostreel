@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { z } from "zod";
 import { StepStrip } from "@/components/kit";
 import { StyleSummary } from "@/components/StyleSummary";
-import { CREATOR_FLOW, FLOW_STEP } from "@/lib/flow";
+import { CREATOR_FLOW, FLOW_STEP, fieldFor } from "@/lib/flow";
 import { creatorKey } from "@/lib/creator";
 import { summarize } from "@/lib/creatorStyle";
 import { getGhost } from "@/lib/newtype";
@@ -81,7 +81,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
         <StepStrip steps={CREATOR_FLOW} current={FLOW_STEP.profile} />
       </section>
 
-      <Link href={`/taste?ghost=${creator.ghostId}`}
+      <Link href={`/taste?ghost=${creator.ghostId}&field=${fieldFor(creator.niche)}&creator=${creator.id}`}
         className="grid h-14 w-full place-items-center rounded-[var(--radius-card)] bg-ghost text-[15px] font-extrabold text-bg">
         이번 주 트렌드로 최적화하기
       </Link>
