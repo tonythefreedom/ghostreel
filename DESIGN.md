@@ -57,6 +57,12 @@ Light theme is out of scope for the hackathon; the app sets `color-scheme: dark`
 | `QueueWeek` | seven day slots, platform icon, state, Approve per item |
 | `DealCard` | seller, product photo → ghost-fitted still, `demo` tag on any money |
 | `DemoTag` | small `--warn` pill: "demo" / "pre-rendered" / "offline data" |
+| `GhostDock` | row of ghost avatars, arrow keys move, chosen one pressed, `+N` overflow, optional `+` new ghost |
+| `ReelGrid` | 9:16 tiles: poster, state pill, `AI` mark, `live`/`prerender`, age in mono; done tiles open the lightbox |
+| `ReelLightbox` | full-screen reel: play/pause, m:ss, seek, sound (starts muted), download, copy link; AI label always on |
+| `StepStrip` | the loop's three steps (고르기 · 승인하기 · 받기) as cards: done ✓, current in accent, ahead dimmed |
+| `FunnelProgress` | back arrow, one segment per step (mint done, violet current), `n/total` in mono |
+| `SpendMeter` | today's cap left as `left / cap` and a bar; amber at a fifth left |
 
 ## Copy
 

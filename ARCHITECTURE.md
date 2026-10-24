@@ -16,6 +16,10 @@ their *insides*.
   honest count line ("platform count · read on 10.21"); 만/억 and K/M with three significant digits; KO/EN words
   side by side; a three-way "how close to the original" sheet (keep / adapt / twist); a persona avatar with a job
   ring; timed say/do lines; a seven-part shot card (camera, subject, action, setting, lighting, audio, avoid).
+  `components/kit/` (10-24) adds the earlier prototype's first menu set the same way: a ghost dock with arrow keys,
+  a 9:16 reel grid with state pills, a lightbox (native dialog: focus held and returned, starts muted, AI label
+  on), three step cards, a segmented funnel bar with back, and a spend-left meter. Interaction patterns only:
+  no copy, names, class names, fonts, assets, or analytics from that prototype or from anything it studied.
 - **Fixtures are reduced.** `scripts/record-shorti.ts` stores only GhostReel's own types (fields on the allowlist
   in `tests/boundary.test.mjs`), never raw answers, UI resources, or internal links.
 - **Enforced, not trusted.** `tests/boundary.test.mjs` runs in the gate, in CI, and as a pre-commit hook. It fails

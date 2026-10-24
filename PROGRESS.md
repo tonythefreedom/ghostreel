@@ -2,6 +2,21 @@
 
 Newest first. Each entry: what is true now, what broke, what is next. Keep it short; long output goes in files.
 
+## 2026-10-24 · UI kit for Lane B (a gift from Lane A)
+
+Ted: "[private] 구레포를 보면 [private] 관련 미학보다는 ux 적인 요소들 추출해놓은게 있는데 … 맨 처음 [private]의 ux ui
+주요메뉴들을 뽑아놓은 깃 커밋 히스토리를 [private] 레포에서 조사해서 체리피킹으로 우리가 흡수하면 좋은 ux ui 패키지를 토니에게
+깃허브로 선물로 올려주자."
+
+- From the earlier private prototype's first menu set (its first three UI commits, 4.17), plus the fixes it earned
+  over ~50 later commits (focus held in dialogs and returned to the opener, previews start muted, arrow-key rows),
+  rewritten on DESIGN.md tokens: `GhostDock`, `ReelGrid`, `ReelLightbox`, `StepStrip`, `FunnelProgress`,
+  `SpendMeter` in `components/kit/` (Lane B now). Try them at `/kit` in development (404 in any build).
+- Not taken: its look (fonts, colours, glass), copy, names, analytics, the 19-step sales funnel's pitch pages.
+- Fits: `ReelGrid` + `ReelLightbox` for T13's reels grid; `FunnelProgress` for `/onboard` one step per screen;
+  `StepStrip` for the landing or an empty channel; `SpendMeter` once a route returns today's count (not wired).
+- Checked at 375 px: no horizontal scroll; lightbox keeps focus inside, Esc closes, focus returns to the tile.
+
 ## 2026-10-24 · no Shorti sign-in, every keyless read wired
 
 Ted: "토니가 대사 MCP 툴 등을 데모에 사용하려고하니까 로그인하라고 뜬다고하네.. 이거 해결해줘.." · "허용해도 되는 툴들 다 해주면
