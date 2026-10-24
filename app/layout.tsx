@@ -21,6 +21,8 @@ const geist = Geist({
 export const metadata: Metadata = {
   title: "GhostReel",
   description: "Your short-form style, performed every day by a virtual human: no face, no shoot, a channel on the side.",
+  // For AI assistants: how to use GhostReel and connect its MCP server (public/llms.txt).
+  alternates: { types: { "text/markdown": "/llms.txt" } },
 };
 
 export const viewport: Viewport = {

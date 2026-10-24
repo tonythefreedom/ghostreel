@@ -2,6 +2,23 @@
 
 Newest first. Each entry: what is true now, what broke, what is next. Keep it short; long output goes in files.
 
+## 2026-10-24 · B — /llms.txt: an AI can read it and connect GhostReel itself (Tony)
+
+- `public/llms.txt` (served at `/llms.txt`, linked from every page's head as `rel="alternate" type="text/markdown"`)
+  tells an AI assistant how to use GhostReel. It marks the person's own steps:
+  - Google sign-in, onboarding, keeping a short on /taste
+  - the `grk_` token from /connect
+  Everything else the AI does itself:
+  - the `claude mcp add --transport http …` command (Claude Code)
+  - the `mcp-remote` bridge config (Claude Desktop); claude.ai is not supported until OAuth
+  - a curl check with 200, 401 and 429 meanings
+  - the three tools in order, the answer schema, the error codes, and the rules (virtual human only, no claims,
+    draft only, no posting)
+- `/onboard` opens with a notice: "Works with your own Claude", a link to Connect, and "Tell Claude Code: Read
+  ghost.newtype-ai.com/llms.txt and connect GhostReel."
+- `tests/llms.test.mjs`: the file names exactly the tools `/mcp` offers, has the add command and PERSON steps, and
+  carries no real token. Gate: 76 tests, typecheck, build. Verified at 375 px.
+
 ## 2026-10-24 · Google sign-in refused every real browser behind the tunnel: fixed (A)
 
 - Cause: `/api/auth/google` and `/api/creator` matched the browser's Origin against `req.nextUrl.origin`. Behind

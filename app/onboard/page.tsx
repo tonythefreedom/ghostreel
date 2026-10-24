@@ -1,5 +1,6 @@
 // Lane B (T8). Registration: the creator's background, past shorts, plans and scripts, and the virtual human.
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
+import { ClaudeNotice } from "@/components/ClaudeNotice";
 import { OnboardForm } from "@/components/OnboardForm";
 import { listCharacters } from "@/lib/newtype";
 import { currentAccount, SESSION_COOKIE } from "@/lib/newtype/cinesynth";
@@ -11,6 +12,9 @@ export default async function OnboardPage() {
     listCharacters(),
     currentAccount((await cookies()).get(SESSION_COOKIE)?.value),
   ]);
+  // The site as the person sees it (the public host behind the tunnel, or localhost in dev), for the llms.txt hint.
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "this site";
   return (
     <main className="flex min-h-dvh flex-col gap-6 py-6">
       <header className="flex flex-col gap-2">
@@ -23,6 +27,7 @@ export default async function OnboardPage() {
           We read the shorts and plans you've made, learn your style, and a virtual human makes a new short in it every day, ready to schedule.
         </p>
       </header>
+      <ClaudeNotice host={host} />
       <OnboardForm ghosts={ghosts} initialAccount={account} />
     </main>
   );
