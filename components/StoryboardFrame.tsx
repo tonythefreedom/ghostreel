@@ -1,6 +1,7 @@
 "use client";
 // Lane B (T23). One beat of the storyboard: the scene image when one was made, else the prompt it will be made from.
 // The AI label sits on every image and is never optional.
+import { AiLabel } from "@/components/ui";
 import { useState } from "react";
 import { LinePicker } from "@/components/LinePicker";
 import type { LineOption } from "@/lib/lineSuggestions";
@@ -24,43 +25,43 @@ export function StoryboardFrame({ frame, pick }: {
   }
 
   return (
-    <li className="flex flex-col gap-2 rounded-[var(--radius-card)] border border-line bg-surface p-3">
-      <div className="relative aspect-[9/16] w-full overflow-hidden rounded-[8px] bg-surface-2">
+    <li className="flex flex-col gap-2">
+      <div className="relative aspect-[9/16] w-full overflow-hidden rounded-[var(--radius-pic)] bg-surface-2">
         {frame.image ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={frame.image.url} alt="" className="size-full object-cover" />
         ) : (
-          <div className="flex size-full flex-col justify-end gap-1 bg-gradient-to-b from-accent/30 to-surface-2 p-3">
-            <span className="text-[12px] font-semibold text-text-dim">Scene pending</span>
-            <p className="line-clamp-6 font-mono text-[11px] leading-snug text-text">{frame.prompt}</p>
+          <div className="flex size-full flex-col justify-end gap-1 bg-surface-2 p-3">
+            <span className="text-[12px] font-[560] text-text-dim">Scene pending</span>
+            <p className="line-clamp-6 font-mono text-[12px] leading-snug text-text">{frame.prompt}</p>
           </div>
         )}
-        <span className="absolute left-2 top-2 whitespace-nowrap rounded-full bg-bg/80 px-1.5 py-0.5 text-[9px] font-semibold text-text">
-          AI-generated · Virtual human
+        <span className="absolute inset-x-2 bottom-2 flex">
+          <AiLabel />
         </span>
         {frame.image ? (
-          <span className="absolute bottom-2 left-2 rounded-full bg-bg/80 px-2 py-0.5 text-[10px] font-semibold text-warn">Pre-made scene</span>
+          <span className="vellum absolute left-2 top-2 rounded-full px-2 py-0.5 text-[12px] font-[560] text-warn">Pre-made scene</span>
         ) : null}
       </div>
       <div className="flex items-baseline gap-2">
-        <span className="font-mono text-[12px] text-accent">{frame.t.toFixed(1)}s</span>
-        <span className="text-[11px] text-text-dim">#{frame.index + 1}</span>
+        <span className="font-mono text-[12px] text-text">{frame.t.toFixed(1)}s</span>
+        <span className="font-mono text-[12px] text-text-3">#{frame.index + 1}</span>
       </div>
       {pick && pick.options.length > 0 ? (
         <LinePicker briefId={pick.briefId} lines={pick.lines} index={frame.index} options={pick.options} locked={pick.locked} />
       ) : (
-        <p className="text-[13px] font-semibold leading-snug">“{frame.say}”</p>
+        <p className="text-[13px] font-[560] leading-snug">“{frame.say}”</p>
       )}
-      <p className="text-[12px] leading-snug text-text-dim">{frame.do}</p>
+      <p className="text-[12px] leading-snug text-text-3">{frame.do}</p>
       <div className="flex gap-2">
         {frame.image ? (
           <a href={frame.image.url} download
-            className="grid h-9 flex-1 place-items-center rounded-[var(--radius-card)] bg-surface-2 text-[12px] font-semibold">
+            className="grid h-11 flex-1 place-items-center rounded-[var(--radius-control)] text-[13px] font-[560] ring-1 ring-inset ring-line-strong hover:bg-surface">
             Download
           </a>
         ) : null}
         <button type="button" onClick={() => void copy()}
-          className="h-9 flex-1 rounded-[var(--radius-card)] border border-line text-[12px] font-semibold text-text-dim">
+          className="h-11 flex-1 rounded-[var(--radius-control)] text-[13px] font-[560] text-text-dim hover:text-text">
           {copied ? "Copied" : frame.image ? "Prompt" : "Copy scene prompt"}
         </button>
       </div>

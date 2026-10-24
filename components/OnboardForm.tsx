@@ -6,14 +6,16 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { GhostCard } from "@/components/GhostCard";
 import { FunnelProgress } from "@/components/kit";
+import { Button, Chip, ChipRow, Verb, VerbSpacer } from "@/components/ui";
 import { UnlockForm } from "@/components/UnlockForm";
 import type { Ghost, Lang } from "@/lib/types";
 
 const STEPS = 3; // about me · what I made · who performs: one question per screen (kit FunnelProgress)
 const MARKETS = ["US", "KR", "JP", "Global"] as const;
 const LANGS: Array<[Lang, string]> = [["en", "English"], ["ko", "Korean"], ["ja", "Japanese"], ["es", "Spanish"]];
-const field = "w-full rounded-[var(--radius-card)] border border-line bg-bg px-3 text-[15px]";
-const label = "text-[13px] font-semibold text-text-dim";
+const field = "w-full rounded-[var(--radius-control)] bg-surface-2 px-3 text-[15px] text-text placeholder:text-text-3 ring-1 ring-inset ring-line focus:ring-line-strong";
+const label = "text-[13px] font-[560] text-text-dim";
+const title = "text-[22px] font-[720] tracking-[-0.01em]";
 
 const urls = (text: string) =>
   text.split(/\s+/).map((s) => s.trim()).filter((s) => /^https?:\/\/\S+$/.test(s));
@@ -63,7 +65,7 @@ export function OnboardForm({ ghosts }: { ghosts: Ghost[] }) {
 
   return (
     <form
-      className="flex flex-col gap-6 pb-28"
+      className="flex flex-col gap-8 pt-2"
       onSubmit={(e) => {
         e.preventDefault();
         if (step < STEPS) {
@@ -73,7 +75,7 @@ export function OnboardForm({ ghosts }: { ghosts: Ghost[] }) {
     >
       <FunnelProgress step={step} total={STEPS} onBack={() => setStep(Math.max(1, step - 1))} />
       <section hidden={step !== 1} className="flex flex-col gap-3">
-        <h2 className="text-[18px] font-extrabold">About you</h2>
+        <h2 className={title}>About you</h2>
         <label className="flex flex-col gap-1">
           <span className={label}>Name or channel name</span>
           <input value={name} onChange={(e) => setName(e.target.value)} maxLength={40} className={`${field} h-11`} />
@@ -88,34 +90,28 @@ export function OnboardForm({ ghosts }: { ghosts: Ghost[] }) {
         </label>
         <div className="flex flex-col gap-1">
           <span className={label}>Market</span>
-          <div role="radiogroup" className="grid grid-cols-4 gap-1 rounded-full bg-surface p-1">
+          <ChipRow label="Market">
             {MARKETS.map((m) => (
-              <button key={m} type="button" role="radio" aria-checked={market === m} onClick={() => setMarket(m)}
-                className={`h-9 rounded-full text-[13px] font-semibold ${market === m ? "bg-surface-2 text-text" : "text-text-dim"}`}>
-                {m}
-              </button>
+              <Chip key={m} on={market === m} onClick={() => setMarket(m)}>{m}</Chip>
             ))}
-          </div>
+          </ChipRow>
         </div>
         <div className="flex flex-col gap-1">
           <span className={label}>Video languages</span>
-          <div className="flex flex-wrap gap-2">
+          <ChipRow label="Video languages">
             {LANGS.map(([l, name]) => (
-              <button key={l} type="button" aria-pressed={languages.includes(l)} onClick={() => toggleLang(l)}
-                className={`h-9 rounded-full border px-3 text-[13px] font-semibold ${languages.includes(l) ? "border-ghost text-ghost" : "border-line text-text-dim"}`}>
-                {name}
-              </button>
+              <Chip key={l} on={languages.includes(l)} onClick={() => toggleLang(l)}>{name}</Chip>
             ))}
-          </div>
+          </ChipRow>
         </div>
       </section>
 
       <section hidden={step !== 2} className="flex flex-col gap-3">
-        <h2 className="text-[18px] font-extrabold">What you've made</h2>
+        <h2 className={title}>What you've made</h2>
         <label className="flex flex-col gap-1">
           <span className={label}>Links to your shorts (optional, one per line, up to 10)</span>
           <textarea value={works} onChange={(e) => setWorks(e.target.value)} rows={4} placeholder="Paste your TikTok, Reels or Shorts links" className={`${field} py-2 font-mono text-[13px]`} />
-          <span className={`font-mono text-[11px] ${links.length > 10 ? "text-danger" : "text-text-dim"}`}>
+          <span className={`font-mono text-[12px] ${links.length > 10 ? "text-danger" : "text-text-3"}`}>
             {links.length} / 10{links.length === 0 ? " · none: your ghost learns from this week's trends" : ""}
           </span>
         </label>
@@ -127,38 +123,33 @@ export function OnboardForm({ ghosts }: { ghosts: Ghost[] }) {
           <span className={label}>A past script (optional)</span>
           <textarea value={script} onChange={(e) => setScript(e.target.value)} maxLength={4000} rows={4} placeholder="Paste a script you wrote" className={`${field} py-2`} />
         </label>
-        <p className="text-[12px] text-text-dim">Share only videos and writing you own. We use them to learn your style and never copy them.</p>
+        <p className="text-[13px] text-text-3">Share only videos and writing you own. We use them to learn your style and never copy them.</p>
       </section>
 
       <section hidden={step !== 3} className="flex flex-col gap-3">
-        <h2 className="text-[18px] font-extrabold">Who performs for you</h2>
+        <h2 className={title}>Who performs for you</h2>
         <div role="radiogroup" className="grid grid-cols-2 gap-3">
           {ghosts.map((g) => (
             <GhostCard key={g.id} ghost={g} selected={ghostId === g.id} onSelect={() => setGhostId(g.id)} />
           ))}
         </div>
-        <p className="text-[12px] text-text-dim">
-          A virtual human appears instead of you, and every video carries the <span className="font-semibold text-text">AI-generated · Virtual human</span> label.
+        <p className="text-[13px] text-text-3">
+          A virtual human appears instead of you, and every video carries the <span className="font-[560] text-text">AI-generated · Virtual human</span> label.
         </p>
       </section>
 
-      <div className="fixed inset-x-0 bottom-0 border-t border-line bg-bg/95 py-3 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-[430px] flex-col gap-2 px-4">
-          {locked ? <UnlockForm onUnlocked={() => { setLocked(false); void submit(); }} /> : null}
-          {error ? <p className="text-[13px] text-danger">Couldn't save ({error}). Check your answers.</p> : null}
-          {step < STEPS ? (
-            <button key="next" type="button" disabled={!stepOk[step - 1]} onClick={() => setStep(step + 1)}
-              className="h-14 w-full rounded-[var(--radius-card)] bg-ghost text-[15px] font-extrabold text-bg disabled:opacity-40">
-              Next
-            </button>
-          ) : (
-            <button key="submit" type="submit" disabled={!ready || busy}
-              className="h-14 w-full rounded-[var(--radius-card)] bg-ghost text-[15px] font-extrabold text-bg disabled:opacity-40">
-              {busy ? "Saving…" : "Sign up and read my style"}
-            </button>
-          )}
-        </div>
-      </div>
+      {locked ? <UnlockForm onUnlocked={() => { setLocked(false); void submit(); }} /> : null}
+      {error ? <p role="alert" className="text-[13px] text-danger">✕ Couldn&apos;t save ({error}). Check your answers.</p> : null}
+      <VerbSpacer />
+      <Verb note={step === STEPS ? "Your face never appears. The ghost performs." : undefined}>
+        {step < STEPS ? (
+          <Button key="next" size="xl" block disabled={!stepOk[step - 1]} onClick={() => setStep(step + 1)}>Next</Button>
+        ) : (
+          <Button key="submit" type="submit" size="xl" block disabled={!ready || busy}>
+            {busy ? "Saving…" : "Sign up and read my style"}
+          </Button>
+        )}
+      </Verb>
     </form>
   );
 }

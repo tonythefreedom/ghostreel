@@ -82,7 +82,7 @@ export function Player({ src, poster, ai = true, mode = "page", autoPlay = true,
 
       <div className="pointer-events-none absolute inset-x-2 top-2 z-[6] flex items-start justify-between gap-2">
         <div className="flex flex-col items-start gap-1.5">
-          {ai ? <AiLabel short={mode === "card"} /> : null}
+          {ai ? <AiLabel /> : null}
           {marks}
         </div>
         {src && !failed && mode !== "card" ? (

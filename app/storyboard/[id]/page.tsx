@@ -1,5 +1,5 @@
 // Lane B (T23). The storyboard for one brief: a scene per timed beat, in order, before the render.
-import Link from "next/link";
+import { ButtonLink, Verb, VerbSpacer } from "@/components/ui";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { StoryboardFrame } from "@/components/StoryboardFrame";
@@ -48,21 +48,21 @@ export default async function StoryboardPage({ params }: { params: Promise<{ id:
   const locked = brief.status === "approved";
 
   return (
-    <main className="flex min-h-dvh flex-col gap-5 py-6 pb-28">
+    <main className="flex min-h-dvh flex-col gap-6 py-6">
       <header className="flex flex-col gap-2">
-        <div className="flex items-center gap-2 text-[13px] font-semibold text-text-dim">
-          <span className="grid size-6 place-items-center rounded-full bg-accent text-[11px] font-extrabold text-text">
+        <div className="flex items-center gap-2 text-[13px] font-[560] text-text-dim">
+          <span className="grid size-6 place-items-center rounded-full bg-accent-soft text-[12px] font-[720] text-accent ring-1 ring-accent">
             {ghost.name.slice(0, 1)}
           </span>
           {ghost.name} · Storyboard
-          <span className="font-mono text-[11px]">{brief.durationSec}s · 9:16 · {brief.lang.toUpperCase()}</span>
+          <span className="font-mono text-[12px]">{brief.durationSec}s · 9:16 · {brief.lang.toUpperCase()}</span>
         </div>
-        <h1 className="text-[24px] font-extrabold leading-tight tracking-[-0.02em]">{brief.hook}</h1>
-        <p className="text-[13px] text-text-dim">
+        <h1 className="text-[22px] font-[720] leading-[1.27] tracking-[-0.01em]">{brief.hook}</h1>
+        <p className="text-[13px] text-text-3">
           {frames.length} beats · {made} scenes ready. Scenes are made with CineSynth; until then each shows the prompt it will use.
         </p>
         {offered ? (
-          <p className="text-[12px] text-text-dim">
+          <p className="text-[12px] text-text-3">
             GhostReel wrote the line options; each shows, in Shorti's own words, the move, opening or open spot it read in the source
             {recipe?.bpm ? ` (source ${Math.round(recipe.bpm)} BPM, ${((recipe.lengthMs ?? 0) / 1000).toFixed(1)} s)` : ""}.
             {locked ? " The brief is approved, so it can't change." : " Picking one updates the brief right away."}
@@ -77,14 +77,12 @@ export default async function StoryboardPage({ params }: { params: Promise<{ id:
         ))}
       </ol>
 
-      <div className="fixed inset-x-0 bottom-0 border-t border-line bg-bg/95 py-3 backdrop-blur">
-        <div className="mx-auto w-full max-w-[430px] px-4">
-          <Link href={`/brief/${brief.id}`}
-            className="grid h-14 w-full place-items-center rounded-[var(--radius-card)] bg-accent text-[15px] font-extrabold">
-            {brief.status === "approved" ? "See the brief and render" : "Back to the brief to approve"}
-          </Link>
-        </div>
-      </div>
+      <VerbSpacer />
+      <Verb>
+        <ButtonLink href={`/brief/${brief.id}`} size="xl" block>
+          {brief.status === "approved" ? "See the brief and render" : "Back to the brief to approve"}
+        </ButtonLink>
+      </Verb>
     </main>
   );
 }

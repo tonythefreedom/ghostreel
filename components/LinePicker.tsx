@@ -41,24 +41,24 @@ export function LinePicker({ briefId, lines, index, options, locked }: {
 
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-[11px] font-semibold text-text-dim">Lines from Shorti</span>
+      <span className="text-[12px] font-[560] text-text-dim">Lines from Shorti</span>
       <div role="radiogroup" className="flex flex-col gap-1">
         {options.map((o) => (
           <button key={o.say} type="button" role="radio" aria-checked={o.current} disabled={locked || o.current || busy !== null}
             onClick={() => void pick(o.say)}
-            className={`flex flex-col items-start gap-0.5 rounded-[8px] border px-2 py-1.5 text-left ${
-              o.current ? "border-ghost bg-ghost/10" : "border-line"
+            className={`flex flex-col items-start gap-0.5 min-h-11 rounded-[var(--radius-pic)] border px-3 py-2 text-left ${
+              o.current ? "border-text bg-surface-2" : "border-line hover:bg-surface"
             } disabled:cursor-default`}>
-            <span className="text-[12px] font-semibold leading-snug">{busy === o.say ? "Changing…" : o.say}</span>
-            <span className="text-[10px] leading-snug text-text-dim">
+            <span className="text-[12px] font-[560] leading-snug">{busy === o.say ? "Changing…" : o.say}</span>
+            <span className="text-[12px] leading-snug text-text-3">
               {o.basis}
-              {o.share ? <span className="text-ghost"> · {o.share}</span> : null}
+              {o.share ? <span className="text-text-dim"> · {o.share}</span> : null}
             </span>
           </button>
         ))}
       </div>
       {needsUnlock ? <UnlockForm onUnlocked={() => { const say = needsUnlock; setNeedsUnlock(null); void pick(say); }} /> : null}
-      {error ? <p className="text-[11px] text-danger">{error}</p> : null}
+      {error ? <p className="text-[12px] text-danger">{error}</p> : null}
     </div>
   );
 }

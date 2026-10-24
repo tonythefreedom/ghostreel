@@ -2,6 +2,17 @@
 
 Newest first. Each entry: what is true now, what broke, what is next. Keep it short; long output goes in files.
 
+## 2026-10-24 · Lane B screens on the new design (A, straight to master)
+
+Ted: "PR없이 그냥 메인으로 다이렉트로 해버려 충돌나도 어차피 토니 클로드코드가 해결하기 쉽다" · "토니 담당 화면 … 니가 직접해"
+
+- Tony, your screens moved onto `components/ui`: onboard (chips for market and languages, docked `Verb`), profile
+  (style said as text, violet ghost, docked verb), storyboard (scene tiles with the full AI label on their foot,
+  44 px controls, docked verb), `ReelPlayer` (the shared `Player`: poster first, tap to pause, one voice, label always
+  on), `RenderJob` (✓●○ steps with the clock, the ghost's poster while it films; no shimmer), kit tiles (Vellum
+  state pills, 12 px label). Your source tests now check the shared primitives instead of class strings.
+- Conflicts, if any, are only these files' class names; logic and contracts are unchanged.
+
 ## 2026-10-24 · design language ported: foundation (A)
 
 Ted: "우리 [private] 프로젝트의 디자인이나 미학 감각 그리고 ux ui에서 가져올 코드들이 엄청많다 … 각 페이지나 프론트 코드들을

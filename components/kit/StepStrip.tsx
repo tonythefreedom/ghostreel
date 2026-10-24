@@ -30,7 +30,7 @@ export function StepStrip({ steps, current, lang = "en" }: { steps?: Step[]; cur
             <span className={`font-mono text-[13px] ${mark === "done" ? "text-ghost" : "text-text-dim"}`}>
               {mark === "done" ? "✓" : String(i + 1).padStart(2, "0")}
             </span>
-            <span className="text-[15px] font-extrabold">{s.title}</span>
+            <span className="text-[15px] font-[720]">{s.title}</span>
             <span className="text-[13px] leading-snug text-text-dim">{s.body}</span>
           </li>
         );

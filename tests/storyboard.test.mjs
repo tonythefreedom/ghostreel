@@ -37,5 +37,6 @@ test("a pre-made keyframe attaches to its ghost and beat only, newest first", ()
 
 test("every scene image carries the AI label", () => {
   const src = readFileSync(new URL("../components/StoryboardFrame.tsx", import.meta.url), "utf8");
-  assert.match(src, /AI-generated · Virtual human/);
+  assert.match(src, /<AiLabel \/>/);
+  assert.match(readFileSync(new URL("../components/ui/Vellum.tsx", import.meta.url), "utf8"), /AI-generated · Virtual human/);
 });

@@ -10,12 +10,12 @@ export function KitPreview({ ghosts, jobs }: { ghosts: Ghost[]; jobs: RenderJob[
   const [step, setStep] = useState(2);
   const [open, setOpen] = useState<RenderJob | null>(null);
   const [used, setUsed] = useState(31);
-  const h = "text-[13px] font-semibold text-text-dim";
+  const h = "text-[13px] font-[560] text-text-dim";
 
   return (
     <main className="flex min-h-dvh flex-col gap-6 py-6">
       <header className="flex items-center justify-between">
-        <h1 className="text-[24px] font-extrabold tracking-[-0.02em]">Kit</h1>
+        <h1 className="text-[28px] font-[720] tracking-[-0.02em]">Kit</h1>
         <button type="button" onClick={() => setLang(lang === "ko" ? "en" : "ko")} className="rounded-full border border-line px-3 py-1 text-[13px]">
           {lang === "ko" ? "EN" : "KO"}
         </button>

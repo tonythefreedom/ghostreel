@@ -2,14 +2,18 @@
 
 import { useEffect, useState } from "react";
 import type { Brief, RenderJob as RenderJobData } from "@/lib/types";
+import { Progress, type Step } from "./ui";
 import { ReelPlayer } from "./ReelPlayer";
 
-const states = {
-  ko: { queued: "대기 중", running: "렌더 중", done: "완료", failed: "실패" },
-  en: { queued: "Queued", running: "Running", done: "Done", failed: "Failed" },
+// Lane B. A render as its steps (✓ approved · ● rendering · ○ ready) with the elapsed time beside the step that is
+// running, the ghost's poster standing in until the reel is ready. Never a spinner or a shimmer.
+const words = {
+  ko: { approved: "브리프 승인", queued: "렌더 대기", running: "고스트가 촬영 중", ready: "숏폼 완성", failed: "렌더 실패" },
+  en: { approved: "Brief approved", queued: "Waiting for the renderer", running: "Your ghost is filming", ready: "Reel ready", failed: "Render failed" },
 };
 
 export function RenderJob({ job, brief, lang = "en" }: { job: RenderJobData; brief?: Brief; lang?: "ko" | "en" }) {
+  const w = words[lang];
   const [now, setNow] = useState<number | null>(null);
   const active = job.status === "queued" || job.status === "running";
   useEffect(() => {
@@ -21,38 +25,31 @@ export function RenderJob({ job, brief, lang = "en" }: { job: RenderJobData; bri
   // Instant pre-render jobs may have no finishedAt from the route; never keep counting a completed job.
   const end = job.finishedAt ? Date.parse(job.finishedAt) : active ? now ?? start : start;
   const elapsed = Number.isFinite(start) && Number.isFinite(end) ? Math.max(0, Math.floor((end - start) / 1000)) : 0;
+  const clock = `${Math.floor(elapsed / 60)}:${String(elapsed % 60).padStart(2, "0")}`;
+
+  const steps: Step[] = [
+    { label: w.approved, state: "done" },
+    job.status === "queued"
+      ? { label: w.queued, state: "now", figure: clock }
+      : { label: w.running, state: job.status === "running" ? "now" : job.status === "failed" ? "now" : "done", figure: job.status === "running" ? clock : undefined },
+    { label: job.status === "failed" ? w.failed : w.ready, state: job.status === "done" ? "done" : "next", figure: job.status === "done" ? clock : undefined },
+  ];
 
   return (
-    <section className="flex w-full flex-col gap-4 rounded-[var(--radius-card)] border border-line bg-surface p-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p role="status" className={`text-[15px] font-semibold ${job.status === "failed" ? "text-danger" : "text-ghost"}`}>
-          {states[lang][job.status]}
-        </p>
-        <span className={`rounded-full px-2 py-1 text-[13px] ${job.provider === "prerender" ? "bg-warn/15 text-warn" : "bg-accent/15 text-accent"}`}>
+    <section className="flex w-full flex-col gap-4">
+      <div className="flex items-center justify-between gap-2">
+        <span className={`rounded-full px-2 py-0.5 text-[12px] font-[560] ${job.provider === "prerender" ? "bg-warn/15 text-warn" : "bg-accent-soft text-accent"}`}>
           {job.provider === "prerender" ? "prerender" : "live"}
         </span>
-        <span className="font-mono text-[13px] text-text-dim" aria-label={lang === "ko" ? "경과 시간" : "Elapsed time"}>
-          {Math.floor(elapsed / 60)}:{String(elapsed % 60).padStart(2, "0")}
-        </span>
       </div>
-      {active ? (
-        <div aria-hidden="true" className="relative aspect-[9/16] overflow-hidden rounded-[var(--radius-card)] bg-bg">
-          {job.status === "running" ? <div className="shimmer absolute inset-0 bg-accent/15" /> : null}
-        </div>
+      <Progress steps={steps} label={lang === "ko" ? "렌더 진행" : "Render progress"} />
+      {job.status === "failed" ? <p role="alert" className="text-[13px] text-danger">✕ {job.error ?? w.failed}</p> : null}
+      {job.status === "done" ? (
+        <ReelPlayer job={job} brief={brief} lang={lang} />
+      ) : active && job.posterUrl ? (
+        // The ghost's own still while it films: a poster, not a placeholder animation.
+        <div aria-hidden className="aspect-[9/16] w-full rounded-[var(--radius-pic)] bg-surface-2 bg-cover bg-center opacity-60" style={{ backgroundImage: `url("${job.posterUrl}")` }} />
       ) : null}
-      {job.status === "failed" ? <p className="text-[13px] text-danger">{job.error ?? states[lang].failed}</p> : null}
-      {job.status === "done" ? <ReelPlayer job={job} brief={brief} lang={lang} /> : null}
-      <style jsx>{`
-        .shimmer { animation: shimmer 4s ease-in-out infinite; }
-        @keyframes shimmer {
-          0%, 100% { transform: translateX(-100%); opacity: 0.2; }
-          50% { transform: translateX(100%); opacity: 0.7; }
-        }
-        @keyframes fade { 0%, 100% { opacity: 0.2; } 50% { opacity: 0.6; } }
-        @media (prefers-reduced-motion: reduce) {
-          .shimmer { animation: fade 4s ease-in-out infinite; animation-duration: 4s !important; transform: none; }
-        }
-      `}</style>
     </section>
   );
 }

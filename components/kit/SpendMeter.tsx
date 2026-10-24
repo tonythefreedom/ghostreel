@@ -7,7 +7,7 @@ export function SpendMeter({ used, cap, lang = "en" }: { used: number; cap: numb
   return (
     <div className="flex flex-col gap-1.5 rounded-[var(--radius-card)] border border-line bg-surface p-3">
       <div className="flex items-baseline justify-between text-[13px]">
-        <span className="font-semibold">{lang === "ko" ? "오늘 남은 생성" : "Left today"}</span>
+        <span className="font-[560]">{lang === "ko" ? "오늘 남은 생성" : "Left today"}</span>
         <span className="font-mono text-text-dim">{left} / {cap}</span>
       </div>
       <div

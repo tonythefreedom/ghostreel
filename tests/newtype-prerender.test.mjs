@@ -93,21 +93,25 @@ test("malformed manifest fails explicitly rather than silently falling back", as
 
 test("ReelPlayer always contains the AI pill and conditional matching-brief disclosure", () => {
   const src = readFileSync(new URL("../components/ReelPlayer.tsx", import.meta.url), "utf8");
-  assert.match(src, /AI-generated · Virtual human/);
-  assert.match(src, /absolute left-2 right-2 top-2/);
-  assert.match(src, /muted autoPlay loop playsInline/);
+  // The shared Player draws the label on the picture unless told not to; a reel never tells it not to.
+  assert.match(src, /<Player\b/);
+  assert.doesNotMatch(src, /ai=\{false\}/);
+  const player = readFileSync(new URL("../components/ui/Player.tsx", import.meta.url), "utf8");
+  assert.match(player, /ai = true/);
+  assert.match(player, /muted=\{muted\}/);
+  assert.match(player, /useState\(true\)/); // starts muted
+  assert.match(readFileSync(new URL("../components/ui/Vellum.tsx", import.meta.url), "utf8"), /AI-generated · Virtual human/);
   assert.match(src, /<DemoTag>/);
   assert.match(src, /!prerenderMatches\(job, brief\)/);
   assert.match(src, /Not rendered from this brief/);
-  assert.match(src, /이 brief 로 방금 렌더한 영상이 아닙니다/);
+  assert.match(src, /이 브리프로 방금 렌더한 영상이 아닙니다/);
 });
 
-test("RenderJob exposes all states, mono timing, and reduced-motion fade without polling", () => {
+test("RenderJob shows every state as steps with timing, no shimmer, without polling", () => {
   const src = readFileSync(new URL("../components/RenderJob.tsx", import.meta.url), "utf8");
   for (const state of ["queued", "running", "done", "failed"]) assert.match(src, new RegExp(state));
-  assert.match(src, /font-mono/);
-  assert.match(src, /prefers-reduced-motion: reduce/);
-  assert.match(src, /animation: fade/);
+  assert.match(src, /<Progress steps=\{steps\}/); // ui Progress draws figures in Geist digits
+  assert.doesNotMatch(src, /shimmer \{|@keyframes|animate-/);
   assert.match(src, /<ReelPlayer job=\{job\} brief=\{brief\}/);
   assert.doesNotMatch(src, /fetch\(/);
 });

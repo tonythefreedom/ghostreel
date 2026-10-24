@@ -43,9 +43,9 @@ export function GhostDock({ ghosts, selectedId, onSelect, onCreate, max = 5, lan
             tabIndex={i === stop ? 0 : -1}
             onClick={() => onSelect(g.id)}
             onKeyDown={(e) => move(e, i)}
-            className={`grid size-10 shrink-0 place-items-center overflow-hidden rounded-full text-[15px] font-extrabold transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ghost ${
+            className={`grid size-10 shrink-0 place-items-center overflow-hidden rounded-full text-[15px] font-[720] transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ghost ${
               on ? "ring-2 ring-accent" : "opacity-70 hover:opacity-100"
-            } ${g.portraitUrl ? "" : "bg-gradient-to-br from-accent to-surface-2"}`}
+            } ${g.portraitUrl ? "" : "bg-accent-soft text-accent ring-1 ring-inset ring-accent/40"}`}
           >
             {g.portraitUrl ? (
               // eslint-disable-next-line @next/next/no-img-element

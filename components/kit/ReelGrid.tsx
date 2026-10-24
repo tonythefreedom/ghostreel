@@ -1,6 +1,6 @@
 "use client";
 // Lane B (gift from Lane A, 10-24). The ghost's reels as 9:16 tiles: poster, state pill, age in mono. A finished
-// tile opens the lightbox; tiles still rendering show the slow violet shimmer, never a spinner.
+// tile opens the lightbox; tiles still rendering keep their poster and say so in words, never a spinner.
 import { useEffect, useState, type ReactNode } from "react";
 import type { RenderJob } from "@/lib/types";
 import { age } from "./logic";
@@ -9,7 +9,7 @@ const STATE = {
   ko: { queued: "대기 중", running: "렌더 중", done: "완료", failed: "실패" },
   en: { queued: "Queued", running: "Rendering", done: "Done", failed: "Failed" },
 };
-const TONE = { queued: "bg-surface-2 text-text-dim", running: "bg-accent text-text", done: "bg-ghost text-bg", failed: "bg-danger text-bg" };
+const TONE = { queued: "vellum text-text-dim", running: "vellum text-text", done: "vellum text-ghost", failed: "vellum text-danger" };
 
 type Props = { jobs: RenderJob[]; onOpen: (job: RenderJob) => void; empty?: ReactNode; lang?: "ko" | "en" };
 
@@ -37,20 +37,19 @@ export function ReelGrid({ jobs, onOpen, empty, lang = "en" }: Props) {
         const label = `${STATE[lang][job.status]}${job.provider === "prerender" ? (lang === "ko" ? " · 미리 렌더함" : " · pre-rendered") : ""}`;
         const body = (
           <>
-            <span className="relative block aspect-[9/16] w-full overflow-hidden rounded-[var(--radius-card)] bg-surface">
+            <span className="relative block aspect-[9/16] w-full overflow-hidden rounded-[var(--radius-pic)] bg-surface-2">
               {job.posterUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={job.posterUrl} alt="" loading="lazy" draggable={false} className="size-full object-cover" />
               ) : null}
-              {job.status === "running" ? <span aria-hidden className="kit-shimmer absolute inset-0 bg-accent/15" /> : null}
-              <span className={`absolute left-1.5 top-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold ${TONE[job.status]}`}>
+              <span className={`absolute left-1.5 top-1.5 rounded-full px-2 py-0.5 text-[12px] font-[560] ${TONE[job.status]}`}>
                 {STATE[lang][job.status]}
               </span>
-              <span className="absolute inset-x-1.5 bottom-1.5 rounded-[6px] bg-bg/80 px-1.5 py-0.5 text-center text-[9px] font-semibold leading-tight text-text">
+              <span className="vellum absolute inset-x-1.5 bottom-1.5 rounded-[var(--radius-badge)] px-1.5 py-0.5 text-center text-[12px] font-[560] leading-tight text-text">
                 AI-generated · Virtual human
               </span>
             </span>
-            <span className="flex items-center justify-between px-0.5 pt-1 text-[11px] text-text-dim">
+            <span className="flex items-center justify-between px-0.5 pt-2 text-[12px] text-text-3">
               <span className={job.provider === "prerender" ? "text-warn" : ""}>{job.provider === "prerender" ? "prerender" : "live"}</span>
               <span className="font-mono">{now ? age(job.finishedAt ?? job.startedAt, now, lang) : ""}</span>
             </span>
@@ -69,16 +68,6 @@ export function ReelGrid({ jobs, onOpen, empty, lang = "en" }: Props) {
           </li>
         );
       })}
-      <style jsx>{`
-        :global(.kit-shimmer) { animation: kit-shimmer 4s ease-in-out infinite; }
-        @keyframes kit-shimmer {
-          0%, 100% { transform: translateX(-100%); opacity: 0.2; }
-          50% { transform: translateX(100%); opacity: 0.7; }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          :global(.kit-shimmer) { animation: none; opacity: 0.4; }
-        }
-      `}</style>
     </ul>
   );
 }

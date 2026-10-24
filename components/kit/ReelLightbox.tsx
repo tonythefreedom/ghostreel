@@ -47,7 +47,7 @@ export function ReelLightbox({ job, brief, onClose, shareUrl, lang = "en" }: Pro
       setTimeout(() => setCopied(false), 1500);
     } catch { /* clipboard blocked: the button simply does nothing */ }
   };
-  const btn = "grid h-10 min-w-10 place-items-center rounded-full bg-surface-2 px-3 text-[13px] font-semibold text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ghost";
+  const btn = "grid h-10 min-w-10 place-items-center rounded-full bg-surface-2 px-3 text-[13px] font-[560] text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ghost";
 
   return (
     <dialog
@@ -76,7 +76,7 @@ export function ReelLightbox({ job, brief, onClose, shareUrl, lang = "en" }: Pro
             className="size-full object-contain"
           />
           <div className="absolute left-2 right-2 top-2 flex flex-wrap items-start gap-2">
-            <span className="rounded-full bg-bg px-2 py-1 text-[13px] font-semibold">AI-generated · Virtual human</span>
+            <span className="rounded-full bg-bg px-2 py-1 text-[13px] font-[560]">AI-generated · Virtual human</span>
             {prerender ? <DemoTag>{t.pre}</DemoTag> : null}
           </div>
         </div>
