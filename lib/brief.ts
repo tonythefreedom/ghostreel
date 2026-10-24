@@ -88,6 +88,34 @@ export function buildBriefPrompt(input: BriefInput): { system: string; user: str
 
 const cut = (s: string, n: number) => (s.length <= n ? s : `${s.slice(0, n - 1).trimEnd()}…`);
 
+// What the owner may change on a draft. Everything else (ids, source, ghost, language) is fixed.
+export const BriefEdit = Brief.pick({
+  hook: true,
+  lines: true,
+  outfit: true,
+  scene: true,
+  caption: true,
+  hashtags: true,
+  durationSec: true,
+}).partial();
+export type BriefEdit = z.infer<typeof BriefEdit>;
+
+export class BriefLocked extends Error {}
+
+/** Applies the owner's edits to a draft, optionally approving it. An approved brief no longer changes. */
+export function applyEdits(brief: Brief, edits: BriefEdit, approve: boolean): Brief {
+  if (brief.status === "approved") throw new BriefLocked("an approved brief is locked");
+  const next = { ...brief, ...edits };
+  const lines = [...next.lines].sort((a, b) => a.t - b.t).map((l) => ({ ...l, t: Math.min(l.t, next.durationSec - 0.5) }));
+  if (lines[0]) lines[0] = { ...lines[0], t: 0 };
+  return Brief.parse({
+    ...next,
+    lines,
+    hashtags: next.hashtags.map((h) => h.replace(/^#+/, "").replace(/\s+/g, "")).filter(Boolean),
+    status: approve ? "approved" : "draft",
+  });
+}
+
 // Model output → a Brief that satisfies the contract: clamped, ordered, trimmed. Throws only if nothing usable came back.
 export function finishBrief(input: BriefInput, draft: Draft, now = new Date()): Brief {
   const durationSec = draft.durationSec > 12 ? 15 : 10;

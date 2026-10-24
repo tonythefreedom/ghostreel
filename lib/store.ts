@@ -2,7 +2,10 @@
 import "server-only";
 import { env } from "./env.ts";
 
-const memory = new Map<string, { value: string; expiresAt?: number }>();
+// One map per process: Next may load this module separately for pages and for route handlers.
+type Memory = Map<string, { value: string; expiresAt?: number }>;
+const scope = globalThis as typeof globalThis & { __ghostreelStore?: Memory };
+const memory: Memory = (scope.__ghostreelStore ??= new Map());
 
 async function redis(command: (string | number)[]): Promise<unknown> {
   const url = env.redisUrl();

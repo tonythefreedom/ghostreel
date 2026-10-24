@@ -42,3 +42,21 @@ test("finishBrief clamps the model's draft into a valid Brief", () => {
   assert.equal(brief.status, "draft");
   assert.equal(brief.intent, "twist");
 });
+
+test("owner edits apply to a draft; approval locks it", async () => {
+  const { applyEdits, BriefLocked } = await import("../lib/brief.ts");
+  const draft = finishBrief(input, {
+    durationSec: 10, hook: "h", lines: [{ t: 0, say: "a", do: "b" }, { t: 4, say: "c", do: "d" }],
+    outfit: "o", scene: "s", caption: "c", hashtags: ["x"], twist: "",
+  });
+  const edited = applyEdits(draft, { hook: "New hook", lines: [{ t: 6, say: "later", do: "x" }, { t: 2, say: "first", do: "y" }], hashtags: ["#a b"] }, false);
+  assert.equal(edited.hook, "New hook");
+  assert.deepEqual(edited.lines.map((l) => [l.t, l.say]), [[0, "first"], [6, "later"]]);
+  assert.deepEqual(edited.hashtags, ["ab"]);
+  assert.equal(edited.status, "draft");
+  assert.equal(edited.id, draft.id, "ids never change");
+  const approved = applyEdits(edited, {}, true);
+  assert.equal(approved.status, "approved");
+  assert.throws(() => applyEdits(approved, { hook: "sneaky" }, false), BriefLocked);
+  assert.throws(() => applyEdits(edited, { lines: [{ t: 0, say: "only one", do: "x" }] }, false), "a brief keeps at least two beats");
+});

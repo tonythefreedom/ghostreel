@@ -33,7 +33,7 @@ their *insides*.
 | Short-form data | Shorti public MCP, keyless (`lib/mcp.ts` ~90-line client, JSON or SSE) | Verified 2026-10-24: stateless, plain JSON; keyless limit 20 req/s per IP, so enrich 4 at a time with backoff. |
 | Ghost render | NEWTYPE CineSynth on Nexus, endpoint and token from env (`lib/newtype/`) | Production characters, voice consent, AI label, watermark. |
 | Brief and captions | Claude via `@anthropic-ai/sdk` 1.3: `claude-opus-5-5`, effort `low`, zod structured output (`beta.messages.parse`), `fallbacks: "default"` (`lib/claude.ts`; prompt and clean-up in `lib/brief.ts`) | Current default model; `low` effort keeps a live edit loop short; a policy decline is retried server-side on Anthropic's recommended fallback. |
-| State | Upstash Redis over REST when env is set, process memory otherwise (`lib/store.ts`) | No schema in an 8-hour build. Memory resets between serverless instances, so prod wants Redis. |
+| State | Upstash Redis over REST when env is set, one process-wide memory map otherwise (`lib/store.ts`) | No schema in an 8-hour build. Pages and routes are separate serverless functions in prod, so prod needs Redis for anything to carry across them. |
 | Deploy | `vercel deploy --prod` from a teammate machine; CI runs the gate on every push | Ted has push, not admin, on the repo. |
 
 ## What Shorti answers keyless (and what it does not)
@@ -54,11 +54,13 @@ their *insides*.
 app/
   page.tsx                    landing → /taste
   taste/page.tsx              the daily game (live Shorti deck, fixture fallback)
-  brief/[id]/page.tsx         the ghost's draft brief (read-only until T11)
+  brief/[id]/page.tsx         the brief editor: edit the draft, approve (locks it), render
   ghost/…                     T13
   api/taste/route.ts          GET/PUT picks (cheap, size-capped)
   api/unlock/route.ts         owner passcode → httpOnly cookie
-  api/brief/route.ts          POST: kept short → brief (spend-guarded); GET ?id=
+  api/brief/route.ts          POST: kept short → brief (spend-guarded); PATCH: owner edits / approve; GET ?id=
+  api/render/route.ts         POST: approved brief → one RenderJob (spend-guarded); GET ?brief= polls (Lane B owns)
+  api/dev/seed/route.ts       development only (404 in builds): a [dev] brief to exercise the flow without a key
   api/render, …               spend routes: always behind lib/guard.ts
 components/                   TrendCard, TrustLine, TasteSwipe, … (DESIGN.md names)
 lib/

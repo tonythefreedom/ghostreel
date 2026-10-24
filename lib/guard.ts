@@ -36,11 +36,15 @@ function burstOk(ip: string, max = 8, windowMs = 60_000): boolean {
   return hits.length <= max;
 }
 
+/** Owner-only writes that cost nothing (editing, approving): a refusal response, or null. */
+export function requireOwner(req: NextRequest): NextResponse | null {
+  return isOwner(req) ? null : NextResponse.json({ error: "locked", hint: "unlock with the owner passcode" }, { status: 401 });
+}
+
 /** Returns a refusal response, or null when the spend may go ahead. */
 export async function guardSpend(req: NextRequest, kind: "brief" | "render"): Promise<NextResponse | null> {
-  if (!isOwner(req)) {
-    return NextResponse.json({ error: "locked", hint: "unlock with the owner passcode" }, { status: 401 });
-  }
+  const locked = requireOwner(req);
+  if (locked) return locked;
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
   if (!burstOk(`${kind}:${ip}`)) {
     return NextResponse.json({ error: "slow_down" }, { status: 429, headers: { "retry-after": "60" } });

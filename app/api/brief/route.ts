@@ -1,8 +1,9 @@
-// Writes a draft brief for one kept short. Spends money (Claude), so the spend guard runs first.
+// POST writes a draft brief for one kept short (Claude: spend-guarded). PATCH lets the owner edit and approve it.
 import { NextResponse, type NextRequest } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
-import { guardSpend } from "@/lib/guard";
+import { applyEdits, BriefEdit, BriefLocked } from "@/lib/brief";
+import { guardSpend, requireOwner } from "@/lib/guard";
 import { BriefRefused, ModelKeyMissing, writeBrief } from "@/lib/claude";
 import { getGhost } from "@/lib/newtype";
 import { formatPlan, reading } from "@/lib/shorti";
@@ -71,4 +72,24 @@ export async function GET(req: NextRequest) {
   if (!id.success) return NextResponse.json({ error: "bad_id" }, { status: 400 });
   const brief = await store.get<Brief>(`brief:${id.data}`);
   return brief ? NextResponse.json({ brief }) : NextResponse.json({ error: "not_found" }, { status: 404 });
+}
+
+const Patch = z.object({ id: z.string().uuid(), edits: BriefEdit.default({}), approve: z.boolean().default(false) });
+
+export async function PATCH(req: NextRequest) {
+  const parsed = Patch.safeParse(await req.json().catch(() => null));
+  if (!parsed.success) return NextResponse.json({ error: "bad_body", issues: parsed.error.issues.slice(0, 3) }, { status: 400 });
+  const locked = requireOwner(req);
+  if (locked) return locked;
+  const brief = await store.get<Brief>(`brief:${parsed.data.id}`);
+  if (!brief) return NextResponse.json({ error: "not_found" }, { status: 404 });
+  try {
+    const next = applyEdits(brief, parsed.data.edits, parsed.data.approve);
+    await store.set(`brief:${next.id}`, next, 60 * 60 * 24 * 7);
+    return NextResponse.json({ brief: next });
+  } catch (e) {
+    if (e instanceof BriefLocked) return NextResponse.json({ error: "approved_locked" }, { status: 409 });
+    if (e instanceof z.ZodError) return NextResponse.json({ error: "invalid_edit", issues: e.issues.slice(0, 3) }, { status: 400 });
+    throw e;
+  }
 }

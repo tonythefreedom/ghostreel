@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { Intent, KeepPart } from "@/lib/types";
 import { t, type UiLang, type WordKey } from "@/lib/words";
+import { UnlockForm } from "./UnlockForm";
 
 export interface KeptItem {
   videoId: string;
@@ -20,7 +21,6 @@ export function BriefStarter({ ghostId, items, lang = "ko" }: { ghostId: string;
   const [busy, setBusy] = useState<string | null>(null);
   const [seconds, setSeconds] = useState(0);
   const [locked, setLocked] = useState<string | null>(null);
-  const [passcode, setPasscode] = useState("");
   const [failed, setFailed] = useState<string | null>(null);
 
   useEffect(() => {
@@ -51,18 +51,6 @@ export function BriefStarter({ ghostId, items, lang = "ko" }: { ghostId: string;
     }
   }
 
-  async function unlock() {
-    const res = await fetch("/api/unlock", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ passcode }),
-    });
-    if (!res.ok) return setPasscode("");
-    const retry = locked;
-    setLocked(null);
-    if (retry) await write(retry);
-  }
-
   return (
     <ul className="flex flex-col gap-3">
       {items.map((item) => {
@@ -89,27 +77,13 @@ export function BriefStarter({ ghostId, items, lang = "ko" }: { ghostId: string;
               ))}
             </div>
             {locked === item.videoId ? (
-              <form
-                className="flex flex-col gap-2"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  void unlock();
+              <UnlockForm
+                lang={lang}
+                onUnlocked={() => {
+                  setLocked(null);
+                  void write(item.videoId);
                 }}
-              >
-                <p className="text-[13px] text-warn">{t("locked", lang)}</p>
-                <div className="flex gap-2">
-                  <input
-                    type="password"
-                    autoComplete="current-password"
-                    value={passcode}
-                    onChange={(e) => setPasscode(e.target.value)}
-                    className="h-11 min-w-0 flex-1 rounded-[var(--radius-card)] border border-line bg-bg px-3 text-[15px]"
-                  />
-                  <button type="submit" className="h-11 rounded-[var(--radius-card)] bg-surface-2 px-4 font-semibold">
-                    {t("unlock", lang)}
-                  </button>
-                </div>
-              </form>
+              />
             ) : (
               <button
                 type="button"

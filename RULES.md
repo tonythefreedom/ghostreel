@@ -8,7 +8,7 @@ Two writers, split by folder so nobody edits the same file at the same time.
 
 | Lane | Owner | Owns |
 | --- | --- | --- |
-| A — loop and Shorti | Ted (+ his agents) | `lib/shorti/`, `lib/mcp.ts`, `lib/claude.ts`, `lib/store.ts`, `lib/words.ts`, `app/taste`, `app/brief`, `app/ghost`, `app/api/taste`, `app/api/brief`, `app/api/queue`, `components/TrendCard.tsx`, `components/TrustLine.tsx`, `components/TasteSwipe.tsx`, `fixtures/shorti`, `scripts/record-shorti.ts` |
+| A — loop and Shorti | Ted (+ his agents) | `lib/shorti/`, `lib/mcp.ts`, `lib/claude.ts`, `lib/store.ts`, `lib/words.ts`, `app/taste`, `app/brief`, `app/ghost`, `app/api/taste`, `app/api/brief`, `app/api/queue`, `app/api/dev`, `components/TrendCard.tsx`, `components/TrustLine.tsx`, `components/TasteSwipe.tsx`, `components/BriefStarter.tsx`, `components/BriefEditor.tsx`, `components/UnlockForm.tsx`, `fixtures/shorti`, `scripts/record-shorti.ts` |
 | B — ghost and render | NEWTYPE teammate (+ their agents) | `lib/newtype/`, `app/onboard`, `app/api/render`, `components/ReelPlayer.tsx`, `components/RenderJob.tsx`, `components/DealCard.tsx`, `fixtures/newtype`, `public/prerender` |
 | Shared | both, by agreement in chat first | `lib/types.ts`, `lib/env.ts`, `lib/guard.ts`, `tests/`, `scripts/deny.mjs`, `.githooks/`, `.github/`, `package.json`, `app/layout.tsx`, `app/globals.css`, the six docs |
 

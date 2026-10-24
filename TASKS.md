@@ -18,7 +18,8 @@ the gate output. Hours count from the start (H0). Lane A = loop and Shorti, Lane
 
 - [x] **T5 · A** `lib/mcp.ts` + `lib/shorti/` (keyless, `lang: 'en'`, 4-wide enrich with backoff, cache, fixture
   fallback with provenance). Pages call it server-side; no public proxy route.
-- [ ] **T6 · B** `lib/newtype/` `listCharacters` + `render` + `getJob` (stub with roster is there); `/api/render` POST/GET.
+- [ ] **T6 · B** `lib/newtype/` `listCharacters` + `render` + `getJob` (stub with roster is there). `/api/render` is
+  scaffolded with the shared rules (approved only, one job per brief, spend guard); fill the adapter, own the route.
   Done: a curl starts a real render and polls it to `done` with a `videoUrl`.
 - [ ] **T7 · B** Start 3 real renders now (Yuna, English, 10 s, from the T4 format) so finished clips exist by H5;
   save them to `public/prerender/`. Done: three AI-labelled MP4s committed or linked.
@@ -31,8 +32,9 @@ the gate output. Hours count from the start (H0). Lane A = loop and Shorti, Lane
 
 - [~] **T10 · A** `lib/claude.ts` + `lib/brief.ts` + `/api/brief` (spend-guarded) + brief starter (keep / adapt / twist)
   + read-only `/brief/[id]`. Guards verified on a prod build. Open: the live < 15 s check needs `ANTHROPIC_API_KEY`.
-- [ ] **T11 · A** `/brief/[id]`: `BriefSheet`, inline line edits, Approve → POST `/api/render`. Done: an approved
-  brief creates a `RenderJob`; an unapproved one cannot.
+- [x] **T11 · A** `/brief/[id]` editor (hook, timed beats ±, outfit, scene, caption, hashtags, 10/15 s), owner-only
+  `PATCH /api/brief`, approve locks it, then `POST /api/render`. Verified: unapproved → 409, approved → a `RenderJob`
+  (failed honestly until T6), edits after approval → 409.
 - [ ] **T12 · B** `ReelPlayer` + `RenderJob` components: poll, shimmer, AI label pill always on, `prerender` tag.
   Done: a finished render plays on a phone-width screen with the label visible.
 

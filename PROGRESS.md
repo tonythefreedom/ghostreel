@@ -2,6 +2,23 @@
 
 Newest first. Each entry: what is true now, what broke, what is next. Keep it short; long output goes in files.
 
+## 2026-10-24 · T11 — brief editor and approve-to-render
+
+Done
+- `/brief/[id]` is an editor: hook, timed beats (add, remove, retime), outfit, scene, caption, hashtags, 10/15 s.
+  Save keeps a draft; "승인하고 렌더" approves (locks the brief), then asks `/api/render` for one job.
+- `PATCH /api/brief` is owner-only (`requireOwner`); `applyEdits` keeps ids fixed and refuses edits after approval.
+- `/api/render` scaffolded for Lane B with the shared rules: approved only (409 otherwise), one job per brief (a
+  second click never pays twice), spend guard; a render that cannot start is stored as a failed job and shown.
+- Verified in the browser at 390 px on a `[dev]` seeded brief: edit → save → reload keeps it → approve → job
+  `failed: newtype render not wired yet (T6)`; unapproved render 409; edit after approve 409.
+
+Broke / learned
+- Pages and route handlers load modules separately, so the memory store is now one process-wide map. On Vercel they
+  are separate functions: **without Redis, a brief written by the API is not visible to its page.** Redis is now a
+  must before the demo, not a nice-to-have.
+- The Next dev badge covered the bottom action bar; `devIndicators: false`.
+
 ## 2026-10-24 · T10 — brief writer (live call pending a key)
 
 Done
