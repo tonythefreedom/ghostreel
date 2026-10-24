@@ -2,6 +2,15 @@
 
 Newest first. Each entry: what is true now, what broke, what is next. Keep it short; long output goes in files.
 
+## 2026-10-24 · B — "Tune it to this week's trends" no longer sits still for 7–15 s
+- Cause: /taste waits for Shorti's deck and a reading of each of its first eight shorts before it draws anything.
+  Measured with a cold cache: 7.1 s in production, 14.6 s locally (plus the dev compile). With a warm cache: 1 s.
+- The profile page now starts those reads without waiting, for the creator's field and language, so the 10-minute
+  cache is full by the time the button is pressed. `app/taste/loading.tsx` shows the title and a line saying the
+  trends are being fetched as soon as the button is pressed, never a spinner. The profile's ghost card shows the
+  ghost's face instead of a monogram.
+- Gate: 95 tests, typecheck, build. Not seen: the loading screen with a cold cache (the local cache was warm).
+
 ## 2026-10-24 · B — live CineSynth render with lip-sync, progress and ETA, running in the background
 - Tony (via PM): approving a brief now starts a real CineSynth render as the signed-in user, not the prerender cut.
   REST routes with the user's CineSynth JWT (its MCP tools only take Nexus-signed calls): `/api/cf/keyframe` →

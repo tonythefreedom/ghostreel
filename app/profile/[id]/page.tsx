@@ -9,8 +9,9 @@ import { getLang } from "@/lib/lang";
 import { t } from "@/lib/words";
 import { creatorKey } from "@/lib/creator";
 import { summarize } from "@/lib/creatorStyle";
+import { withFace } from "@/lib/ghostFace";
 import { getGhost } from "@/lib/newtype";
-import { reading, recipeEdit } from "@/lib/shorti";
+import { reading, recipeEdit, trending } from "@/lib/shorti";
 import { store } from "@/lib/store";
 import type { Creator } from "@/lib/types";
 
@@ -23,6 +24,12 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
   if (!creator) notFound();
   const ghost = await getGhost(creator.ghostId);
   const lang = await getLang();
+  // Warm the next screen: /taste waits for this week's deck and a reading of each of its first eight shorts (7 s or
+  // more cold, 1 s warm). Started here without waiting, so the 10-minute Shorti cache is full by the time the button
+  // is pressed.
+  void trending(fieldFor(creator.niche), lang)
+    .then(({ data }) => Promise.all(data.cards.slice(0, 8).map((c) => reading(c.videoId, c.url, lang))))
+    .catch(() => undefined);
   // Keyless Shorti reads of the creator's own shorts (cached 10 min); a miss just leaves that short out.
   const style = creator.works.length
     ? summarize(await Promise.all(creator.works.map(async (url) => ({
@@ -71,7 +78,12 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
 
       {ghost ? (
         <section className="flex items-center gap-3 rounded-[var(--radius-card)] bg-surface p-4">
-          <span className="grid size-12 shrink-0 place-items-center rounded-full bg-accent-soft text-[18px] font-[720] text-accent ring-2 ring-accent">{ghost.name.slice(0, 1)}</span>
+          {withFace(ghost).portraitUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={withFace(ghost).portraitUrl} alt="" className="size-12 shrink-0 rounded-full object-cover object-[50%_18%] ring-2 ring-accent" />
+          ) : (
+            <span className="grid size-12 shrink-0 place-items-center rounded-full bg-accent-soft text-[18px] font-[720] text-accent ring-2 ring-accent">{ghost.name.slice(0, 1)}</span>
+          )}
           <div className="flex flex-col">
             <span className="text-[15px] font-[720]">{lang === "ko" ? `${ghost.name}가 대신 출연해요` : `${ghost.name} performs for you`}</span>
             <span className="text-[13px] text-text-3">AI-generated · Virtual human</span>

@@ -9,6 +9,7 @@ export function langFromAccept(accept: string | null): UiLang {
 export const words = {
   brand: { ko: "고스트릴", en: "GhostReel" },
   tasteTitle: { ko: "오늘의 감각 고르기", en: "Teach your taste" },
+  tasteLoading: { ko: "이번 주 해외 트렌드와 쇼티의 영상 읽기를 불러오는 중이에요. 처음엔 몇 초 걸려요.", en: "Fetching this week's trends abroad and Shorti's reading of each short. The first time takes a few seconds." },
   tasteSub: {
     ko: "이번 주 해외에서 뜨는 숏폼이에요. 내 고스트가 따라 했으면 하는 것만 남기세요.",
     en: "Shorts rising abroad this week. Keep only what your ghost should learn from.",
