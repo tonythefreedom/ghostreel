@@ -4,6 +4,8 @@
 // downloads included, carries it as a Bearer token. Nothing here is a GhostReel secret.
 import "server-only";
 import { z } from "zod";
+import { env } from "../env.ts";
+import { OWNER_COOKIE, ownerToken } from "../guard.ts";
 import { CinesynthAccount } from "../types.ts";
 
 export const CINESYNTH_URL = (process.env.CINESYNTH_URL ?? "https://vs.newtype-ai.com").replace(/\/+$/, "");
@@ -56,6 +58,17 @@ export async function currentAccount(token: string | undefined): Promise<Cinesyn
   } catch {
     return null;
   }
+}
+
+/**
+ * Tony (10-24): an approved CineSynth account is the owner, so no passcode is needed. The owner cookie Lane A's guard
+ * already checks is set alongside the session; the passcode stays as a fallback. Without a passcode configured there
+ * is no owner token to give, and the guard's own rule (dev open, prod closed) applies.
+ */
+export function ownerCookieFor(account: CinesynthAccount): { name: string; value: string } | null {
+  const passcode = env.passcode();
+  if (account.status !== "approved" || !passcode) return null;
+  return { name: OWNER_COOKIE, value: ownerToken(passcode) };
 }
 
 /** Fetches one of the user's own CineSynth results (a link an MCP or job answer gave) with their session. */

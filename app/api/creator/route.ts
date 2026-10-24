@@ -32,5 +32,6 @@ export async function POST(req: NextRequest) {
     account: { id: account.id, email: account.email },
   });
   await store.set(creatorKey(creator.id), creator, CREATOR_TTL);
+  await store.push(`creators:${account.id}`, creator.id, 20, CREATOR_TTL); // the account's ghosts, for its MCP tokens
   return NextResponse.json({ creator }, { status: 201 });
 }

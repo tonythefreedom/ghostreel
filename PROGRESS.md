@@ -2,6 +2,29 @@
 
 Newest first. Each entry: what is true now, what broke, what is next. Keep it short; long output goes in files.
 
+## 2026-10-24 · B — GhostReel MCP server: the person's own Claude writes the brief (Tony's decision, Ted's yes)
+
+- Tony: the public server holds no model key; users write briefs with their own Claude. Connect token now, OAuth
+  after the hackathon. Ted agreed: new files only; `lib/brief.ts` used read-only; `/api/brief` unchanged.
+- `/mcp` (Streamable HTTP 2025-06-18, JSON answers, POST only). Three tools, scoped to the token's account:
+  - `ghostreel_ghosts`: your ghosts and kept shorts
+  - `ghostreel_brief_context`: Lane A's `buildBriefPrompt` system and user prompt, plus the `Draft` JSON schema
+  - `ghostreel_brief_submit`: `Draft` + `finishBrief` → a DRAFT brief and its link
+  No approve, render, spend or post tool exists.
+- Tokens (`lib/ghostmcp/tokens.ts`):
+  - `grk_` + 32 random bytes, shown once on `/connect` with the `claude mcp add` command.
+  - Only the SHA-256 is stored, compared in constant time.
+  - 7-day expiry, at most 3 live per account, Revoke and Revoke all; sign-out revokes all.
+  - Bad, expired or revoked tokens get 401 with `WWW-Authenticate`; 30 calls a minute per token.
+  - `/connect` warns that the add command leaves the token in shell history and the Claude config.
+- Ownership: an account owns the ghosts of its own `Creator` records (`creators:<accountId>`, written at sign-up).
+- An approved CineSynth account is now the owner without the passcode (Tony): sign-in also sets Lane A's owner
+  cookie when a passcode is configured; the passcode stays as a fallback. `lib/guard.ts` is unchanged.
+- `tests/ghostmcp.test.mjs` (6) covers PM's list: wrong-account ghost refused, expired and revoked tokens refused,
+  submit stores only a DRAFT with no approve or render path, and the token never in an answer or a log.
+- Local smoke: `GET /mcp` 405; no or bad token 401; `/api/mcp-tokens` without a session 401. Gate: 71 tests,
+  typecheck, build. End to end with a real token needs a Google sign-in (Tony).
+
 ## 2026-10-24 · T7 (B) — a labelled preview clip until lip-sync is back
 
 - `public/prerender/yuna-percent-ready-preview.mp4` (720×1280, 7.76 s, 463 KB) + poster: the four storyboard scenes
