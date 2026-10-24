@@ -24,11 +24,11 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
   if (!creator) notFound();
   const ghost = await getGhost(creator.ghostId);
   const lang = await getLang();
-  // Warm the next screen: /taste waits for this week's deck and a reading of each of its first eight shorts (7 s or
+  // Warm the next screen: /taste waits for this week's deck and a reading of each of its first twenty shorts (7 s or
   // more cold, 1 s warm). Started here without waiting, so the 10-minute Shorti cache is full by the time the button
   // is pressed.
   void trending(fieldFor(creator.niche), lang)
-    .then(({ data }) => Promise.all(data.cards.slice(0, 8).map((c) => reading(c.videoId, c.url, lang))))
+    .then(({ data }) => Promise.all(data.cards.slice(0, 20).map((c) => reading(c.videoId, c.url, lang))))
     .catch(() => undefined);
   // Keyless Shorti reads of the creator's own shorts (cached 10 min); a miss just leaves that short out.
   const style = creator.works.length
