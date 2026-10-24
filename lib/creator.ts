@@ -13,7 +13,7 @@ export const CreatorInput = z.object({
   market: Market.default("US"),
   languages: z.array(Lang).min(1).max(4),
   ghostId: z.string().regex(/^[a-z0-9-]{1,40}$/), // the virtual human who performs; never the creator's own face
-  works: z.array(z.string().trim().url().max(300)).min(1).max(10), // the creator's own past shorts
+  works: z.array(z.string().trim().url().max(300)).max(10).default([]), // own past shorts; none is fine (Ted 10-24)
   plan: z.string().trim().max(4000).default(""), // a past plan or pitch, pasted as text
   script: z.string().trim().max(4000).default(""), // a past script, pasted as text
 });

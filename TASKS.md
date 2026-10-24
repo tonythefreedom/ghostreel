@@ -51,7 +51,8 @@ the gate output. Hours count from the start (H0). Lane A = loop and Shorti, Lane
 
 ## H6–H7 — Stage-proofing
 
-- [ ] **T16a · Ted** Pick the demo machine and who runs it; run the demo host steps in ARCHITECTURE.md on it once.
+- [ ] **T16a · B** Decided by Ted 10-24: the demo host is Tony's machine, run by Tony; Ted's laptop runs the same
+  build with `GHOSTREEL_OFFLINE=1` as the backup. Done: both run the host steps in ARCHITECTURE.md once.
 
 - [ ] **T16 · A+B** Full run on prod with `GHOSTREEL_OFFLINE` unset, then with it set. Done: both runs complete the
   demo script in PRD.md without a dead end.

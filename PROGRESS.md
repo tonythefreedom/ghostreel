@@ -2,6 +2,15 @@
 
 Newest first. Each entry: what is true now, what broke, what is next. Keep it short; long output goes in files.
 
+## 2026-10-24 · Ted's decisions landed — one front door
+
+Ted: "테드가 정할것 전부 니 추천대로 가자. 마저 마무리해서 올려줘"
+
+- Landing "내 고스트 만들기" → `/onboard`. Own past shorts are optional (0–10) in `lib/creator.ts`, the form and
+  `/profile/[id]` (Lane B files, changed by Lane A with Ted's approval): someone without a catalog picks a ghost and
+  goes straight to the trend step.
+- Demo host: Tony's machine, run by Tony; Ted's laptop is the offline backup (T16a).
+
 ## 2026-10-24 · T23 (B) — storyboard board
 
 Done

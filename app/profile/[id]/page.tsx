@@ -26,6 +26,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
         {creator.bio ? <p className="text-[15px] text-text-dim">{creator.bio}</p> : null}
       </header>
 
+      {creator.works.length > 0 ? (
       <section className="flex flex-col gap-3 rounded-[var(--radius-card)] border border-line bg-surface p-4">
         <h2 className="text-[15px] font-extrabold">스타일 분석</h2>
         <p className="text-[13px] text-text-dim">
@@ -35,9 +36,14 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
           분석 준비 중 (T21)
         </span>
       </section>
+      ) : (
+        <p className="rounded-[var(--radius-card)] border border-line bg-surface p-4 text-[13px] text-text-dim">
+          올린 숏폼이 없어도 괜찮아요. 다음 단계에서 해외에서 뜨는 숏폼을 골라 고스트에게 감각을 가르쳐요.
+        </p>
+      )}
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-[15px] font-extrabold">올린 숏폼</h2>
+        {creator.works.length > 0 ? <h2 className="text-[15px] font-extrabold">올린 숏폼</h2> : null}
         <ul className="flex flex-col gap-1">
           {creator.works.map((url) => (
             <li key={url} className="truncate font-mono text-[12px] text-text-dim">

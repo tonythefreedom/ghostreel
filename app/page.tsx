@@ -22,10 +22,10 @@ export default function Home() {
 
       <footer className="flex flex-col gap-4">
         <Link
-          href="/taste?ghost=yuna&field=beauty"
+          href="/onboard"
           className="grid h-14 w-full place-items-center rounded-[var(--radius-card)] bg-ghost text-[15px] font-extrabold text-bg"
         >
-          내 감각 가르치기
+          내 고스트 만들기
         </Link>
         <p className="text-[13px] text-text-dim">
           모든 고스트 영상에는 <span className="font-semibold text-text">AI-generated · Virtual human</span> 라벨이

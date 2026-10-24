@@ -98,8 +98,8 @@ that write across requests are not promised there.
 (no account, HTTPS), keep the machine awake. A restart clears live picks and briefs; the recorded fixtures and the
 `public/prerender/` clips are what the demo leans on.
 
-**Ted decides (T16a):** which machine and who runs it. Lane A's recommendation is Tony's machine, since the CineSynth
-session is already there. The backup is Ted's laptop running the same build with `GHOSTREEL_OFFLINE=1`.
+**Decided by Ted (T16a):** Tony's machine hosts the demo and Tony runs it, since the CineSynth session is already
+there. The backup is Ted's laptop running the same build with `GHOSTREEL_OFFLINE=1`.
 
 ## 5. Product direction
 
@@ -123,8 +123,9 @@ primary user on it:
     issue 2).
   - The route is spend-guarded only if it calls Claude.
 
-The landing button stays on `/taste` until Ted decides. Lane A recommends `/onboard` once `works` is optional, so both
-users start from the same door.
+**Decided by Ted:** `works` is optional (0–10) and the landing button goes to `/onboard`, so both users start from the
+same door. Lane A made the one-line schema change in `lib/creator.ts` and the form and profile follow-ups, with Ted's
+approval; Lane B owns the files from here.
 
 The submitted one-liner ("내가 고른 숏폼 감각") already covers both, so nothing needs resubmitting.
 
