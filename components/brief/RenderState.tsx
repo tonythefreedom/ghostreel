@@ -73,13 +73,13 @@ export function RenderState({ job, brief, poster, fallback, lang }: {
   const notice = job.notice ? NOTICE_WORD[job.notice] : undefined;
 
   return (
-    <section className="flex flex-col gap-4" aria-live="polite">
+    <section id="render" className="flex scroll-mt-20 flex-col gap-4" aria-live="polite">
       <Progress steps={steps} label={t("renderRunning", lang)} />
       {active && live ? (
         <div className="flex flex-col gap-1.5">
           <div role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-label={stageLabel}
-            className="h-2 w-full overflow-hidden rounded-full bg-surface-2">
-            <div className="h-full rounded-full bg-accent transition-[width] duration-700" style={{ width: `${Math.max(2, pct)}%` }} />
+            className="h-2 w-full overflow-hidden rounded-full bg-line-strong/60">
+            <div className="h-full rounded-full bg-accent transition-[width] duration-700" style={{ width: `${Math.max(3, pct)}%` }} />
           </div>
           <div className="flex items-baseline justify-between text-[13px]">
             <span className="font-mono text-text-dim">{pct}%</span>
@@ -113,5 +113,35 @@ export function RenderState({ job, brief, poster, fallback, lang }: {
         </p>
       ) : null}
     </section>
+  );
+}
+
+/**
+ * The render in one line for the docked bar (10-24: the bar in the page sat out of sight after Approve): the stage,
+ * a thin bar, the share done and the estimated finish. Tapping it scrolls to the full view.
+ */
+export function RenderStatusLine({ job, lang }: { job: RenderJob; lang: UiLang }) {
+  const [now, setNow] = useState<number | null>(null);
+  useEffect(() => {
+    setNow(Date.now());
+    const id = setInterval(() => setNow(Date.now()), 30_000);
+    return () => clearInterval(id);
+  }, []);
+  const pct = Math.round((job.progress ?? 0) * 100);
+  const stage = job.stage ? t(STAGE_WORD[job.stage], lang) : t(JOB_WORD[job.status], lang);
+  const clip = job.stage === "lipsync" && job.clip && job.clips ? ` ${job.clip}/${job.clips}` : "";
+  const eta = job.etaAt && now != null
+    ? new Date(Math.max(now, Date.parse(job.etaAt))).toLocaleTimeString(lang === "ko" ? "ko-KR" : "en-US", { hour: "2-digit", minute: "2-digit", hour12: false })
+    : null;
+  return (
+    <a href="#render" className="flex w-full flex-col gap-1 text-left">
+      <span className="flex items-baseline justify-between gap-2 text-[13px]">
+        <span className="truncate font-[560] text-text">● {stage}{clip}</span>
+        <span className="shrink-0 font-mono text-text-dim">{pct}%{eta ? ` · ${t("etaAt", lang)} ${eta}` : ""}</span>
+      </span>
+      <span aria-hidden className="block h-1 w-full overflow-hidden rounded-full bg-line-strong/60">
+        <span className="block h-full rounded-full bg-accent transition-[width] duration-700" style={{ width: `${Math.max(3, pct)}%` }} />
+      </span>
+    </a>
   );
 }

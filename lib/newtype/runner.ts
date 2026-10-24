@@ -14,7 +14,9 @@ export const TTL = 60 * 60 * 24 * 7;
 const ACTIVE = "rendersActive";
 const TICK_MS = 10_000;
 
-export type StoredPipe = Pipe & { token?: string };
+export type StoredPipe = Pipe & { token?: string; blipSince?: string };
+// How long CineSynth may not answer before a render is reported failed (it never stays "running" forever).
+const GIVE_UP_MS = 15 * 60_000;
 export const pipeKey = (id: string) => `renderPipe:${id}`;
 
 export async function saveJob(job: RenderJob): Promise<RenderJob> {
@@ -44,14 +46,23 @@ export function step(id: string): Promise<RenderJob | null> {
     if (!job || !inFlight(job)) return job;
     const pipe = await store.get<StoredPipe>(pipeKey(id));
     const brief = await store.get<Brief>(`brief:${job.briefId}`);
-    if (!pipe?.token || !brief) return job;
+    const end = (error: string) =>
+      saveJob(RenderJob.parse({ ...job, status: "failed", error, progress: undefined, etaAt: undefined, finishedAt: new Date().toISOString() }));
+    if (!pipe?.token || !brief) return end("This render lost its CineSynth session; render again");
     try {
       const { patch, pipe: after } = await advance(job, brief, pipe, pipe.token);
       const ended = after.stage === "done" || after.stage === "failed";
-      await store.set(pipeKey(id), ended ? { ...after, token: undefined } : { ...after, token: pipe.token }, TTL);
+      await store.set(pipeKey(id), ended ? { ...after, token: undefined } : { ...after, token: pipe.token, blipSince: undefined }, TTL);
       return await saveJob(RenderJob.parse({ ...job, ...patch, finishedAt: ended ? new Date().toISOString() : undefined }));
     } catch {
-      return job; // a blip (network, CineSynth busy): keep the last state and try on the next tick
+      // A blip (network, CineSynth busy): keep the last state and try on the next tick, for a while.
+      const since = pipe.blipSince ? Date.parse(pipe.blipSince) : Date.now();
+      if (Date.now() - since > GIVE_UP_MS) {
+        await store.set(pipeKey(id), { ...pipe, stage: "failed", token: undefined }, TTL);
+        return end("CineSynth did not answer for 15 minutes; render again");
+      }
+      if (!pipe.blipSince) await store.set(pipeKey(id), { ...pipe, blipSince: new Date(since).toISOString() }, TTL);
+      return job;
     }
   })().finally(() => busy.delete(id));
   busy.set(id, run);

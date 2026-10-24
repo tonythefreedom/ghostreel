@@ -11,8 +11,12 @@ export type Actor = { accountId: number | null };
 
 /** The approved account signed in on this request, else the passcode owner (no account), else nobody. */
 export async function actor(req: NextRequest): Promise<Actor | null> {
-  const account = await currentAccount(req.cookies.get(SESSION_COOKIE)?.value);
-  if (account?.status === "approved") return { accountId: account.id };
+  const session = req.cookies.get(SESSION_COOKIE)?.value;
+  if (session) {
+    // Signed in with Google: act as that account or not at all. A failed lookup never falls back to the operator.
+    const account = await currentAccount(session);
+    return account?.status === "approved" ? { accountId: account.id } : null;
+  }
   return isOwner(req) ? { accountId: null } : null;
 }
 

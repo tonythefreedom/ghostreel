@@ -1,7 +1,7 @@
 "use client";
 // The daily taste game: eight shorts as a fanned deck. Drag the top card, ←/→, or the docked verbs skip or keep;
 // Z undoes. A keep asks in a sheet what to keep; the end lists what was kept and writes the brief from one.
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { KeepPart, TastePick, TrendCard as Card, VideoReading } from "@/lib/types";
 import { fill, t, type UiLang } from "@/lib/words";
 import { Button, Empty, Verb } from "./ui";
@@ -16,7 +16,17 @@ const ROUND = 20; // this week's radar, hits and season (Ted, 10-24: «8개밖�
 export function TasteSwipe({ cards: all, readings = {}, ghostId, creatorId, lang: langProp }: { cards: Card[]; readings?: Record<string, VideoReading>; ghostId: string; creatorId?: string; lang?: UiLang }) {
   const ctxLang = useLang();
   const lang = langProp ?? ctxLang;
-  const cards = useMemo(() => all.slice(0, ROUND), [all]);
+  const deck = useMemo(() => all.slice(0, ROUND), [all]);
+  // Shorts already decided come first, in the order they were decided, so the deck resumes where it stopped even when
+  // Claude kept one out of order over MCP.
+  const [order, setOrder] = useState<string[]>([]);
+  const cards = useMemo(() => {
+    const first = order.map((id) => deck.find((c) => c.videoId === id)).filter((c): c is Card => Boolean(c));
+    return [...first, ...deck.filter((c) => !order.includes(c.videoId))];
+  }, [deck, order]);
+  // Picks from other decks (the other field, the other language, Claude's) are kept and sent back with every save;
+  // the store holds one list per ghost, so leaving them out would erase them.
+  const others = useRef<TastePick[]>([]);
   const [picks, setPicks] = useState<TastePick[]>([]);
   const [asking, setAsking] = useState<Card | null>(null);
   const [leaving, setLeaving] = useState<Leaving | null>(null);
@@ -32,9 +42,15 @@ export function TasteSwipe({ cards: all, readings = {}, ghostId, creatorId, lang
   useEffect(() => {
     fetch(`/api/taste?ghost=${ghostId}`)
       .then((r) => r.json())
-      .then((d: { picks?: TastePick[] }) => setPicks((d.picks ?? []).filter((p) => cards.some((c) => c.videoId === p.videoId))))
+      .then((d: { picks?: TastePick[] }) => {
+        const saved = d.picks ?? [];
+        const inDeck = saved.filter((p) => deck.some((c) => c.videoId === p.videoId));
+        others.current = saved.filter((p) => !deck.some((c) => c.videoId === p.videoId));
+        setOrder(inDeck.map((p) => p.videoId));
+        setPicks(inDeck);
+      })
       .catch(() => {});
-  }, [ghostId, cards]);
+  }, [ghostId, deck]);
 
   // Picks are the signed-in account's own; anyone else is asked to sign in once, then the latest picks are saved.
   const persist = useCallback(
@@ -43,7 +59,7 @@ export function TasteSwipe({ cards: all, readings = {}, ghostId, creatorId, lang
         const res = await fetch("/api/taste", {
           method: "PUT",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ ghostId, picks: next }),
+          body: JSON.stringify({ ghostId, picks: [...others.current, ...next] }),
         });
         setLocked(res.status === 401 ? next : null);
       } catch {

@@ -65,3 +65,24 @@ test("a live render keeps going without the page and never starts a stage twice"
   assert.match(src("../app/brief/[id]/page.tsx"), /store\.get<RenderJob>/);
   assert.match(src("../components/brief/RenderState.tsx"), /role="progressbar"/);
 });
+
+test("review 10-24: one render per brief even on a double tap, and no GPU start is ever sent twice", () => {
+  assert.match(src("../lib/render.ts"), /starting\.get\(brief\.id\)/); // concurrent starts share the first
+  assert.match(src("../components/BriefEditor.tsx"), /disabled=\{busy\} onClick=\{\(\) => void startRender\(\)\}/);
+  const live = src("../lib/newtype/live.ts");
+  assert.doesNotMatch(live, /if \(!\(e instanceof LipSyncUnavailable\)\) throw e/); // a lip-sync start that failed is never re-sent
+  assert.match(live, /Voice take did not start/);
+  assert.match(src("../lib/newtype/runner.ts"), /GIVE_UP_MS/); // never "running" forever
+});
+
+test("review 10-24: a Google sign-in never acts as the operator", () => {
+  assert.match(src("../lib/newtype/cinesynth.ts"), /ownerCookieFor\(_account: CinesynthAccount\)[^\n]*\n\s*return null;/);
+  assert.match(src("../lib/guard.ts"), /ghostreel-owner-v2/); // cookies handed out before are void
+  assert.match(src("../lib/owner.ts"), /if \(session\) \{[\s\S]*?return account\?\.status === "approved" \? \{ accountId: account\.id \} : null;/);
+});
+
+test("review 10-24: switching field or language keeps the picks from the other decks", () => {
+  const swipe = src("../components/TasteSwipe.tsx");
+  assert.match(swipe, /picks: \[\.\.\.others\.current, \.\.\.next\]/);
+  assert.match(src("../app/api/taste/route.ts"), /max\(200\)/);
+});

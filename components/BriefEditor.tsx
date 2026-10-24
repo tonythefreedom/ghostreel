@@ -13,7 +13,7 @@ import { BriefHead } from "./brief/BriefHead";
 import { BriefLoop, versionLine } from "./brief/BriefLoop";
 import { KeptLine } from "./brief/KeptLine";
 import { MoreDetail } from "./brief/MoreDetail";
-import { RenderState } from "./brief/RenderState";
+import { RenderState, RenderStatusLine } from "./brief/RenderState";
 import { SpeechMeter } from "./brief/SpeechMeter";
 import { UnlockForm } from "./UnlockForm";
 import { useLang } from "@/components/Lang";
@@ -158,13 +158,26 @@ export function BriefEditor({ initial, initialJob, ghost, kept = [], extra, fall
     }
   }
 
+  // One start at a time: a second press while the first is on its way would start a second GPU render.
+  const starting = useRef(false);
   async function startRender() {
+    if (starting.current) return;
+    starting.current = true;
+    setBusy(true);
     setError(null);
-    const res = await call("render", "POST", { briefId: brief.id }, () => void startRender());
-    if (!res) return;
-    const body = (await res.json()) as { job?: RenderJob };
-    if (body.job) setJob(body.job);
-    else setError("renderFailed");
+    try {
+      const res = await call("render", "POST", { briefId: brief.id }, () => void startRender());
+      if (!res) return;
+      const body = (await res.json()) as { job?: RenderJob };
+      if (body.job) {
+        setJob(body.job);
+        // The render's own view sits mid-page; bring it into sight once it starts.
+        requestAnimationFrame(() => document.getElementById("render")?.scrollIntoView({ behavior: "smooth", block: "center" }));
+      } else setError("renderFailed");
+    } finally {
+      starting.current = false;
+      setBusy(false);
+    }
   }
 
   const beats: Beat[] = brief.lines.map((l, i) => ({ at: l.t, title: beatTitle(l, i, lang) }));
@@ -242,7 +255,9 @@ export function BriefEditor({ initial, initialJob, ghost, kept = [], extra, fall
       <VerbSpacer />
       <div aria-hidden className="h-10" />
 
-      <Verb note={error ? <span role="alert" className="text-danger">✕ {t(error, lang)}</span> : locked ? undefined : (
+      <Verb note={error ? <span role="alert" className="text-danger">✕ {t(error, lang)}</span> : locked ? undefined : job?.provider === "newtype" && (job.status === "queued" || job.status === "running") ? (
+        <RenderStatusLine job={job} lang={lang} />
+      ) : (
         // Beside the render, the other way to make it: the person's own Claude over MCP (Ted, 10-24).
         <span className="flex items-center justify-center gap-2">
           <span className="truncate">{editable ? t("approveNote", lang) : t("renderByClaude", lang)}</span>
@@ -268,7 +283,7 @@ export function BriefEditor({ initial, initialJob, ghost, kept = [], extra, fall
             </Button>
           </>
         ) : !job || job.status === "failed" ? (
-          <Button size="xl" onClick={() => void startRender()}>
+          <Button size="xl" disabled={busy} onClick={() => void startRender()}>
             {t(job ? "renderRetry" : "renderStart", lang)}
           </Button>
         ) : (

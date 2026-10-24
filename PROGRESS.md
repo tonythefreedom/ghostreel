@@ -2,6 +2,27 @@
 
 Newest first. Each entry: what is true now, what broke, what is next. Keep it short; long output goes in files.
 
+## 2026-10-24 · B — final review fixes: one render per brief, no stuck renders, picks kept, no operator cookie, progress in sight
+- A code review (subagent, read-only) found these before the judging; all fixed here.
+- One render per brief: the render button locks while its start is on its way, and `lib/render.ts` shares one start
+  per brief across concurrent requests. Before, a second tap during Approve started a second hours-long GPU job.
+- No render stays "running" forever:
+  - A missing poster no longer holds the render up.
+  - A voice take that did not start fails the render.
+  - A lip-sync start that failed or timed out is never sent again; the frame is set to the voice instead.
+  - An ffmpeg failure fails the render.
+  - The driver gives up after 15 minutes without an answer from CineSynth.
+- Taste picks from the other field, the other language or Claude's MCP keeps are sent back with every save; switching
+  decks used to erase them. A deck resumes at the first undecided short. The cap is now 200 picks.
+- A Google sign-in no longer receives the operator's passcode cookie. The token version moved to v2, so cookies handed
+  out earlier are void. With a Google session, `actor()` acts as that account or no one. An `/api/auth/me` timeout is
+  not cached.
+- Progress in sight: after Approve the page scrolls to the render view. The docked bar shows "stage n/m · % · ETA"
+  while it runs. The bar's track has more contrast.
+- First live render on production (brief 47170bbc, Yuna): keyframe and voice done, S2V lip-sync running on the MI250,
+  clip 1/9, ETA 19:45.
+- Gate: 104 tests, typecheck, build. Not run on the dev server, per Tony.
+
 ## 2026-10-24 · A — the demo's hardening: sign-in instead of a passcode, one deck each, KO beside every line, the loop and the whole make over MCP
 
 Ted, 10-24: «이사한 패스코드 이런거 걸리적거리면 안되고», «브리프가 한글도 같이», «read 되고나서 결과물을 다시 write»,

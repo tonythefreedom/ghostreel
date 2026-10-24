@@ -33,7 +33,18 @@ export type Started = { job: RenderJob; status: number } | { error: "not_approve
  * The brief's job if it has a live one, else a new live render as the CineSynth session given (the signed-in owner's).
  * Call only after the spend guard said yes.
  */
-export async function startRender(brief: Brief, session: string | undefined): Promise<Started> {
+export function startRender(brief: Brief, session: string | undefined): Promise<Started> {
+  // Two starts for one brief at once (a double tap, two tabs) share the first: the job is saved only after CineSynth
+  // answers, so without this both would find no job and start two GPU renders.
+  const running = starting.get(brief.id);
+  if (running) return running;
+  const run = begin(brief, session).finally(() => starting.delete(brief.id));
+  starting.set(brief.id, run);
+  return run;
+}
+const starting = new Map<string, Promise<Started>>();
+
+async function begin(brief: Brief, session: string | undefined): Promise<Started> {
   if (brief.status !== "approved") return { error: "not_approved" };
   const existing = await jobFor(brief.id);
   if (existing && existing.status !== "failed") return { job: existing, status: 200 };

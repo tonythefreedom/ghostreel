@@ -5,8 +5,6 @@
 import "server-only";
 import { createHash } from "node:crypto";
 import { z } from "zod";
-import { env } from "../env.ts";
-import { OWNER_COOKIE, ownerToken } from "../guard.ts";
 import { CinesynthAccount } from "../types.ts";
 
 export const CINESYNTH_URL = (process.env.CINESYNTH_URL ?? "https://vs.newtype-ai.com").replace(/\/+$/, "");
@@ -64,8 +62,9 @@ export async function currentAccount(token: string | undefined): Promise<Cinesyn
   let account: CinesynthAccount | null = null;
   try {
     account = CinesynthAccount.parse(z.object({ user: z.unknown() }).parse(await call("/api/auth/me", { token })).user);
-  } catch {
-    account = null;
+  } catch (e) {
+    // Only CineSynth's own answer (an expired or refused token) is remembered; a timeout is asked again next time.
+    if (!(e instanceof CinesynthAuthError)) return null;
   }
   if (seen.size > 500) seen.clear();
   seen.set(key, { account, until: Date.now() + SEEN_MS });
@@ -73,14 +72,11 @@ export async function currentAccount(token: string | undefined): Promise<Cinesyn
 }
 
 /**
- * Tony (10-24): an approved CineSynth account is the owner, so no passcode is needed. The owner cookie Lane A's guard
- * already checks is set alongside the session; the passcode stays as a fallback. Without a passcode configured there
- * is no owner token to give, and the guard's own rule (dev open, prod closed) applies.
+ * An approved CineSynth account acts as itself (lib/owner.ts), never as the operator: no passcode cookie is handed to a
+ * Google sign-in (10-24 review: every judge held the operator's cookie). Kept so callers need no change.
  */
-export function ownerCookieFor(account: CinesynthAccount): { name: string; value: string } | null {
-  const passcode = env.passcode();
-  if (account.status !== "approved" || !passcode) return null;
-  return { name: OWNER_COOKIE, value: ownerToken(passcode) };
+export function ownerCookieFor(_account: CinesynthAccount): { name: string; value: string } | null {
+  return null;
 }
 
 /** Fetches one of the user's own CineSynth results (a link an MCP or job answer gave) with their session. */

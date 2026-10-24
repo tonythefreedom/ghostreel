@@ -10,7 +10,7 @@ import { TastePick } from "@/lib/types";
 import { store } from "@/lib/store";
 
 const GhostId = z.string().regex(/^[a-z0-9-]{1,40}$/);
-const Body = z.object({ ghostId: GhostId, picks: z.array(TastePick).max(60) });
+const Body = z.object({ ghostId: GhostId, picks: z.array(TastePick).max(200) }); // both fields, both languages, Claude's
 
 export async function GET(req: NextRequest) {
   const ghostId = GhostId.safeParse(req.nextUrl.searchParams.get("ghost"));

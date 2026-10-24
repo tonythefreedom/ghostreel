@@ -10,8 +10,10 @@ import { store } from "./store.ts";
 
 export const OWNER_COOKIE = "gr_owner";
 
+// v2 (10-24): every approved Google sign-in used to get this cookie too, so one judge could act as the operator on
+// another's briefs. Only the passcode gives it now, and the version change voids the ones already handed out.
 export function ownerToken(passcode: string): string {
-  return createHmac("sha256", passcode).update("ghostreel-owner-v1").digest("hex");
+  return createHmac("sha256", passcode).update("ghostreel-owner-v2").digest("hex");
 }
 
 export function passcodeMatches(given: string): boolean {

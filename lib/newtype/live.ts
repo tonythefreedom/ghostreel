@@ -108,9 +108,15 @@ export async function advance(job: RenderJob, brief: Brief, pipe: Pipe, token: s
 
   if (pipe.stage === "keyframe") {
     if (!st.keyframe?.path) return failed(pipe, "CineSynth returned no frame");
-    await save(job.id, "poster", await fetchOwnFile(st.keyframe.path, token)).catch(() => undefined);
-    const task = await startTake(token, scriptOf(brief), brief.lang);
-    const now = next({ ...pipe, keyframe: st.keyframe.path }, "voice", task);
+    const kf = st.keyframe.path;
+    await fetchOwnFile(kf, token).then((res) => save(job.id, "poster", res)).catch(() => undefined); // a missing poster never holds the render up
+    let task: string;
+    try {
+      task = await startTake(token, scriptOf(brief), brief.lang);
+    } catch (e) {
+      return failed(pipe, `Voice take did not start: ${(e as Error).message}`); // reported, never sent again
+    }
+    const now = next({ ...pipe, keyframe: kf }, "voice", task);
     return { patch: { posterUrl: mediaUrl(job.id, "poster"), providerJobId: task, ...view(now, 0) }, pipe: now };
   }
   if (pipe.stage === "voice") {
@@ -124,8 +130,10 @@ export async function advance(job: RenderJob, brief: Brief, pipe: Pipe, token: s
       const now = next(withTake, "lipsync", task);
       return { patch: { providerJobId: task, ...view(now, 0) }, pipe: now };
     } catch (e) {
-      if (!(e instanceof LipSyncUnavailable)) throw e;
-      return assemble(job, { ...next(withTake, "assemble"), lipSync: false, notice: "lipsync_unavailable" }, token);
+      // Refused up front (no GPU) is "unavailable"; anything else, a timeout included, may or may not have started an
+      // hours-long GPU job, so it is never sent again: the frame is set to the voice instead.
+      const notice = e instanceof LipSyncUnavailable ? "lipsync_unavailable" : "lipsync_failed";
+      return assemble(job, { ...next(withTake, "assemble"), lipSync: false, notice }, token);
     }
   }
   // lip-sync finished
@@ -138,11 +146,19 @@ export async function advance(job: RenderJob, brief: Brief, pipe: Pipe, token: s
 /** No lip-sync: the opening frame, slowly pushed in, over the voice take. Made here with ffmpeg in seconds. */
 async function assemble(job: RenderJob, pipe: Pipe, token: string): Promise<{ patch: Patch; pipe: Pipe }> {
   if (!pipe.keyframe || !pipe.take) return failed(pipe, "nothing to assemble");
+  try {
+    return await assembleNow(job, pipe, token);
+  } catch (e) {
+    return failed(pipe, `Could not set the frame to the voice: ${(e as Error).message}`);
+  }
+}
+
+async function assembleNow(job: RenderJob, pipe: Pipe, token: string): Promise<{ patch: Patch; pipe: Pipe }> {
   await mkdir(rendersDir(), { recursive: true });
   const poster = renderFile(job.id, "poster");
-  if (!(await stat(poster).catch(() => null))) await save(job.id, "poster", await fetchOwnFile(pipe.keyframe, token));
+  if (!(await stat(poster).catch(() => null))) await save(job.id, "poster", await fetchOwnFile(pipe.keyframe!, token));
   const audio = join(rendersDir(), `${job.id}.wav`);
-  await writeFile(audio, Buffer.from(await (await fetchOwnFile(pipe.take, token)).arrayBuffer()), { mode: 0o600 });
+  await writeFile(audio, Buffer.from(await (await fetchOwnFile(pipe.take!, token)).arrayBuffer()), { mode: 0o600 });
   const sec = Math.min(60, (pipe.takeSec ?? 8) + 0.6);
   const frames = Math.ceil(sec * 30);
   await run("ffmpeg", [
