@@ -54,7 +54,8 @@ export function RenderState({ job, brief, poster, fallback, lang }: {
   const live = job.provider === "newtype";
 
   const stageLabel = active && job.stage ? t(STAGE_WORD[job.stage], lang) : t(JOB_WORD[job.status], lang);
-  const clipFigure = active && job.stage === "lipsync" && job.clip && job.clips ? `${job.clip}/${job.clips}` : null;
+  // n of m only when CineSynth chains segments (a long take); one render shows no count.
+  const clipFigure = active && job.stage === "lipsync" && job.clip && job.clips && job.clips > 1 ? `· ${t("segment", lang)} ${job.clip}/${job.clips}` : null;
   const steps: Step[] = [
     { label: t("stepWritten", lang), state: "done" },
     {
@@ -129,7 +130,7 @@ export function RenderStatusLine({ job, lang }: { job: RenderJob; lang: UiLang }
   }, []);
   const pct = Math.round((job.progress ?? 0) * 100);
   const stage = job.stage ? t(STAGE_WORD[job.stage], lang) : t(JOB_WORD[job.status], lang);
-  const clip = job.stage === "lipsync" && job.clip && job.clips ? ` ${job.clip}/${job.clips}` : "";
+  const clip = job.stage === "lipsync" && job.clip && job.clips && job.clips > 1 ? ` · ${t("segment", lang)} ${job.clip}/${job.clips}` : "";
   const eta = job.etaAt && now != null
     ? new Date(Math.max(now, Date.parse(job.etaAt))).toLocaleTimeString(lang === "ko" ? "ko-KR" : "en-US", { hour: "2-digit", minute: "2-digit", hour12: false })
     : null;

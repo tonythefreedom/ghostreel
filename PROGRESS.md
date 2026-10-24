@@ -2,6 +2,17 @@
 
 Newest first. Each entry: what is true now, what broke, what is next. Keep it short; long output goes in files.
 
+## 2026-10-24 · B — render copy and ETA follow LTX, not Wan-S2V (Tony via PM)
+- Since CineSynth 6a971f2 (16:47), /api/cf/generate with no engine renders LTX-2.5 A2V on the MI250, so GhostReel
+  renders are LTX now.
+- The copy says lip-sync "usually takes about 10–30 min" (KO and EN), not a firm number.
+- The stage shows a segment n/m only when CineSynth chains. LTX renders one go up to 401 frames at 24 fps (~16.7 s)
+  with 1 s + 1.5 s of padding; past that it chains 8 s segments. The S2V clip count is gone.
+- ETA seed: ~12 min up to 8 s of voice, ~20 min up to one render, then +10 min per segment past two. It then follows
+  CineSynth's own progress, and never shows less than 3 min while nothing has been reported.
+- Comments in cinesynth.ts and live.ts now say CineSynth picks the engine (LTX by default).
+- Gate: 104 tests, typecheck, build.
+
 ## 2026-10-24 · B — final review fixes: one render per brief, no stuck renders, picks kept, no operator cookie, progress in sight
 - A code review (subagent, read-only) found these before the judging; all fixed here.
 - One render per brief: the render button locks while its start is on its way, and `lib/render.ts` shares one start

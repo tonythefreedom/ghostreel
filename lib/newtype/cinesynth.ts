@@ -129,7 +129,7 @@ export async function characterThumb(name: string, token: string): Promise<Respo
 // CineSynth's own REST routes for a talking ad, called as the signed-in user (its MCP tools only take calls signed by
 // the Nexus gateway). The same owner checks and GPU caps apply there. Each start returns a task id to poll.
 
-/** A character's reference views: the full-body front (keyframe reference) and the face views (identity for S2V). */
+/** A character's reference views: the full-body front (keyframe reference) and the face views (identity for lip-sync). */
 export async function characterViews(name: string, token: string): Promise<{ front: string; faces: string[]; complete: boolean } | null> {
   const View = z.object({ path: z.string().min(1) }).passthrough();
   const Row = z.object({
@@ -167,7 +167,8 @@ export async function startTake(token: string, text: string, language: string): 
 
 export class LipSyncUnavailable extends Error {}
 
-/** Step 3: the lip-synced video (Wan-S2V) from the approved frame and take. Hours of GPU; refused up front (503) when
+/** Step 3: the lip-synced video from the approved frame and take, with the engine CineSynth picks (LTX-2.5 A2V on the
+ * MI250 by default since 10-24 16:47). Tens of minutes of GPU; refused up front (503) when
  * no GPU can hold it, with nothing started. */
 export async function startTalking(token: string, args: {
   keyframe: string; take: string; text: string; language: string; scenePrompt: string;

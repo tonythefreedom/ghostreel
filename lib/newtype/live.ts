@@ -1,7 +1,7 @@
 // Lane B (10-24, Tony: a real render with progress, lip-sync included). The approved brief rendered live by
-// CineSynth as the signed-in user: opening frame → voice take → lip-synced video (Wan-S2V, on the MI250 when routed
-// there). When CineSynth has no GPU for lip-sync it refuses up front (nothing started, nothing charged); then the frame
-// is animated over the voice here instead, and the job says it is not lip-synced.
+// CineSynth as the signed-in user: opening frame → voice take → lip-synced video (CineSynth picks the engine: LTX-2.5
+// A2V on the MI250 by default). When CineSynth has no GPU for lip-sync it refuses up front (nothing started, nothing
+// charged); then the frame is animated over the voice here instead, and the job says it is not lip-synced.
 //
 // No background worker: each poll of /api/render moves the pipeline one step with the polling owner's own CineSynth
 // session, and the state lives in the store, so a GhostReel restart picks up where it was. A start is never retried
@@ -24,7 +24,7 @@ export type Pipe = {
   task?: string; // the CineSynth task of the running stage
   stageAt: string; // when the running stage started
   front: string; // the character's full-body front (keyframe reference)
-  faces: string[]; // its face views (S2V identity)
+  faces: string[]; // its face views (lip-sync identity)
   keyframe?: string; // CineSynth paths, uploads/…
   take?: string;
   takeSec?: number;

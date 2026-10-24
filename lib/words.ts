@@ -71,6 +71,7 @@ export const words = {
   stageLipsync: { ko: "립싱크 렌더 중", en: "Lip-sync render" },
   stageAssemble: { ko: "장면과 목소리 합치는 중", en: "Setting the frame to the voice" },
   etaAt: { ko: "예상 완료", en: "Est. done" },
+  segment: { ko: "구간", en: "segment" },
   notLipSynced: { ko: "립싱크 아님", en: "Not lip-synced" },
   lipsyncUnavailable: {
     ko: "지금은 립싱크를 돌릴 GPU가 없어 장면과 목소리만 합쳤어요. 시작 전에 거절돼 GPU 몫은 쓰지 않았어요.",
@@ -80,8 +81,8 @@ export const words = {
   lipsyncLost: { ko: "CineSynth가 재시작돼 립싱크 작업을 잃어서 장면과 목소리만 합쳤어요.", en: "CineSynth restarted and lost the lip-sync job, so the frame was set to the voice." },
   fallbackClip: { ko: "대신 미리 렌더한 클립이에요", en: "The pre-rendered clip, shown instead" },
   renderLongNote: {
-    ko: "립싱크는 7.5초 한 편에 1~1.5시간 걸려요. 이 페이지를 닫아도 렌더는 서버에서 계속되고, 다시 열면 지금 진행률을 보여 줘요.",
-    en: "Lip-sync takes 1–1.5 h for a 7.5 s reel. Close this page if you like: the render goes on on the server, and it shows where it is when you come back.",
+    ko: "립싱크는 보통 10~30분쯤 걸려요. 이 페이지를 닫아도 렌더는 서버에서 계속되고, 다시 열면 지금 진행률을 보여 줘요.",
+    en: "Lip-sync usually takes about 10–30 min. Close this page if you like: the render goes on on the server, and it shows where it is when you come back.",
   },
   prerendered: { ko: "미리 렌더", en: "Pre-rendered" },
   prerenderOther: { ko: "다른 대본으로 렌더한 클립", en: "rendered from a different script" },
