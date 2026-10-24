@@ -78,3 +78,16 @@ export function sameSite(headers: Headers, ownHost: string): boolean {
     .flatMap((h) => (h ? h.split(",").map((x) => x.trim().toLowerCase()) : []));
   return hosts.includes(from);
 }
+
+/**
+ * The address people reach this server at, for links and the MCP add command: GHOSTREEL_BASE_URL when set, else the
+ * tunnel's forwarded host (https unless it says otherwise), else the Host header, else the fallback.
+ */
+export function publicOrigin(headers: Headers, fallback: string, base = process.env.GHOSTREEL_BASE_URL): string {
+  if (base) return base.replace(/\/+$/, "");
+  const first = (name: string) => headers.get(name)?.split(",")[0]?.trim() || undefined;
+  const fwd = first("x-forwarded-host");
+  if (fwd) return `${first("x-forwarded-proto") ?? "https"}://${fwd}`;
+  const host = first("host");
+  return host ? `${first("x-forwarded-proto") ?? "http"}://${host}` : fallback;
+}

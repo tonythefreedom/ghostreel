@@ -3,7 +3,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { summarize } from "@/lib/creatorStyle";
 import { handleRpc, PROTOCOL } from "@/lib/ghostmcp/rpc";
-import { allowHit } from "@/lib/limits";
+import { allowHit, publicOrigin } from "@/lib/limits";
 import { getGhost } from "@/lib/newtype";
 import { formatPlan, reading, recipeEdit } from "@/lib/shorti";
 import { store } from "@/lib/store";
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
         return s.read ? { hooks: s.hooks, moves: s.moves.map((m) => ({ cue: m.cue, do: m.do })), makeItYours: s.makeItYours, bpm: s.bpm, lengthSec: s.lengthSec } : undefined;
       },
       allow: (key) => allowHit(key, PER_MINUTE, 60_000),
-      origin: process.env.GHOSTREEL_BASE_URL?.replace(/\/+$/, "") ?? req.nextUrl.origin,
+      origin: publicOrigin(req.headers, req.nextUrl.origin),
     },
     req.headers.get("authorization"),
     body,

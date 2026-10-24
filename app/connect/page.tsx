@@ -1,15 +1,16 @@
 // Lane B. Connect your own Claude to GhostReel: your Claude writes the brief (no model key on our server), GhostReel
 // keeps it as a draft for you to approve.
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { ConnectClaude } from "@/components/ConnectClaude";
 import { ButtonLink } from "@/components/ui";
+import { publicOrigin } from "@/lib/limits";
 import { currentAccount, SESSION_COOKIE } from "@/lib/newtype/cinesynth";
 
 export const dynamic = "force-dynamic";
 
 export default async function ConnectPage() {
   const account = await currentAccount((await cookies()).get(SESSION_COOKIE)?.value);
-  const base = process.env.GHOSTREEL_BASE_URL?.replace(/\/+$/, "") ?? "http://localhost:3000";
+  const base = publicOrigin(await headers(), "http://localhost:3000"); // the tunnel's address, not the server's own
   return (
     <main className="flex min-h-dvh flex-col gap-6 py-6">
       <header className="flex flex-col gap-2">

@@ -1,7 +1,7 @@
 // Review 2026-10-24, issues 7 and 8: refused hits never grow a window; unlock attempts are limited per IP and globally.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { allowHit, recordUnlockFailure, unlockBlockedFor, clearUnlockFailures, sameSite } from "../lib/limits.ts";
+import { allowHit, recordUnlockFailure, unlockBlockedFor, clearUnlockFailures, publicOrigin, sameSite } from "../lib/limits.ts";
 
 const req = (ip) => ip;
 
@@ -41,4 +41,13 @@ test("same-site check compares hosts, so a TLS tunnel's own pages pass and other
   assert.equal(sameSite(h({}), "localhost:3000"), true); // no Origin: not a cross-site browser form
   assert.equal(sameSite(h({ origin: "https://evil.example", host: "ghost.newtype-ai.com" }), "localhost:3000"), false);
   assert.equal(sameSite(h({ origin: "null", host: "ghost.newtype-ai.com" }), "localhost:3000"), false);
+});
+
+test("publicOrigin: the tunnel's host wins over the server's own address; the env base wins over both", () => {
+  const h = (o) => new Headers(o);
+  assert.equal(publicOrigin(h({ host: "localhost:3000", "x-forwarded-host": "ghost.newtype-ai.com", "x-forwarded-proto": "https" }), "http://x", ""), "https://ghost.newtype-ai.com");
+  assert.equal(publicOrigin(h({ host: "localhost:3000", "x-forwarded-host": "ghost.newtype-ai.com" }), "http://x", ""), "https://ghost.newtype-ai.com");
+  assert.equal(publicOrigin(h({ host: "localhost:3000" }), "http://x", ""), "http://localhost:3000");
+  assert.equal(publicOrigin(h({}), "http://x", ""), "http://x");
+  assert.equal(publicOrigin(h({ "x-forwarded-host": "evil.example" }), "http://x", "https://ghost.newtype-ai.com/"), "https://ghost.newtype-ai.com");
 });

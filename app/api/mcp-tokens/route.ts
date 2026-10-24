@@ -1,13 +1,14 @@
 // Lane B. Connect tokens for the GhostReel MCP server, for the signed-in, CineSynth-approved owner. POST shows a new
 // token once; GET lists live ones by short id only; DELETE revokes one (?id=) or all.
 import { NextResponse, type NextRequest } from "next/server";
+import { requireSameSite } from "@/lib/guard";
 import { issueToken, listTokens, revokeTokens, tokenId } from "@/lib/ghostmcp/tokens";
 import { currentAccount, SESSION_COOKIE } from "@/lib/newtype/cinesynth";
 import { store } from "@/lib/store";
 
 async function owner(req: NextRequest) {
-  const origin = req.headers.get("origin");
-  if (req.method !== "GET" && origin && origin !== req.nextUrl.origin) return { error: NextResponse.json({ error: "cross_origin" }, { status: 403 }) };
+  const foreign = req.method === "GET" ? null : requireSameSite(req); // host match: behind the tunnel the server is http://localhost
+  if (foreign) return { error: foreign };
   const account = await currentAccount(req.cookies.get(SESSION_COOKIE)?.value);
   if (!account) return { error: NextResponse.json({ error: "sign_in" }, { status: 401 }) };
   if (account.status !== "approved") return { error: NextResponse.json({ error: "account_pending" }, { status: 403 }) };
