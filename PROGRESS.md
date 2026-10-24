@@ -2,6 +2,11 @@
 
 Newest first. Each entry: what is true now, what broke, what is next. Keep it short; long output goes in files.
 
+## 2026-10-24 · B — every ghost has a face on "Who performs for you"
+- Only Yuna had a keyframe, so Rina, Jihyun and Miyeon showed empty tiles. `withFace` (lib/ghostFace.ts) now falls back
+  to the CineSynth character portraits in `public/ghosts/` (768×960 webp, from the CineSynth landing). A keyframe still
+  wins, so Yuna keeps her real CineSynth frame. `lib/types.ts` is unchanged.
+- Gate: 89 tests, typecheck, build. All four show at 375 px on onboarding step 4.
 ## 2026-10-24 · A — every flow overhauled: KO/EN, one player with the coaching pencil, 4D camera preset, Connect as steps
 
 Ted, 10-24: «한/영 토글도 없고 … 재생 음소거나 코칭 색연필 등등도 안되어있고 … 대대적인 개선이 필요하다».
