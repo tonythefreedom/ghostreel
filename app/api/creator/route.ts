@@ -3,6 +3,7 @@
 import { randomUUID } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { CREATOR_TTL, creatorKey } from "@/lib/creator";
+import { requireSameSite } from "@/lib/guard";
 import { getGhost } from "@/lib/newtype";
 import { currentAccount, SESSION_COOKIE } from "@/lib/newtype/cinesynth";
 import { store } from "@/lib/store";
@@ -11,8 +12,8 @@ import { Creator, CreatorInput } from "@/lib/types";
 const MAX_BYTES = 16_000;
 
 export async function POST(req: NextRequest) {
-  const origin = req.headers.get("origin");
-  if (origin && origin !== req.nextUrl.origin) return NextResponse.json({ error: "cross_origin" }, { status: 403 });
+  const foreign = requireSameSite(req); // host match: behind Tony's tunnel the server sees itself as http://localhost
+  if (foreign) return foreign;
   // Signing up needs the CineSynth account the renders will run as (Google sign-in), approved by CineSynth.
   const account = await currentAccount(req.cookies.get(SESSION_COOKIE)?.value);
   if (!account) return NextResponse.json({ error: "sign_in" }, { status: 401 });

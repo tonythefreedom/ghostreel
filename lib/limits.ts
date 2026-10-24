@@ -59,3 +59,22 @@ export function recordUnlockFailure(ip: string): void {
 export function clearUnlockFailures(ip: string): void {
   windows.delete(`unlock:${ip}`);
 }
+
+/**
+ * A browser POST came from our own pages. Compares hosts only: behind a TLS-terminating tunnel or proxy the server sees
+ * itself as http://localhost, so a full-origin match refuses every real browser. No Origin header (curl, same-origin
+ * GET-like clients) passes; a different host or an unparsable Origin does not.
+ */
+export function sameSite(headers: Headers, ownHost: string): boolean {
+  const origin = headers.get("origin");
+  if (!origin) return true;
+  let from: string;
+  try {
+    from = new URL(origin).host.toLowerCase();
+  } catch {
+    return false;
+  }
+  const hosts = [headers.get("x-forwarded-host"), headers.get("host"), ownHost]
+    .flatMap((h) => (h ? h.split(",").map((x) => x.trim().toLowerCase()) : []));
+  return hosts.includes(from);
+}

@@ -2,6 +2,15 @@
 
 Newest first. Each entry: what is true now, what broke, what is next. Keep it short; long output goes in files.
 
+## 2026-10-24 · Google sign-in refused every real browser behind the tunnel: fixed (A)
+
+- Cause: `/api/auth/google` and `/api/creator` matched the browser's Origin against `req.nextUrl.origin`. Behind
+  Cloudflare the browser says `https://ghost.newtype-ai.com` while Next sees itself as plain http (localhost), so every
+  real sign-in and creator save got `403 cross_origin` (probed live: with the site's Origin → 403, without → 401 at
+  CineSynth). The Google button itself rendered fine.
+- Fix: `requireSameSite` (lib/guard.ts, pure `sameSite` in lib/limits.ts) compares hosts (Origin vs Host /
+  X-Forwarded-Host); other sites still get 403. Tested. Tony: pull and restart `next start` on the demo host.
+
 ## 2026-10-24 · B — GhostReel MCP server: the person's own Claude writes the brief (Tony's decision, Ted's yes)
 
 - Tony: the public server holds no model key; users write briefs with their own Claude. Connect token now, OAuth

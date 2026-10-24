@@ -2,13 +2,14 @@
 // it returns stays in an httpOnly cookie and never reaches the page.
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
+import { requireSameSite } from "@/lib/guard";
 import { CinesynthAuthError, ownerCookieFor, SESSION_COOKIE, SESSION_MAX_AGE, signInWithGoogle } from "@/lib/newtype/cinesynth";
 
 const Body = z.object({ credential: z.string().min(100).max(4096) });
 
 export async function POST(req: NextRequest) {
-  const origin = req.headers.get("origin");
-  if (origin && origin !== req.nextUrl.origin) return NextResponse.json({ error: "cross_origin" }, { status: 403 });
+  const foreign = requireSameSite(req); // host match: behind Tony's tunnel the server sees itself as http://localhost
+  if (foreign) return foreign;
   const parsed = Body.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "bad_body" }, { status: 400 });
   try {

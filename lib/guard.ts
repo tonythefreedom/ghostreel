@@ -4,7 +4,7 @@ import "server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { env } from "./env.ts";
-import { allowHit, clientIp } from "./limits.ts";
+import { allowHit, clientIp, sameSite } from "./limits.ts";
 import { store } from "./store.ts";
 
 export const OWNER_COOKIE = "gr_owner";
@@ -45,4 +45,9 @@ export async function guardSpend(req: NextRequest, kind: "brief" | "render"): Pr
     return NextResponse.json({ error: "daily_cap", hint: "today's spend cap is used up" }, { status: 429 });
   }
   return null;
+}
+
+/** 403 unless the request came from one of our own pages (host match; see sameSite). */
+export function requireSameSite(req: NextRequest): NextResponse | null {
+  return sameSite(req.headers, req.nextUrl.host) ? null : NextResponse.json({ error: "cross_origin" }, { status: 403 });
 }
