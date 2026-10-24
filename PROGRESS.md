@@ -2,6 +2,13 @@
 
 Newest first. Each entry: what is true now, what broke, what is next. Keep it short; long output goes in files.
 
+## 2026-10-24 · ops — owner passcode live
+
+- `GHOSTREEL_PASSCODE` set in Vercel production (generated, 13 chars); Ted's copy is in `.env.local` (git-ignored).
+  Verified on prod: wrong passcode 401, right one sets the owner cookie and owner-only routes open.
+- Waiting on Ted: `ANTHROPIC_API_KEY` (prompt open in his terminal), then a redeploy and the live brief check.
+- Still open: Redis in prod, without which a brief written by the API is not visible to its page.
+
 ## 2026-10-24 · T11 — brief editor and approve-to-render
 
 Done
@@ -51,7 +58,6 @@ Broke / learned
 
 Open (owner)
 - Upstash Redis for prod, or picks reset between serverless instances (A).
-- `GHOSTREEL_PASSCODE` in Vercel prod before any spend route ships (Ted).
 - T2 contract sign-off on `Ghost` / `RenderJob`; T3 NEWTYPE path (B).
 
 ## 2026-10-24 · T1 — scaffold live
