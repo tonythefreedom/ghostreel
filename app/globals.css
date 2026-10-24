@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+/* DESIGN.md › Colour is the home of these values; tests/tokens.test.mjs keeps them equal. */
+:root {
+  --bg: #0D0B1A;
+  --surface: #16132A;
+  --surface-2: #211C3B;
+  --line: #2E2850;
+  --text: #F4F2FF;
+  --text-dim: #A39DC4;
+  --accent: #8B5CF6;
+  --accent-soft: #8B5CF61F;
+  --ghost: #7CF5D4;
+  --warn: #FFB547;
+  --danger: #FF5C7A;
+
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-text: var(--text);
+  --color-text-dim: var(--text-dim);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-ghost: var(--ghost);
+  --color-warn: var(--warn);
+  --color-danger: var(--danger);
+
+  --font-sans: var(--font-pretendard), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+
+  --radius-card: 12px;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+body {
+  font-family: var(--font-sans);
+  word-break: keep-all;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

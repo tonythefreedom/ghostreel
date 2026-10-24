@@ -5,7 +5,7 @@ the gate output. Hours count from the start (H0). Lane A = loop and Shorti, Lane
 
 ## H0–H1 — Foundation (upstream first)
 
-- [ ] **T1 · A** Scaffold Next.js 16 + TS strict + Tailwind v4, DESIGN.md tokens in `globals.css`, Pretendard,
+- [x] **T1 · A** Scaffold Next.js 16 + TS strict + Tailwind v4, DESIGN.md tokens in `globals.css`, Pretendard,
   `npm run gate`, `.env.example`. Done: `gate` green, empty dark page deployed to Vercel prod.
 - [ ] **T2 · A+B** Land `lib/types.ts` exactly as ARCHITECTURE.md, both lanes agree. Done: merged on `master`.
 - [ ] **T3 · B** Confirm the NEWTYPE path from a server: endpoint, token, character list, a render's real latency.
