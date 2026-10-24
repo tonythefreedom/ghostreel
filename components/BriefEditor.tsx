@@ -25,9 +25,11 @@ function beatTitle(line: BriefLine, i: number, lang: UiLang): string {
   return words.length > 1 ? words.slice(0, 3).join(" ") : [...say].slice(0, 8).join("");
 }
 
-export function BriefEditor({ initial, initialJob, ghost, kept = [], extra, lang: langProp }: {
+export function BriefEditor({ initial, initialJob, ghost, kept = [], extra, fallback, lang: langProp }: {
   initial: Brief;
   initialJob: RenderJob | null;
+  /** The pre-rendered clip shown, labelled, if a live render fails. */
+  fallback?: { src: string; poster?: string };
   ghost: GhostFace;
   kept?: KeepPart[];
   /** What the page shows under the brief: the source short and its camera preset. */
@@ -161,7 +163,7 @@ export function BriefEditor({ initial, initialJob, ghost, kept = [], extra, lang
 
       <MoreDetail brief={brief} editable={editable} onEdit={edit} lang={lang} />
 
-      {!editable && job ? <RenderState job={job} brief={brief} poster={ghost.portraitUrl} lang={lang} /> : null}
+      {!editable && job ? <RenderState job={job} brief={brief} poster={ghost.portraitUrl} fallback={fallback} lang={lang} /> : null}
 
       <Link href={`/storyboard/${brief.id}`} className="-my-2 inline-flex min-h-11 items-center self-end text-[13px] font-[560] text-text-dim underline-offset-4 hover:text-text hover:underline">
         {t("storyboard", lang)} →

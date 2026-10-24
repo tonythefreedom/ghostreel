@@ -10,6 +10,8 @@ import { hitCues } from "@/lib/cues";
 import { withFace } from "@/lib/ghostFace";
 import { getLang } from "@/lib/lang";
 import { getGhost } from "@/lib/newtype";
+import { pickClip } from "@/lib/newtype/prerender";
+import { startDriver } from "@/lib/newtype/runner";
 import { cameraSetups, hitCard, reading } from "@/lib/shorti";
 import { store } from "@/lib/store";
 import type { Brief, RenderJob, TastePick } from "@/lib/types";
@@ -29,6 +31,15 @@ export default async function BriefPage({ params }: { params: Promise<{ id: stri
     store.get<TastePick[]>(`taste:${brief.ghostId}`),
   ]);
   const job = jobId ? await store.get<RenderJob>(`render:${jobId}`) : null;
+  startDriver(); // a live render moves on the server; the page reads it as it stands
+  const clip = (() => {
+    try {
+      return pickClip(brief.ghostId, brief.lang);
+    } catch {
+      return null;
+    }
+  })();
+  const fallback = clip ? { src: `/prerender/${clip.file}`, poster: clip.poster ? `/prerender/${clip.poster}` : undefined } : undefined;
   // What the owner kept from the original in /taste, remembered here as words.
   const pick = picks?.find((p) => p.videoId === brief.sourceVideoId);
   const kept = pick?.kept ? pick.keep : [];
@@ -57,6 +68,7 @@ export default async function BriefPage({ params }: { params: Promise<{ id: stri
       <BriefEditor
         initial={brief}
         initialJob={job}
+        fallback={fallback}
         ghost={{ id: brief.ghostId, name: ghost?.name ?? brief.ghostId, portraitUrl: ghost ? withFace(ghost).portraitUrl : undefined }}
         kept={kept}
         extra={

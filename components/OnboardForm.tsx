@@ -7,6 +7,7 @@ import { GhostCard, type CastState } from "@/components/GhostCard";
 import { GoogleSignIn } from "@/components/GoogleSignIn";
 import { useT } from "@/components/Lang";
 import { FunnelProgress } from "@/components/kit";
+import { NEW_CHARACTER_URL } from "@/lib/newtype/links";
 import { Button, Chip, ChipRow, Verb, VerbSpacer } from "@/components/ui";
 import type { CinesynthAccount, Ghost, Lang } from "@/lib/types";
 
@@ -48,6 +49,13 @@ export function OnboardForm({ ghosts, initialAccount, notice }: { ghosts: Ghost[
       .then((b: { characters?: Array<{ name: string; complete: boolean; thumb: string | null }> }) => setCast(b.characters ?? []))
       .catch(() => setCast([]));
   }, [account, cast]);
+  // Back from making a character in CineSynth (another tab): read the list again.
+  useEffect(() => {
+    if (account?.status !== "approved") return;
+    const again = () => setCast(null);
+    window.addEventListener("focus", again);
+    return () => window.removeEventListener("focus", again);
+  }, [account]);
   const castOf = (g: Ghost): { picture: string | null; state: CastState } => {
     if (!cast) return { picture: null, state: "unknown" };
     const c = cast.find((x) => x.name === g.characterId);
@@ -181,6 +189,16 @@ export function OnboardForm({ ghosts, initialAccount, notice }: { ghosts: Ghost[
               castWord={cast ? t(castOf(g).state === "ready" ? "castReady" : castOf(g).state === "incomplete" ? "castIncomplete" : "castMissing") : undefined} />
           ))}
         </div>
+        {account?.status === "approved" ? (
+          <a href={NEW_CHARACTER_URL} target="_blank" rel="noopener noreferrer"
+            className={`flex flex-col gap-1 rounded-[var(--radius-card)] p-3 ring-inset ${
+              cast && cast.length === 0 ? "bg-accent-soft ring-2 ring-accent" : "ring-1 ring-line hover:bg-surface"
+            }`}>
+            {cast && cast.length === 0 ? <span className="text-[13px] font-[560] text-text">{t("newCharacterFirst")}</span> : null}
+            <span className="text-[15px] font-[720] text-accent">+ {t("newCharacter")} ↗</span>
+            <span className="text-[12px] leading-snug text-text-dim">{t("newCharacterLine")}</span>
+          </a>
+        ) : null}
         <p className="text-[13px] leading-snug text-text-3">
           {t("obWhoLine")} <span className="font-[560] text-text">AI-generated · Virtual human</span>
         </p>

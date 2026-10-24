@@ -62,6 +62,23 @@ export const words = {
   renderDone: { ko: "렌더 완료", en: "Render done" },
   renderFailed: { ko: "렌더 실패", en: "Render failed" },
   renderRetry: { ko: "다시 렌더", en: "Render again" },
+  stageKeyframe: { ko: "첫 장면 만드는 중", en: "Making the opening frame" },
+  stageVoice: { ko: "목소리 녹음 중", en: "Recording the voice" },
+  stageLipsync: { ko: "립싱크 렌더 중", en: "Lip-sync render" },
+  stageAssemble: { ko: "장면과 목소리 합치는 중", en: "Setting the frame to the voice" },
+  etaAt: { ko: "예상 완료", en: "Est. done" },
+  notLipSynced: { ko: "립싱크 아님", en: "Not lip-synced" },
+  lipsyncUnavailable: {
+    ko: "지금은 립싱크를 돌릴 GPU가 없어 장면과 목소리만 합쳤어요. 시작 전에 거절돼 GPU 몫은 쓰지 않았어요.",
+    en: "No GPU can run lip-sync right now, so the frame was set to the voice. It was refused before starting; no GPU time was used.",
+  },
+  lipsyncFailed: { ko: "립싱크 렌더가 실패해 장면과 목소리만 합쳤어요.", en: "The lip-sync render failed, so the frame was set to the voice." },
+  lipsyncLost: { ko: "CineSynth가 재시작돼 립싱크 작업을 잃어서 장면과 목소리만 합쳤어요.", en: "CineSynth restarted and lost the lip-sync job, so the frame was set to the voice." },
+  fallbackClip: { ko: "대신 미리 렌더한 클립이에요", en: "The pre-rendered clip, shown instead" },
+  renderLongNote: {
+    ko: "립싱크는 7.5초 한 편에 1~1.5시간 걸려요. 이 페이지를 닫아도 렌더는 서버에서 계속되고, 다시 열면 지금 진행률을 보여 줘요.",
+    en: "Lip-sync takes 1–1.5 h for a 7.5 s reel. Close this page if you like: the render goes on on the server, and it shows where it is when you come back.",
+  },
   prerendered: { ko: "미리 렌더", en: "Pre-rendered" },
   prerenderOther: { ko: "다른 대본으로 렌더한 클립", en: "rendered from a different script" },
   speech: { ko: "대사", en: "Speech" },
@@ -368,6 +385,12 @@ export const words = {
   castReady: { ko: "CineSynth 캐릭터 준비됨", en: "Ready in CineSynth" },
   castIncomplete: { ko: "CineSynth 3면 이미지 일부 없음", en: "CineSynth views incomplete" },
   castMissing: { ko: "내 CineSynth에 아직 없음", en: "Not in your CineSynth yet" },
+  newCharacter: { ko: "CineSynth에서 새 캐릭터 만들기", en: "Create a new character in CineSynth" },
+  newCharacterLine: {
+    ko: "3면(정면·측면·뒷면)이 모두 생기면 여기서 고를 수 있어요. 만들고 돌아오면 목록이 새로 고쳐져요.",
+    en: "Once all three views (front, side, back) are ready, it shows up here. The list refreshes when you come back.",
+  },
+  newCharacterFirst: { ko: "내 CineSynth에 아직 캐릭터가 없어요.", en: "Your CineSynth has no characters yet." },
   orClaude: { ko: "내 Claude로 쓰고 싶다면:", en: "Rather write it with your own Claude?" },
 } as const satisfies Record<string, Record<UiLang, string>>;
 

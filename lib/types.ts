@@ -235,6 +235,16 @@ export const RenderJob = z
     error: z.string().optional(),
     startedAt: z.string(),
     finishedAt: z.string().optional(),
+    // A live CineSynth render (Lane B, 10-24): which stage it is in, how far along (0–1), when it should finish
+    // (ISO, an estimate), and for lip-sync which clip of how many. lipSync false = the frame is animated over the
+    // voice without lip-sync, and the UI says so. notice: why it fell back (e.g. "lipsync_unavailable").
+    stage: z.enum(["keyframe", "voice", "lipsync", "assemble"]).optional(),
+    progress: z.number().min(0).max(1).optional(),
+    etaAt: z.string().optional(),
+    clip: z.number().int().optional(),
+    clips: z.number().int().optional(),
+    lipSync: z.boolean().optional(),
+    notice: z.string().optional(),
   })
   .superRefine((job, ctx) => {
     if (job.provider === "prerender" && !job.manifest) {

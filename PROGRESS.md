@@ -2,6 +2,28 @@
 
 Newest first. Each entry: what is true now, what broke, what is next. Keep it short; long output goes in files.
 
+## 2026-10-24 · B — live CineSynth render with lip-sync, progress and ETA, running in the background
+- Tony (via PM): approving a brief now starts a real CineSynth render as the signed-in user, not the prerender cut.
+  REST routes with the user's CineSynth JWT (its MCP tools only take Nexus-signed calls): `/api/cf/keyframe` →
+  `/api/cf/tts-preview` (whole script, default voice) → `/api/cf/generate` (Wan-S2V lip-sync; MI250 when routed there).
+- No lip-sync GPU: CineSynth refuses up front (503, nothing started, nothing charged). Then the opening frame is pushed
+  in over the voice take here with ffmpeg and labelled "Not lip-synced" with the reason. The same happens if S2V fails
+  or CineSynth restarts and loses it. If the render fails before any video, the prerender plays, labelled.
+- Background: `lib/newtype/runner.ts` moves every live render a step about every 10 s with or without the page open.
+  `instrumentation.ts` restarts it after a server restart. To do that, the render keeps the owner's CineSynth session
+  in its pipeline record in the store (file mode 600, never sent to a browser) and drops it when the render ends. The
+  job (stage, share done, ETA, clip n/m) is saved each step, so a reload shows the bar where it stands.
+- ETA: measured S2V speed (45.8 s/step × 25 steps/clip, clips = 1 entry + speech/2.5 s + 2 exit) until the job
+  moves, then the job's own rate. Finished videos and frames are saved under `.data/renders/` and served by
+  `/api/render/media?id=` (UUID, byte ranges).
+- `lib/types.ts` (shared, for Ted): `RenderJob` gains optional `stage, progress, etaAt, clip, clips, lipSync, notice`.
+  Older jobs still parse.
+- Onboarding: a "Create a new character in CineSynth" card (new tab, `?page=character`) under "Who performs". It is
+  stronger when the account has none, and the list re-reads when the tab regains focus (씨네's request for Tony).
+- Gate: 95 tests, typecheck, build. Checked at 375 px: the failed state with its labelled prerender, and a running
+  job at lip-sync 3/6 · 40% · ETA. **Not checked: a real CineSynth render.** That needs a signed-in session, and
+  S2V needs the MI250 route to be live.
+
 ## 2026-10-24 · A — the pencil draws where it points; onboarding shows CineSynth's own characters
 
 Ted, 10-24: «코칭 색연필이 … 화면 구도나 미쟝센 그 좌표에 그려지지않는데», «온보딩시 캐릭터 고르는 것도 CineSynth로».
