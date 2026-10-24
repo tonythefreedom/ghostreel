@@ -32,6 +32,16 @@ Ted: "토니가 대사 MCP 툴 등을 데모에 사용하려고하니까 로그�
   or the new `recipeEdit` cues for `LinePicker`. (2) a recipe-edit reader in `lib/shorti/`: done (`recipeEdit`);
   Lane B may call it from server code.
 
+## 2026-10-24 · T7 (B) — the demo storyboard has all four scenes
+
+- Three more `cinesynth_cf_keyframe` scenes for Yuna's beats 2–4 (cushion pat, lip tint with a side glance, full
+  look with a wave), Tony-confirmed, started together at 04:39:01 UTC: `kf_4f05e354` done 04:39:48, `kf_226b227a`
+  04:40:18, `kf_d34cf918` 04:40:19 (about 47–78 s each; the progress showed them running on the MI250 worker).
+- Prompts keep beat 1's bathroom vanity and change only the action. They leave out the brief's outfit (the 3-view
+  sheet decides it) and the on-screen counter (an image model would draw stray text); the exact prompt is in
+  `public/prerender/keyframes.json`. Beat 2's frame is a mirror shot with a shoulder in the foreground.
+- GPU today: 7 of 30 used. Verified at 375 px: the storyboard shows four pre-made scenes with downloads.
+
 ## 2026-10-24 · English by default, every screen (Tony's decision)
 
 - Tony: the front end defaults to English and everything on screen is English. Done across both lanes in one

@@ -7,6 +7,30 @@
       "prompt": "Vertical 9:16 shot from slightly above eye level at a bright home bathroom vanity in soft morning light, round mirror and white tiles behind her. Hair loosely clipped up, fresh bare skin, she faces the camera holding a small glass serum dropper in one hand and a lip tint in the other, playful getting-ready mood.",
       "source": "CineSynth cf_keyframe kf_58cd559c (character default), owner session; Shorti format fam_way-be186ab1c0a4",
       "renderedAt": "2026-10-24T03:44:02Z"
+    },
+    {
+      "ghostId": "yuna",
+      "beat": 1,
+      "file": "default-percent-ready-1.jpg",
+      "prompt": "Vertical 9:16 shot from slightly above eye level at the same bright home bathroom vanity in soft morning light, round mirror and white tiles behind her, hair loosely clipped up. She pats a small cushion compact against her cheek with one hand, focused and playful, mid getting-ready.",
+      "source": "CineSynth cf_keyframe kf_4f05e354 (character default), owner session; Shorti format fam_way-be186ab1c0a4",
+      "renderedAt": "2026-10-24T04:39:48Z"
+    },
+    {
+      "ghostId": "yuna",
+      "beat": 2,
+      "file": "default-percent-ready-2.jpg",
+      "prompt": "Vertical 9:16 shot from slightly above eye level at the same bright home bathroom vanity in soft morning light, round mirror and white tiles behind her, hair loosely clipped up. She touches a small lip tint wand to her lips and glances sideways at the camera with a half smile, makeup almost finished.",
+      "source": "CineSynth cf_keyframe kf_226b227a (character default), owner session; Shorti format fam_way-be186ab1c0a4",
+      "renderedAt": "2026-10-24T04:40:18Z"
+    },
+    {
+      "ghostId": "yuna",
+      "beat": 3,
+      "file": "default-percent-ready-3.jpg",
+      "prompt": "Vertical 9:16 shot from slightly above eye level at the same bright home bathroom vanity in soft morning light, round mirror and white tiles behind her. Full makeup finished, hair let down and smooth, she faces the camera with a bright smile and gives a small friendly wave with one hand.",
+      "source": "CineSynth cf_keyframe kf_d34cf918 (character default), owner session; Shorti format fam_way-be186ab1c0a4",
+      "renderedAt": "2026-10-24T04:40:19Z"
     }
   ]
 }
