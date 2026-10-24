@@ -30,11 +30,11 @@ their *insides*.
 | App | Next.js 16.4 (App Router), React 19, TypeScript strict (`erasableSyntaxOnly`), Node 24 | Server routes keep keys off the client; Node runs `lib/` TS directly for scripts and tests. |
 | Style | Tailwind CSS v4 on DESIGN.md tokens | Fastest consistent mobile UI. |
 | Contracts | zod 4 in `lib/types.ts` | Every outside answer and request body is parsed at the edge. |
-| Short-form data | Shorti public MCP, keyless (`lib/mcp.ts` ~90-line client, JSON or SSE) | Verified 2026-10-24: stateless, plain JSON; keyless limit 20 req/s per IP, so enrich 4 at a time with backoff. |
+| Short-form data | Shorti public MCP, keyless, through `lib/mcp.ts`: Streamable HTTP 2025-06-18 (one shared initialize per URL, `MCP-Protocol-Version` and session headers, 404/400 session recovery, SSE parsed per event, response matched by id) | Stateless JSON today; the client also handles sessions and SSE so Lane B can reuse it. Keyless limit 20 req/s per IP, so enrich 4 at a time with backoff. Tested against a fake session-expiring server. |
 | Ghost render | NEWTYPE CineSynth on Nexus, endpoint and token from env (`lib/newtype/`) | Production characters, voice consent, AI label, watermark. |
 | Brief and captions | Claude via `@anthropic-ai/sdk` 1.3: `claude-opus-5-5`, effort `low`, zod structured output (`beta.messages.parse`), `fallbacks: "default"` (`lib/claude.ts`; prompt and clean-up in `lib/brief.ts`) | Current default model; `low` effort keeps a live edit loop short; a policy decline is retried server-side on Anthropic's recommended fallback. |
-| State | Upstash Redis over REST when env is set, one process-wide memory map otherwise (`lib/store.ts`) | No schema in an 8-hour build. Pages and routes are separate serverless functions in prod, so prod needs Redis for anything to carry across them. |
-| Deploy | `vercel deploy --prod` from a teammate machine; CI runs the gate on every push | Ted has push, not admin, on the repo. |
+| State | One process-wide memory map (`lib/store.ts`: atomic counters, fresh windows, swept expiries, capped lists); Upstash Redis over REST when its env is set | The demo runs as one `next start` process, so memory is consistent until a restart; anything the demo needs survives as fixtures or prerender clips. |
+| Deploy | **Demo:** one `next start` process on an owner-run machine, public through a Cloudflare quick tunnel. **Preview:** Vercel (`ghostreel-delta.vercel.app`), always on, landing and the taste deck only. CI runs the gate on every push. | One process keeps memory state consistent and sits next to the CineSynth session that renders; Vercel's separate functions share no state without Redis, so write flows are not promised there. |
 
 ## What Shorti answers keyless (and what it does not)
 
@@ -65,21 +65,23 @@ app/
 components/                   TrendCard, TrustLine, TasteSwipe, … (DESIGN.md names)
 lib/
   types.ts                    contracts (zod); change by agreement
-  mcp.ts                      minimal MCP client
+  mcp.ts                      MCP client (Streamable HTTP, session recovery, SSE)
   shorti/read.ts              Lane A: live reads + reducers (Node-safe, used by the recorder)
   shorti/index.ts             Lane A: what pages call: cache, fixture fallback, provenance
   newtype/index.ts            Lane B: roster, render, job status
   claude.ts                   Lane A: the Claude call (server-only)
   brief.ts                    Lane A: brief prompt + clean-up (pure, tested without a model)
   env.ts                      the only reader of secrets (server-only)
-  guard.ts                    spend guard: owner cookie, per-IP burst, daily cap
+  guard.ts                    owner cookie, requireOwner, spend guard (burst + daily cap)
+  limits.ts                   rate windows: per-IP and global unlock limits, client IP (Node-safe)
   store.ts                    Redis or memory
   words.ts                    KO/EN copy, counts, KST dates
+  speech.ts                   spoken-length estimate and budget (prompt, editor meter)
 fixtures/shorti/              reduced, recorded Shorti answers (offline + tests)
 fixtures/newtype/             roster and recorded jobs (Lane B)
 scripts/record-shorti.ts      re-record fixtures: npm run record:shorti
 scripts/deny.mjs              hashed denylist: hash a term, check a file
-tests/                        node --test: boundary, tokens, words, …
+tests/                        node --conditions=react-server --test: boundary, mcp, store, limits, brief, contract, …
 .githooks/                    pre-commit (boundary), commit-msg (denylist); installed by npm install
 .github/workflows/gate.yml    CI: npm ci && npm run gate
 ```
@@ -112,6 +114,25 @@ tests/                        node --test: boundary, tokens, words, …
 | `GHOSTREEL_DAILY_CAP` | spend calls per day, default 40 |
 | `SHORTI_MCP_URL` | defaults to the public MCP |
 | `GHOSTREEL_OFFLINE=1` | adapters serve fixtures only (CI, stage fallback) |
+
+## Running the demo host
+
+```bash
+npm ci && npm run gate
+```
+
+```bash
+npm start
+```
+
+```bash
+cloudflared tunnel --url http://localhost:3000
+```
+
+`npm start` reads `.env.local` (git-ignored: `GHOSTREEL_PASSCODE`, `ANTHROPIC_API_KEY`, `NEWTYPE_*`). The tunnel needs no
+account and serves HTTPS; guards read the client address from `CF-Connecting-IP` first. Keep the
+machine awake (`caffeinate -dims` on macOS). A restart clears picks and briefs made live; the recorded fixtures and
+`public/prerender/` clips are what the demo can always fall back on.
 
 ## Gate
 

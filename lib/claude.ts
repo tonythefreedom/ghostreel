@@ -13,6 +13,7 @@ let client: Anthropic | null = null;
 const anthropic = () => (client ??= new Anthropic({ apiKey: env.anthropicKey(), timeout: 45_000, maxRetries: 1 }));
 
 export class BriefRefused extends Error {}
+export const modelReady = () => Boolean(env.anthropicKey());
 export class ModelKeyMissing extends Error {}
 
 export async function writeBrief(input: BriefInput): Promise<{ brief: Brief; ms: number; model: string }> {

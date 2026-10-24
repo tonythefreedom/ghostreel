@@ -114,17 +114,38 @@ export const Brief = z.object({
 export type BriefLine = z.infer<typeof BriefLine>;
 export type Brief = z.infer<typeof Brief>;
 
-export const RenderJob = z.object({
-  id: z.string(),
-  briefId: z.string(),
-  provider: z.enum(["newtype", "prerender"]), // prerender is always shown as such
-  status: z.enum(["queued", "running", "done", "failed"]),
-  videoUrl: z.string().url().optional(),
-  posterUrl: z.string().url().optional(),
-  error: z.string().optional(),
-  startedAt: z.string(),
-  finishedAt: z.string().optional(),
+// A clip rendered outside the live path (an owner-run CineSynth session) and placed in public/prerender/.
+// Required whenever provider is "prerender", so the UI can say what it is and what it was rendered from.
+export const PrerenderManifest = z.object({
+  characterId: z.string().min(1),
+  script: z.array(z.string()).min(1), // the approved "say" lines it was rendered from, in order
+  durationSec: z.number().positive(),
+  renderedBy: z.string().min(1), // who ran the owner session
+  renderedAt: z.string().min(1),
+  source: z.string().min(1), // e.g. "CineSynth talking_ad, owner session"
+  briefId: z.string().optional(), // when it was rendered from a GhostReel brief
 });
+export type PrerenderManifest = z.infer<typeof PrerenderManifest>;
+
+export const RenderJob = z
+  .object({
+    id: z.string(), // GhostReel's own id (a UUID); never the provider's
+    briefId: z.string(),
+    provider: z.enum(["newtype", "prerender"]), // prerender is always shown as such
+    providerJobId: z.string().optional(), // CineSynth's job id, for status and download
+    status: z.enum(["queued", "running", "done", "failed"]),
+    videoUrl: z.string().url().optional(),
+    posterUrl: z.string().url().optional(),
+    manifest: PrerenderManifest.optional(),
+    error: z.string().optional(),
+    startedAt: z.string(),
+    finishedAt: z.string().optional(),
+  })
+  .superRefine((job, ctx) => {
+    if (job.provider === "prerender" && !job.manifest) {
+      ctx.addIssue({ code: "custom", path: ["manifest"], message: "a prerendered clip carries its manifest" });
+    }
+  });
 export type RenderJob = z.infer<typeof RenderJob>;
 
 export const QueueItem = z.object({
@@ -140,3 +161,10 @@ export type QueueItem = z.infer<typeof QueueItem>;
 
 // Every adapter answer carries where it came from, so the UI can label fixtures honestly.
 export type Sourced<T> = { data: T; provenance: Provenance };
+
+/** Whether a prerendered clip says exactly what this brief says (same spoken lines, same order). */
+export function prerenderMatches(job: RenderJob, brief: Brief): boolean {
+  if (job.provider !== "prerender" || !job.manifest) return false;
+  const said = brief.lines.map((l) => l.say.trim());
+  return job.manifest.script.length === said.length && job.manifest.script.every((line, i) => line.trim() === said[i]);
+}

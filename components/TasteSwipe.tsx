@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { KeepPart, TastePick, TrendCard as Card } from "@/lib/types";
 import { t, type UiLang } from "@/lib/words";
 import { BriefStarter } from "./BriefStarter";
+import { UnlockForm } from "./UnlockForm";
 import { TrendCard } from "./TrendCard";
 
 const PARTS: KeepPart[] = ["hook", "beat", "look", "sound"];
@@ -29,19 +30,29 @@ export function TasteSwipe({ cards, ghostId, lang = "ko" }: { cards: Card[]; gho
       .catch(() => {});
   }, [ghostId, cards]);
 
-  const save = useCallback(
-    (next: TastePick[]) => {
-      setPicks(next);
-      void fetch("/api/taste", {
+  // Only the owner writes picks; anyone else is asked for the passcode once, then the latest picks are saved.
+  const [locked, setLocked] = useState<TastePick[] | null>(null);
+  const persist = useCallback(
+    async (next: TastePick[]) => {
+      const res = await fetch("/api/taste", {
         method: "PUT",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ ghostId, picks: next }),
       });
+      setLocked(res.status === 401 ? next : null);
+    },
+    [ghostId],
+  );
+
+  const save = useCallback(
+    (next: TastePick[]) => {
+      setPicks(next);
+      void persist(next);
       setToast(true);
       if (timer.current) clearTimeout(timer.current);
       timer.current = setTimeout(() => setToast(false), 5000);
     },
-    [ghostId],
+    [persist],
   );
 
   const pick = (c: Card, kept: boolean, keep: KeepPart[] = []) =>
@@ -86,6 +97,11 @@ export function TasteSwipe({ cards, ghostId, lang = "ko" }: { cards: Card[]; gho
 
   return (
     <div className="flex flex-col gap-4">
+      {locked ? (
+        <div className="rounded-[var(--radius-card)] border border-warn/40 bg-surface p-3">
+          <UnlockForm lang={lang} onUnlocked={() => void persist(locked)} />
+        </div>
+      ) : null}
       <div className="flex items-center justify-between text-[13px] text-text-dim">
         <span className="font-mono">
           {Math.min(index + 1, cards.length)} / {cards.length}

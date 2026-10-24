@@ -4,7 +4,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 import { applyEdits, BriefEdit, BriefLocked } from "@/lib/brief";
 import { guardSpend, requireOwner } from "@/lib/guard";
-import { BriefRefused, ModelKeyMissing, writeBrief } from "@/lib/claude";
+import { BriefRefused, ModelKeyMissing, modelReady, writeBrief } from "@/lib/claude";
 import { getGhost } from "@/lib/newtype";
 import { formatPlan, reading } from "@/lib/shorti";
 import { store } from "@/lib/store";
@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
   const pick = picks.find((p) => p.videoId === videoId && p.kept);
   if (!pick) return NextResponse.json({ error: "not_kept", hint: "keep the short in /taste first" }, { status: 409 });
 
+  if (!modelReady()) return NextResponse.json({ error: "model_key_missing" }, { status: 503 }); // before the cap counts it
   const refused = await guardSpend(req, "brief"); // after cheap checks, so bad requests never count against the cap
   if (refused) return refused;
 
@@ -53,11 +54,11 @@ export async function POST(req: NextRequest) {
       spot: openSpot ? { label: openSpot.label, what: openSpot.what, how: openSpot.how } : undefined,
     });
     await store.set(`brief:${brief.id}`, brief, 60 * 60 * 24 * 7);
-    const list = (await store.get<string[]>(`briefs:${ghostId}`)) ?? [];
-    await store.set(`briefs:${ghostId}`, [brief.id, ...list].slice(0, 50), 60 * 60 * 24 * 7);
+    await store.push(`briefs:${ghostId}`, brief.id, 50, 60 * 60 * 24 * 7);
     return NextResponse.json({ brief, ms, model });
   } catch (e) {
     if (e instanceof ModelKeyMissing) return NextResponse.json({ error: "model_key_missing" }, { status: 503 });
+    if (e instanceof z.ZodError) return NextResponse.json({ error: "brief_unusable", hint: "the draft had too few usable beats; try again" }, { status: 422 });
     if (e instanceof BriefRefused) return NextResponse.json({ error: "refused" }, { status: 422 });
     if (e instanceof Anthropic.RateLimitError) return NextResponse.json({ error: "model_busy" }, { status: 429 });
     if (e instanceof Anthropic.AuthenticationError) return NextResponse.json({ error: "model_key" }, { status: 503 });

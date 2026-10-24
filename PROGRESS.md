@@ -2,6 +2,26 @@
 
 Newest first. Each entry: what is true now, what broke, what is next. Keep it short; long output goes in files.
 
+## 2026-10-24 · review 311a8a4 answered — fixes and T2
+
+Done
+- Lane B's review (docs/review-2026-10-24.md) answered in docs/review-2026-10-24-reply.md.
+- Fixed and tested: 1 taste writes owner-only (+ unlock prompt in the deck), 2 every prompt input is escaped JSON
+  in its own tag, 3 SSE per event + response by id, 4 session recovery on 404/400 with one shared initialize and
+  `MCP-Protocol-Version`, 5 atomic memory counters, 6 fresh window after expiry, 7 swept stores and windows, refused
+  hits not stored, 8 unlock limited per IP (5/15 min) and globally (30/15 min), 9 key check before the cap and 422 for
+  unusable drafts, 10 brief ids pushed to a capped list. Reproductions for 3, 4, 5, 6 fail on the old code.
+- T2 approved with conditions and landed: `providerJobId`, `PrerenderManifest` required for prerender,
+  `prerenderMatches`; adapter returns `ProviderJob`; the editor tags prerendered clips and shows a speech meter.
+- Deploy: the demo is one `next start` process behind a Cloudflare tunnel; Vercel stays a read-only preview.
+- Verified on a production build: stranger taste write 401, sixth wrong passcode 429 (the right one too, from that IP),
+  owner write 200, eleven brief calls without a key all 503 and never 429. Browser: locked save → passcode → saved.
+- Gate: 27 tests, typecheck, build green.
+
+Open
+- Ted: demo machine and who runs it (T16a); `ANTHROPIC_API_KEY`.
+- Lane B: confirm the CineSynth confirm step for T2's last condition; check fixes 1, 2, 8 against the private details.
+
 ## 2026-10-24 · T8 (B) — creator registration, first cut
 
 Done

@@ -35,9 +35,10 @@ export async function POST(req: NextRequest) {
   const refused = await guardSpend(req, "render");
   if (refused) return refused;
 
+  const startedAt = new Date().toISOString();
   try {
-    const job = RenderJob.parse(await render(brief, ghost));
-    return NextResponse.json({ job: await save({ ...job, briefId: brief.id }) }, { status: 202 });
+    const job = RenderJob.parse({ ...(await render(brief, ghost)), id: randomUUID(), briefId: brief.id, startedAt });
+    return NextResponse.json({ job: await save(job) }, { status: 202 });
   } catch (e) {
     const failed = await save({
       id: randomUUID(),
@@ -45,7 +46,7 @@ export async function POST(req: NextRequest) {
       provider: "newtype",
       status: "failed",
       error: (e as Error).message.slice(0, 200),
-      startedAt: new Date().toISOString(),
+      startedAt,
     });
     return NextResponse.json({ job: failed }, { status: 502 });
   }
@@ -55,12 +56,15 @@ export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams;
   const briefId = z.string().uuid().safeParse(q.get("brief"));
   const id = briefId.success ? await store.get<string>(`renderFor:${briefId.data}`) : q.get("id");
-  if (!id || !/^[A-Za-z0-9_-]{1,80}$/.test(id)) return NextResponse.json({ job: null });
+  if (!id || !z.string().uuid().safeParse(id).success) return NextResponse.json({ job: null });
   const job = await store.get<RenderJob>(`render:${id}`);
   if (!job) return NextResponse.json({ job: null });
-  if (job.provider !== "newtype" || (job.status !== "queued" && job.status !== "running")) return NextResponse.json({ job });
+  const inFlight = job.status === "queued" || job.status === "running";
+  if (job.provider !== "newtype" || !inFlight || !job.providerJobId) return NextResponse.json({ job });
   try {
-    return NextResponse.json({ job: await save({ ...RenderJob.parse(await getJob(job.id)), briefId: job.briefId }) });
+    const now = await getJob(job.providerJobId);
+    const done = now.status === "done" || now.status === "failed";
+    return NextResponse.json({ job: await save(RenderJob.parse({ ...job, ...now, finishedAt: done ? new Date().toISOString() : undefined })) });
   } catch {
     return NextResponse.json({ job }); // keep the last known state; the client polls again
   }

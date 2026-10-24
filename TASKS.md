@@ -9,7 +9,9 @@ the gate output. Hours count from the start (H0). Lane A = loop and Shorti, Lane
   and commit-msg hooks, CI gate, spend guard (owner passcode, burst, daily cap).
 - [x] **T1 · A** Scaffold Next.js 16 + TS strict + Tailwind v4, DESIGN.md tokens in `globals.css`, Pretendard,
   `npm run gate`, `.env.example`. Done: `gate` green, empty dark page deployed to Vercel prod.
-- [~] **T2 · A+B** `lib/types.ts` (zod) landed as a draft from the live Shorti shapes. Done when Lane B agrees or amends `Ghost` and `RenderJob`.
+- [x] **T2 · A+B** Contract approved 2026-10-24 with conditions: `Ghost` as is; `RenderJob` keeps our UUID `id`, adds
+  `providerJobId`, and a `manifest` that is required when `provider` is `prerender`. Open: a confirm step
+  (`needs_confirm` + `previewUrl`) once Lane B confirms CineSynth's `confirm_token` flow.
 - [ ] **T3 · B** Confirm the NEWTYPE path from a server: endpoint, token, character list, a render's real latency.
   Done: one line each in PROGRESS.md.
 - [x] **T4 · A** Reduced Shorti fixtures for beauty and fashion (cards, readings, format plans) via `npm run record:shorti`.
@@ -18,7 +20,7 @@ the gate output. Hours count from the start (H0). Lane A = loop and Shorti, Lane
 
 - [x] **T5 · A** `lib/mcp.ts` + `lib/shorti/` (keyless, `lang: 'en'`, 4-wide enrich with backoff, cache, fixture
   fallback with provenance). Pages call it server-side; no public proxy route.
-- [ ] **T6 · B** `lib/newtype/` `listCharacters` + `render` + `getJob` (stub with roster is there). `/api/render` is
+- [ ] **T6 · B** `lib/newtype/` `listCharacters` + `render` + `getJob` returning `ProviderJob` (stub is there). `/api/render` is
   scaffolded with the shared rules (approved only, one job per brief, spend guard); fill the adapter, own the route.
   Done: a curl starts a real render and polls it to `done` with a `videoUrl`.
 - [ ] **T7 · B** Start 3 real renders now (Yuna, English, 10 s, from the T4 format) so finished clips exist by H5;
@@ -48,6 +50,8 @@ the gate output. Hours count from the start (H0). Lane A = loop and Shorti, Lane
   Done: one deal visible in the queue.
 
 ## H6–H7 — Stage-proofing
+
+- [ ] **T16a · Ted** Pick the demo machine and who runs it; run the demo host steps in ARCHITECTURE.md on it once.
 
 - [ ] **T16 · A+B** Full run on prod with `GHOSTREEL_OFFLINE` unset, then with it set. Done: both runs complete the
   demo script in PRD.md without a dead end.

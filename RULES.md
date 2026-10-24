@@ -8,9 +8,9 @@ Two writers, split by folder so nobody edits the same file at the same time.
 
 | Lane | Owner | Owns |
 | --- | --- | --- |
-| A — loop and Shorti | Ted (+ his agents) | `lib/shorti/`, `lib/mcp.ts`, `lib/claude.ts`, `lib/store.ts`, `lib/words.ts`, `app/taste`, `app/brief`, `app/ghost`, `app/api/taste`, `app/api/brief`, `app/api/queue`, `app/api/dev`, `components/TrendCard.tsx`, `components/TrustLine.tsx`, `components/TasteSwipe.tsx`, `components/BriefStarter.tsx`, `components/BriefEditor.tsx`, `components/UnlockForm.tsx`, `fixtures/shorti`, `scripts/record-shorti.ts` |
+| A — loop and Shorti | Ted (+ his agents) | `lib/shorti/`, `lib/mcp.ts`, `lib/claude.ts`, `lib/store.ts`, `lib/words.ts`, `lib/brief.ts`, `lib/speech.ts`, `app/taste`, `app/brief`, `app/ghost`, `app/api/taste`, `app/api/brief`, `app/api/queue`, `app/api/dev`, `components/TrendCard.tsx`, `components/TrustLine.tsx`, `components/TasteSwipe.tsx`, `components/BriefStarter.tsx`, `components/BriefEditor.tsx`, `components/UnlockForm.tsx`, `fixtures/shorti`, `scripts/record-shorti.ts` |
 | B — ghost and render | NEWTYPE teammate (+ their agents) | `lib/newtype/`, `app/onboard`, `app/api/render`, `components/ReelPlayer.tsx`, `components/RenderJob.tsx`, `components/DealCard.tsx`, `fixtures/newtype`, `public/prerender` |
-| Shared | both, by agreement in chat first | `lib/types.ts`, `lib/env.ts`, `lib/guard.ts`, `tests/`, `scripts/deny.mjs`, `.githooks/`, `.github/`, `package.json`, `app/layout.tsx`, `app/globals.css`, the six docs |
+| Shared | both, by agreement in chat first | `lib/types.ts`, `lib/env.ts`, `lib/guard.ts`, `lib/limits.ts`, `tests/`, `scripts/deny.mjs`, `.githooks/`, `.github/`, `package.json`, `app/layout.tsx`, `app/globals.css`, the six docs |
 
 Touch another lane's file only after its owner says yes.
 
@@ -35,7 +35,10 @@ Touch another lane's file only after its owner says yes.
 - TypeScript strict. No `any`; use `unknown` and narrow. Types live in `lib/types.ts` only.
 - Server components by default; `'use client'` only for interaction (swipe, edit, poll).
 - External calls only inside `lib/` adapters. Pages and components `fetch` only relative `/api/…` routes.
-- Every route that spends money (Claude, GPU) starts with `guardSpend()` from `lib/guard.ts`.
+- Every route that spends money (Claude, GPU) starts with `guardSpend()` from `lib/guard.ts`; every route that writes
+  owner data (picks, briefs, approval) starts with `requireOwner()`. Cheap checks (body, existence, model key) run first.
+- Anything a person typed or a provider returned goes into a prompt as escaped JSON inside its own tag, never as prose.
+- A GPU start is never retried after an ambiguous timeout: read the job's status first. Only read-only tools retry.
 - Secrets are read only through `lib/env.ts`.
 - Code under `lib/` that scripts or tests import uses relative imports with the `.ts` extension and erasable syntax
   only (no enums, no parameter properties), so Node 24 runs it directly.

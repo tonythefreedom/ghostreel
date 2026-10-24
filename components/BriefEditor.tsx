@@ -2,7 +2,8 @@
 // The owner's last word before any GPU spend: edit the ghost's draft inline, then approve and render.
 // Approving locks the brief; the render route refuses anything unapproved.
 import { useEffect, useState } from "react";
-import type { Brief, RenderJob } from "@/lib/types";
+import { speechBudget, speechSeconds } from "@/lib/speech";
+import { prerenderMatches, type Brief, type RenderJob } from "@/lib/types";
 import { t, type UiLang, type WordKey } from "@/lib/words";
 import { UnlockForm } from "./UnlockForm";
 
@@ -98,6 +99,7 @@ export function BriefEditor({ initial, initialJob, lang = "ko" }: { initial: Bri
           </button>
         ))}
         <span className="font-mono text-[12px] text-text-dim">9:16 · {brief.lang.toUpperCase()}</span>
+        <SpeechMeter brief={brief} lang={lang} />
       </div>
 
       <ol className="flex flex-col gap-3">
@@ -200,6 +202,12 @@ export function BriefEditor({ initial, initialJob, lang = "ko" }: { initial: Bri
               <span className="rounded-full bg-ghost/15 px-3 py-1 text-[13px] font-semibold text-ghost">{t("approved", lang)}</span>
               {job ? (
                 <span className={`text-[13px] font-semibold ${job.status === "failed" ? "text-danger" : "text-text"}`}>
+                  {job.provider === "prerender" ? (
+                    <span className="mr-1 rounded-full bg-warn/15 px-2 py-0.5 text-[11px] text-warn">
+                      {t("prerendered", lang)}
+                      {prerenderMatches(job, brief) ? "" : ` · ${t("prerenderOther", lang)}`}
+                    </span>
+                  ) : null}
                   {t(JOB_WORD[job.status], lang)}
                   {job.error ? ` · ${job.error}` : ""}
                 </span>
@@ -215,5 +223,16 @@ export function BriefEditor({ initial, initialJob, lang = "ko" }: { initial: Bri
         </div>
       </footer>
     </div>
+  );
+}
+
+// Rough spoken length against the duration's budget, so the owner trims before a render does it for them.
+function SpeechMeter({ brief, lang }: { brief: Brief; lang: UiLang }) {
+  const used = speechSeconds(brief.lines, brief.lang);
+  const budget = speechBudget(brief.durationSec, brief.lang).seconds;
+  return (
+    <span className={`ml-auto font-mono text-[12px] ${used > budget ? "text-danger" : "text-text-dim"}`}>
+      {t("speech", lang)} ~{used.toFixed(1)}s / {budget.toFixed(0)}s
+    </span>
   );
 }

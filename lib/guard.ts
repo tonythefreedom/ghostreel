@@ -1,10 +1,10 @@
-// Spend guard for routes that cost money (Claude calls, GPU renders). The deployed URL is public, so:
-// 1. the owner unlocks once with the owner passcode (httpOnly cookie); without one set, prod spends nothing;
-// 2. per-IP burst limit; 3. a global daily cap (GHOSTREEL_DAILY_CAP, default 40).
+// Guards for a public URL. Spend (Claude, GPU): owner cookie, per-IP burst, global daily cap (GHOSTREEL_DAILY_CAP,
+// default 40). Rate windows live in lib/limits.ts. Without an owner passcode set, prod spends and writes nothing.
 import "server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { env } from "./env.ts";
+import { allowHit, clientIp } from "./limits.ts";
 import { store } from "./store.ts";
 
 export const OWNER_COOKIE = "gr_owner";
@@ -21,22 +21,13 @@ export function passcodeMatches(given: string): boolean {
   return a.length === b.length && timingSafeEqual(a, b);
 }
 
-function isOwner(req: NextRequest): boolean {
+export function isOwner(req: NextRequest): boolean {
   const passcode = env.passcode();
   if (!passcode) return process.env.NODE_ENV !== "production"; // dev without a passcode: open; prod: closed
   return req.cookies.get(OWNER_COOKIE)?.value === ownerToken(passcode);
 }
 
-const bursts = new Map<string, number[]>();
-function burstOk(ip: string, max = 8, windowMs = 60_000): boolean {
-  const now = Date.now();
-  const hits = (bursts.get(ip) ?? []).filter((t) => now - t < windowMs);
-  hits.push(now);
-  bursts.set(ip, hits);
-  return hits.length <= max;
-}
-
-/** Owner-only writes that cost nothing (editing, approving): a refusal response, or null. */
+/** Owner-only writes that cost nothing (picks, edits, approval): a refusal response, or null. */
 export function requireOwner(req: NextRequest): NextResponse | null {
   return isOwner(req) ? null : NextResponse.json({ error: "locked", hint: "unlock with the owner passcode" }, { status: 401 });
 }
@@ -45,8 +36,7 @@ export function requireOwner(req: NextRequest): NextResponse | null {
 export async function guardSpend(req: NextRequest, kind: "brief" | "render"): Promise<NextResponse | null> {
   const locked = requireOwner(req);
   if (locked) return locked;
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
-  if (!burstOk(`${kind}:${ip}`)) {
+  if (!allowHit(`${kind}:${clientIp(req.headers)}`, 8, 60_000)) {
     return NextResponse.json({ error: "slow_down" }, { status: 429, headers: { "retry-after": "60" } });
   }
   const day = new Date().toISOString().slice(0, 10);

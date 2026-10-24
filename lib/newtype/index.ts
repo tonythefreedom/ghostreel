@@ -5,6 +5,10 @@ import { z } from "zod";
 import roster from "@/fixtures/newtype/characters.json";
 import { Ghost, type Brief, type RenderJob } from "../types.ts";
 
+// What the adapter reports about a render; the route adds GhostReel's own id, briefId and timestamps.
+// Never retry a GPU start after an ambiguous timeout: read the job's status first (review 2026-10-24, rule 5).
+export type ProviderJob = Pick<RenderJob, "provider" | "providerJobId" | "status" | "videoUrl" | "posterUrl" | "manifest" | "error">;
+
 const ghosts = z.array(Ghost).parse(roster.characters);
 
 export async function listCharacters(): Promise<Ghost[]> {
@@ -15,10 +19,10 @@ export async function getGhost(id: string): Promise<Ghost | null> {
   return (await listCharacters()).find((g) => g.id === id) ?? null;
 }
 
-export async function render(_brief: Brief, _ghost: Ghost): Promise<RenderJob> {
+export async function render(_brief: Brief, _ghost: Ghost): Promise<ProviderJob> {
   throw new Error("newtype: render not wired yet (TASKS T6)"); // TODO(B): start a GPU job for an approved brief
 }
 
-export async function getJob(_id: string): Promise<RenderJob> {
+export async function getJob(_providerJobId: string): Promise<ProviderJob> {
   throw new Error("newtype: getJob not wired yet (TASKS T6)"); // TODO(B)
 }

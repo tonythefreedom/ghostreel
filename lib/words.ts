@@ -47,6 +47,9 @@ export const words = {
   renderDone: { ko: "렌더 완료", en: "Render done" },
   renderFailed: { ko: "렌더 실패", en: "Render failed" },
   renderRetry: { ko: "다시 렌더", en: "Render again" },
+  prerendered: { ko: "미리 렌더", en: "Pre-rendered" },
+  prerenderOther: { ko: "다른 대본으로 렌더한 클립", en: "rendered from a different script" },
+  speech: { ko: "대사", en: "Speech" },
   approveNote: {
     ko: "승인하면 브리프가 잠기고, 그때 처음으로 GPU 렌더가 시작돼요.",
     en: "Approving locks the brief; only then does a GPU render start.",
