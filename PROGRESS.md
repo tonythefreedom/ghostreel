@@ -2,6 +2,21 @@
 
 Newest first. Each entry: what is true now, what broke, what is next. Keep it short; long output goes in files.
 
+## 2026-10-24 · T8 (B) — creator registration, first cut
+
+Done
+- `/onboard`: the creator's name, niche, background, market, languages, own past short links (1–10), a past plan
+  and script as text, and the virtual human who performs (`GhostCard` grid from `listCharacters`).
+- `POST /api/creator`: owner-only (`requireOwner`), same-origin check, 16 KB body cap, ghost must exist; stores a
+  `Creator` for 7 days. No model or GPU, so no spend guard. No public GET: plans and scripts stay server-side.
+- `/profile/[id]`: what was registered, the performer, and a "분석 준비 중 (T21)" tag until Lane A's StyleProfile
+  route lands; its button goes on to `/taste` for the trend step.
+- `lib/creator.ts` holds the `Creator` schema until T2 moves it into `lib/types.ts` by agreement.
+- Verified in the browser at 375 px: fill → save → `/profile/<id>` shows both links and Yuna.
+
+Open
+- The landing page still links to `/taste`; pointing it at `/onboard` is Ted's call (PRD change proposal).
+
 ## 2026-10-24 · ops — owner passcode live
 
 - `GHOSTREEL_PASSCODE` set in Vercel production (generated, 13 chars); Ted's copy is in `.env.local` (git-ignored).
