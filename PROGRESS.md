@@ -22,6 +22,7 @@ Ted, 10-24: «코칭 색연필이 … 화면 구도나 미쟝센 그 좌표에 �
   to the CineSynth character portraits in `public/ghosts/` (768×960 webp, from the CineSynth landing). A keyframe still
   wins, so Yuna keeps her real CineSynth frame. `lib/types.ts` is unchanged.
 - Gate: 89 tests, typecheck, build. All four show at 375 px on onboarding step 4.
+
 ## 2026-10-24 · A — every flow overhauled: KO/EN, one player with the coaching pencil, 4D camera preset, Connect as steps
 
 Ted, 10-24: «한/영 토글도 없고 … 재생 음소거나 코칭 색연필 등등도 안되어있고 … 대대적인 개선이 필요하다».
