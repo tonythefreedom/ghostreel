@@ -1,5 +1,5 @@
 {
-  "recordedAt": "2026-10-24T01:58:06.374Z",
+  "recordedAt": "2026-10-24T04:01:01.483Z",
   "formats": {
     "fam_way-be186ab1c0a4": {
       "formatId": "fam_way-be186ab1c0a4",
@@ -23,28 +23,6 @@
       ],
       "page": "https://shorti.ai/en/f/way-be186ab1c0a4#flow"
     },
-    "fam_cur-6cedd3c94ec9": {
-      "formatId": "lin_4d42a13ad231",
-      "line": "They dance barefaced before transitioning into a fully styled glam look with a hand gesture.",
-      "open": [
-        {
-          "label": "makeup fail",
-          "what": "The hand swipe reveals an exaggerated, messy makeup fail instead of glamorous perfection.",
-          "how": "Swipe the hand to cut into smeared clownish lipstick, wonky eyeliner, and bewildered acting."
-        },
-        {
-          "label": "partner swap",
-          "what": "The person swiping stays bare-faced while their partner behind them transforms into full glam.",
-          "how": "Swipe on your tired face, but reveal yourself unchanged while your partner behind poses cute."
-        },
-        {
-          "label": "reverse glam",
-          "what": "Instead of turning glamorous, the swipe cuts to an even messier bedtime look with a sheet mask.",
-          "how": "Swipe forward expecting glam, then reveal yourself in an awkward sheet mask and oversized glasses."
-        }
-      ],
-      "page": "https://shorti.ai/en/l/4d42a13ad231"
-    },
     "fam_cur-80ca955b9370": {
       "formatId": "lin_551a3a9c2765",
       "line": "Show the sequential stages of a hair routine from messy hair to the finished style.",
@@ -66,6 +44,28 @@
         }
       ],
       "page": "https://shorti.ai/en/l/551a3a9c2765"
+    },
+    "fam_cur-6cedd3c94ec9": {
+      "formatId": "lin_4d42a13ad231",
+      "line": "They dance barefaced before transitioning into a fully styled glam look with a hand gesture.",
+      "open": [
+        {
+          "label": "makeup fail",
+          "what": "The hand swipe reveals an exaggerated, messy makeup fail instead of glamorous perfection.",
+          "how": "Swipe the hand to cut into smeared clownish lipstick, wonky eyeliner, and bewildered acting."
+        },
+        {
+          "label": "partner swap",
+          "what": "The person swiping stays bare-faced while their partner behind them transforms into full glam.",
+          "how": "Swipe on your tired face, but reveal yourself unchanged while your partner behind poses cute."
+        },
+        {
+          "label": "reverse glam",
+          "what": "Instead of turning glamorous, the swipe cuts to an even messier bedtime look with a sheet mask.",
+          "how": "Swipe forward expecting glam, then reveal yourself in an awkward sheet mask and oversized glasses."
+        }
+      ],
+      "page": "https://shorti.ai/en/l/4d42a13ad231"
     },
     "fam_cur-12194faefdb2": {
       "formatId": "lin_376aef466ca9",

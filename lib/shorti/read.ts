@@ -2,12 +2,20 @@
 // Node-safe (no Next imports) so scripts/record-shorti.ts can reuse it.
 import { callTool, type ToolResult } from "../mcp.ts";
 import {
+  CameraSetup,
+  FindMatch,
   FormatPlan,
+  OpenSpot,
+  RecipeEdit,
   TrendCard,
   VideoReading,
   type FormatPlan as FormatPlanT,
   type TrendCard as TrendCardT,
   type VideoReading as VideoReadingT,
+  type RecipeEdit as RecipeEditT,
+  type CameraSetup as CameraSetupT,
+  type FindMatch as FindMatchT,
+  type OpenSpot as OpenSpotT,
 } from "../types.ts";
 
 export const SHORTI_MCP = process.env.SHORTI_MCP_URL ?? "https://shorti.ai/mcp";
@@ -28,8 +36,30 @@ const arr = (v: unknown): unknown[] => (Array.isArray(v) ? v : []);
 const str = (v: unknown): string | undefined => (typeof v === "string" && v.length > 0 ? v : undefined);
 const num = (v: unknown): number | undefined => (typeof v === "number" && Number.isFinite(v) ? v : undefined);
 
-// Keyless door: 20 req/s per IP, then 429. Two gentle retries, then give up.
+// The only Shorti calls GhostReel makes: keyless reads. Shorti's writes (recipe brief, cut, check, share, board,
+// arena join, my_*) need a person signed in and approving at that moment, so an unattended server never calls them
+// and a demo never shows a Shorti sign-in. Anything off this list throws before it leaves the process.
+export const KEYLESS_READS: Record<string, readonly string[] | null> = {
+  shorti_what_to_shoot: null,
+  shorti_video: null,
+  shorti_find: null,
+  shorti_format: ["plan", "flow", "scene"], // by `part`
+  shorti_recipe: ["edit", "remake", "scene"], // by `kind`
+  shorti_arena: ["spots", "board"], // by `view`; never `join` or `leave`
+};
+
+export function isKeylessRead(tool: string, args: Obj): boolean {
+  if (!(tool in KEYLESS_READS)) return false;
+  const kinds = KEYLESS_READS[tool];
+  if (!kinds) return true;
+  if ("join" in args || "leave" in args || "idempotency_key" in args) return false;
+  const which = args.part ?? args.kind ?? args.view;
+  return typeof which === "string" && kinds.includes(which);
+}
+
+// Keyless door: 20 req/s per IP, then 429. Two gentle retries, then give up. Reads only, so a retry is safe.
 async function call(tool: string, args: Obj): Promise<ToolResult> {
+  if (!isKeylessRead(tool, args)) throw new ShortiRefusal(tool, "not_a_keyless_read");
   for (let attempt = 0; ; attempt++) {
     try {
       const r = await callTool(SHORTI_MCP, tool, { lang: "en", ...args }, { timeoutMs: 25_000 });
@@ -158,4 +188,75 @@ export async function enrich(cards: TrendCardT[]): Promise<{ cards: TrendCardT[]
     );
   }
   return { cards: out, readings };
+}
+
+const strs = (v: unknown): string[] => arr(v).filter((x): x is string => typeof x === "string" && x.length > 0);
+const en = (v: unknown): string | undefined => str(obj(v).en) ?? str(v);
+
+export function toRecipeEdit(structured: unknown): RecipeEditT {
+  const s = obj(structured);
+  const r = obj(s.recipe);
+  const f = obj(s.formula);
+  return RecipeEdit.parse({
+    videoId: str(s.video_id) ?? str(obj(r.reference).video) ?? "",
+    lengthMs: num(r.length_ms),
+    bpm: num(obj(r.beats).bpm),
+    hookFacts: arr(r.hook).flatMap((h) => (str(obj(h).en) ? [str(obj(h).en)!] : [])),
+    cues: arr(f.cues).flatMap((c) => {
+      const cue = en(obj(c).cue);
+      const doIt = en(obj(c).do);
+      return cue && doIt ? [{ cue, do: doIt, share: en(obj(c).share) ?? "" }] : [];
+    }),
+    makeItYours: strs(obj(f.make_it_yours).en),
+    free: arr(r.free).flatMap((x) => (str(obj(x).en) ? [str(obj(x).en)!] : [])),
+  });
+}
+
+export function toCameraSetups(structured: unknown): CameraSetupT[] {
+  return arr(obj(structured).setups).flatMap((raw) => {
+    const u = obj(raw);
+    const parsed = CameraSetup.safeParse({
+      tMs: num(u.t_ms) ?? 0, mount: str(u.mount), move: str(u.move), height: str(u.height), distM: num(u.dist_m), tiltDeg: num(u.tilt_deg),
+    });
+    return parsed.success ? [parsed.data] : [];
+  });
+}
+
+export function toFindMatches(structured: unknown): FindMatchT[] {
+  const s = obj(structured);
+  return [...arr(s.matches), ...arr(s.formats)].flatMap((raw) => {
+    const m = obj(raw);
+    const parsed = FindMatch.safeParse({
+      formatId: str(m.format_id), title: str(m.title), idea: str(m.idea), videos: num(m.videos), exampleUrl: str(obj(m.example).url),
+    });
+    return parsed.success ? [parsed.data] : [];
+  });
+}
+
+export function toOpenSpots(structured: unknown): OpenSpotT[] {
+  return arr(obj(structured).spots).flatMap((raw) => {
+    const sp = obj(raw);
+    const parsed = OpenSpot.safeParse({ label: str(sp.label), what: str(sp.how) ?? "", how: "" });
+    return parsed.success ? [parsed.data] : [];
+  });
+}
+
+/** How a hit moves beat by beat: measured hook facts, the cues most of its copies keep, and what is free to change. */
+export async function readRecipeEdit(url: string): Promise<RecipeEditT> {
+  return toRecipeEdit((await call("shorti_recipe", { kind: "edit", url })).structured);
+}
+
+/** Where the phone stood in a hit, per setup. */
+export async function readCameraSetups(url: string): Promise<CameraSetupT[]> {
+  return toCameraSetups((await call("shorti_format", { part: "scene", url })).structured);
+}
+
+/** Formats that match words or a product line (e.g. a seller's product for a deal). */
+export async function readFind(query: string, limit = 5): Promise<FindMatchT[]> {
+  return toFindMatches((await call("shorti_find", { query, limit })).structured);
+}
+
+/** Open spots across formats: variations nobody has taken yet. */
+export async function readOpenSpots(limit = 6): Promise<OpenSpotT[]> {
+  return toOpenSpots((await call("shorti_arena", { view: "spots", limit })).structured);
 }

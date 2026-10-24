@@ -44,8 +44,9 @@ the gate output. Hours count from the start (H0). Lane A = loop and Shorti, Lane
 
 - [ ] **T13 · A** `/ghost/[id]`: reels grid, `QueueWeek` (7 slots), Approve per item via `/api/queue`.
   Done: approving a slot persists; nothing calls a posting API.
-- [ ] **T14 · A** Keyless `shorti_check` hands off to a Shorti page (verified). Show that hand-off link on a done
-  render, labelled; no inline fixes promised.
+- [x] **T14 · A** Dropped as a link-out: `shorti_check` needs a Shorti sign-in, and the demo must never show one.
+  Instead every keyless read is wired (`recipeEdit`, `cameraSetups`, `findFormats`, `openSpots`) and the hit's beat
+  moves time the brief.
 - [ ] **T15 · B** `DealCard`: product photo → `fitProduct` → queued short, money shown with `demo` tag.
   Done: one deal visible in the queue.
 

@@ -1,0 +1,188 @@
+{
+  "recordedAt": "2026-10-24T04:01:01.483Z",
+  "recipes": {
+    "https://www.instagram.com/reel/DelxnyBTeSp/": {
+      "videoId": "vid_instagram_DelxnyBTeSp",
+      "lengthMs": 10767,
+      "bpm": 90.9,
+      "hookFacts": [
+        "The scene changes at 0.4 s",
+        "A face shows from the start",
+        "Music more than speech",
+        "They start bare-faced or unstyled."
+      ],
+      "cues": [
+        {
+          "cue": "Step the percent up on beats",
+          "do": "Cut on the music's beats and raise the number with each cut, landing 100% on the beat drop.",
+          "share": "More than half do this"
+        },
+        {
+          "cue": "Cut to a new outfit at 100%",
+          "do": "The moment the counter hits 100%, cut straight to you in a different outfit wearing the finished look.",
+          "share": "More than half do this"
+        },
+        {
+          "cue": "Pin the percent in one spot",
+          "do": "Put the completion percentage at chest level or above your head and keep it in that exact spot through every makeup step.",
+          "share": "More than half do this"
+        }
+      ],
+      "makeItYours": [
+        "Going solo or racing a partner's getting-ready speed",
+        "The props that hide the face at the start",
+        "The final outfit and makeup style",
+        "A bare number or a filling progress bar"
+      ],
+      "free": [
+        "You can vary the where it was shot"
+      ]
+    },
+    "https://www.tiktok.com/@haircarewitharii/video/7698354136579951905": {
+      "videoId": "vid_tiktok_7698354136579951905",
+      "lengthMs": 8442,
+      "bpm": 85.7,
+      "hookFacts": [
+        "Music more than speech",
+        "Open with an unstyled or wet back view of hair."
+      ],
+      "cues": [
+        {
+          "cue": "Show the hair being set midway",
+          "do": "Between the starting state and the final styled reveal, show a clip of the hair being set.",
+          "share": "More than half do this"
+        },
+        {
+          "cue": "Hair shake right after the reveal",
+          "do": "Shake out your finished hair right after the final reveal cut so it moves on screen.",
+          "share": "Most do this"
+        },
+        {
+          "cue": "Stage changes from the same spot",
+          "do": "Fix the camera in place and stay in the same spot as you jump cut from one styling stage to the next.",
+          "share": "Nearly all do this"
+        },
+        {
+          "cue": "Fixed stage name captions",
+          "do": "Place a text label in the same spot on screen at each cut to name the current styling stage.",
+          "share": "Nearly all do this"
+        },
+        {
+          "cue": "Turn around to show the back hair",
+          "do": "Turn your back to the camera and center the back of your head so your hair from crown to ends fills the frame.",
+          "share": "Most do this"
+        },
+        {
+          "cue": "Cut stages on rank callouts",
+          "do": "Use a rank callout audio track and cut to the next styling stage right when each callout sounds.",
+          "share": "More than half do this"
+        }
+      ],
+      "makeItYours": [
+        "Your hair texture and styling method, from air-dried waves to straightened strands",
+        "The top color and room backdrop chosen to contrast with your hair shade",
+        "The wording and font style of the on-screen stage labels"
+      ],
+      "free": [
+        "Make the first cut anywhere between 2.2 s and 4.1 s",
+        "You can change whether a face shows in the first shot",
+        "You can vary how long a person is on screen",
+        "You can vary the spacing of the cuts",
+        "You can vary the length",
+        "You can vary the face on camera",
+        "You can vary the how it opens",
+        "You can vary the where it was shot"
+      ]
+    },
+    "https://www.tiktok.com/@nataliireynoldss/video/7697448995152596255": {
+      "videoId": "vid_tiktok_7697448995152596255",
+      "lengthMs": 17233,
+      "hookFacts": [],
+      "cues": [
+        {
+          "cue": "Unstyled Opening Look",
+          "do": "Start the video in bare skin, skincare prep, or sleepwear so the unstyled state is clear right away.",
+          "share": "Nearly all do this"
+        },
+        {
+          "cue": "Beat Hand Moves Before Cut",
+          "do": "Move your hands to the music beat inside an upper body frame before the transformation cut.",
+          "share": "Nearly all do this"
+        },
+        {
+          "cue": "Direct Gaze Lyric Mouthing",
+          "do": "Look straight into the camera lens while mouthing the song lyrics before the transformation cut.",
+          "share": "Nearly all do this"
+        },
+        {
+          "cue": "Lock Face Spot Across Cut",
+          "do": "Keep your eyes and face in the exact same spot in the frame before and after the cut so the two shots match.",
+          "share": "Nearly all do this"
+        },
+        {
+          "cue": "Hands Open Reveal Cut",
+          "do": "Bring both hands together in front of the lens and fling them open on the beat to cut into the finished look.",
+          "share": "Most do this"
+        },
+        {
+          "cue": "Hand Beside Face End Pose",
+          "do": "After the transformation cut, rest a hand beside your cheek or temple and tilt your head for a final pose.",
+          "share": "More than half do this"
+        }
+      ],
+      "makeItYours": [
+        "The finished makeup style and outfit theme",
+        "The unstyled opening props such as skincare pads, hair rollers, or sleepwear",
+        "The filming location from a bedroom to an outdoor landmark",
+        "The closing move after the reveal such as stepping back or glancing over the shoulder"
+      ],
+      "free": []
+    },
+    "https://www.tiktok.com/@carlhoos_/video/7695589779441863949": {
+      "videoId": "vid_tiktok_7695589779441863949",
+      "lengthMs": 15023,
+      "hookFacts": [],
+      "cues": [
+        {
+          "cue": "Open on walking lower body",
+          "do": "Start with the camera aimed low at the walking subject's lower body while keeping their face out of the frame.",
+          "share": "Nearly all do this"
+        },
+        {
+          "cue": "Tilt up on the beat change",
+          "do": "Tilt the camera upward from the lower body to the face on the music beat change to reveal the full costume and makeup.",
+          "share": "Nearly all do this"
+        },
+        {
+          "cue": "Hand pose after face reveal",
+          "do": "After the face reveal, look right at the camera and raise your hands to pose in character to the music.",
+          "share": "Most do this"
+        },
+        {
+          "cue": "Walk backward ahead of them",
+          "do": "Move backward in front of the walking subject at the same pace as they walk forward toward the camera.",
+          "share": "Nearly all do this"
+        },
+        {
+          "cue": "Front light on a night street",
+          "do": "Shine a direct camera light on the subject on a dark night street so the costume stands out from the dark background.",
+          "share": "More than half do this"
+        }
+      ],
+      "makeItYours": [
+        "The character or costume theme, from fairytale outfits to movie and horror makeup",
+        "Walking solo or marching side by side as a duo or trio",
+        "Hand props such as fans, canes, or costume accessories"
+      ],
+      "free": []
+    },
+    "https://www.tiktok.com/@bizinhatsuyoi_/video/7694617702882725138": {
+      "videoId": "vid_tiktok_7694617702882725138",
+      "lengthMs": 15083,
+      "hookFacts": [],
+      "cues": [],
+      "makeItYours": [],
+      "free": []
+    }
+  }
+}

@@ -85,6 +85,7 @@ test("fixtures hold only reduced public fields and stay small", () => {
     "line", "open", "label", "what", "how",
     "id", "name", "characterId", "portraitUrl", "voiceId", "bio", "niche", "market", "languages",
     "briefId", "provider", "status", "videoUrl", "startedAt", "finishedAt", "jobs", "characters",
+    "recipes", "lengthMs", "bpm", "hookFacts", "cues", "cue", "share", "makeItYours", "free",
   ]);
   const fixtures = files.filter((f) => f.startsWith("fixtures/") && f.endsWith(".json"));
   for (const f of fixtures) {
@@ -92,7 +93,7 @@ test("fixtures hold only reduced public fields and stay small", () => {
     const walk = (v, path) => {
       if (Array.isArray(v)) return v.forEach((x) => walk(x, path));
       if (v && typeof v === "object") for (const [k, x] of Object.entries(v)) {
-        const isId = path.endsWith("readings") || path.endsWith("formats") && !/^(recordedAt)$/.test(k);
+        const isId = path.endsWith("readings") || path.endsWith("recipes") || path.endsWith("formats") && !/^(recordedAt)$/.test(k);
         assert.ok(isId || allowed.has(k), `${f}: field "${k}" is not on the fixture allowlist`);
         walk(x, `${path}.${k}`);
       }

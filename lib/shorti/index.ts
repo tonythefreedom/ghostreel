@@ -4,8 +4,9 @@ import "server-only";
 import beauty from "@/fixtures/shorti/trending-beauty.json";
 import fashion from "@/fixtures/shorti/trending-fashion.json";
 import recordedFormats from "@/fixtures/shorti/formats.json";
-import { enrich, readFormatPlan, readTrending, readVideo } from "./read.ts";
-import { FormatPlan, TrendCard, VideoReading, type Sourced } from "../types.ts";
+import recordedRecipes from "@/fixtures/shorti/recipes.json";
+import { enrich, readCameraSetups, readFind, readFormatPlan, readOpenSpots, readRecipeEdit, readTrending, readVideo } from "./read.ts";
+import { FormatPlan, RecipeEdit, TrendCard, VideoReading, type CameraSetup, type FindMatch, type OpenSpot, type Sourced } from "../types.ts";
 import { z } from "zod";
 
 export const FIELDS = ["beauty", "fashion"] as const;
@@ -21,6 +22,7 @@ const fixtures: Record<Field, z.infer<typeof Recorded>> = {
   fashion: Recorded.parse(fashion),
 };
 const fixtureFormats = z.record(z.string(), FormatPlan).parse(recordedFormats.formats);
+const fixtureRecipes = z.record(z.string(), RecipeEdit).parse(recordedRecipes.recipes); // by video url
 
 const offline = () => process.env.GHOSTREEL_OFFLINE === "1";
 const TTL_MS = 10 * 60_000;
@@ -78,4 +80,32 @@ export async function formatPlan(formatId: string): Promise<z.infer<typeof Forma
   } catch {
     return recorded ?? null;
   }
+}
+
+// Every reader below is a keyless Shorti read: no sign-in ever reaches a viewer. A miss returns null or [] and the
+// caller carries on without it.
+
+export async function recipeEdit(url: string): Promise<z.infer<typeof RecipeEdit> | null> {
+  const recorded = fixtureRecipes[url] ?? null;
+  if (offline()) return recorded;
+  try {
+    return await cached(`edit:${url}`, () => readRecipeEdit(url));
+  } catch {
+    return recorded;
+  }
+}
+
+export async function cameraSetups(url: string): Promise<CameraSetup[]> {
+  if (offline()) return [];
+  return cached(`scene:${url}`, () => readCameraSetups(url)).catch(() => []);
+}
+
+export async function findFormats(query: string, limit = 5): Promise<FindMatch[]> {
+  if (offline() || !query.trim()) return [];
+  return cached(`find:${limit}:${query.trim().toLowerCase()}`, () => readFind(query.trim(), limit)).catch(() => []);
+}
+
+export async function openSpots(limit = 6): Promise<OpenSpot[]> {
+  if (offline()) return [];
+  return cached(`spots:${limit}`, () => readOpenSpots(limit)).catch(() => []);
 }

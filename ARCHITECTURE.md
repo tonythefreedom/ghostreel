@@ -43,10 +43,11 @@ their *insides*.
 | `shorti_what_to_shoot` `lens: radar`, `field` | the swipe deck: rising shorts abroad, with format | yes |
 | `shorti_video` `url` | poster, hook, turn, beats, checklist, needs, props: the brief's raw material | yes |
 | `shorti_format` `part: flow` | the format's one-line move and its open spots (the "twist") | yes |
-| `shorti_format` `part: scene` `url` | camera setups of a hit | yes (not used yet) |
-| `shorti_arena` `view: spots` | open spots across formats | yes (not used yet) |
-| `shorti_check` | a take or post check | **no**: hands off to a Shorti page; show the link, promise nothing inline |
-| `shorti_recipe` `kind: brief` / `remake` | product brief, character remake | **no** (sign-in) / model name unresolved |
+| `shorti_recipe` `kind: edit` `url` | the hit's beat moves: measured hook facts, cues most copies keep, what is yours or free (`recipeEdit`, into the brief prompt as `<moves>`) | yes |
+| `shorti_format` `part: scene` `url` | camera setups of a hit (`cameraSetups`) | yes |
+| `shorti_find` `query` | formats that match words or a product line (`findFormats`, for deals) | yes |
+| `shorti_arena` `view: spots` | open spots across formats (`openSpots`) | yes |
+| `shorti_recipe` `kind: brief` / `cut` / `my_edit`, `shorti_check`, `shorti_share`, boards, arena join, `my_*` | writes, or reads of a signed-in person's own data | **never called.** Writes need a person signed in and approving at that moment (an API key is read-only), so an unattended server cannot, and a demo must not show a Shorti sign-in. `KEYLESS_READS` in `lib/shorti/read.ts` refuses them before a request leaves. Spoken lines come from GhostReel's own brief (Claude), timed to `<moves>`. |
 
 ## Folders
 

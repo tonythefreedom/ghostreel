@@ -2,6 +2,21 @@
 
 Newest first. Each entry: what is true now, what broke, what is next. Keep it short; long output goes in files.
 
+## 2026-10-24 · no Shorti sign-in, every keyless read wired
+
+Ted: "토니가 대사 MCP 툴 등을 데모에 사용하려고하니까 로그인하라고 뜬다고하네.. 이거 해결해줘.." · "허용해도 되는 툴들 다 해주면
+좋을거같아" · "데모로 구현해야하니까 쇼티로그인이 뜨면 안되지 당연히"
+
+- Why it asked: `shorti_recipe kind: brief` (and `cut`, `my_edit`, `check`) are writes. Shorti requires a person
+  signed in and approving at that moment; a personal API key is read-only, so no server-side key can do it either.
+- Fix: GhostReel calls only keyless reads, enforced by `KEYLESS_READS` (writes throw before leaving; tested). New
+  readers in `lib/shorti/`: `recipeEdit` (beat moves: hook facts, cues, what is yours/free), `cameraSetups`,
+  `findFormats`, `openSpots`; recorded recipes for offline. Spoken lines stay GhostReel's own (Claude), now timed to
+  the hit's moves via a `<moves>` block. Verified live: 3 cues + bpm 90.9, 2 camera setups, find and spots return.
+- Tony's two asks: (1) sign-in for `brief`: not possible unattended, by Shorti's design; use `/api/brief` (lines)
+  or the new `recipeEdit` cues for `LinePicker`. (2) a recipe-edit reader in `lib/shorti/`: done (`recipeEdit`);
+  Lane B may call it from server code.
+
 ## 2026-10-24 · T23 (B) — pick each beat's line on the storyboard
 
 - Shorti returns no spoken lines (its public tools give the format's hook, beats and open spots), and creators' words

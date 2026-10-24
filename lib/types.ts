@@ -90,6 +90,39 @@ export type CreatorInput = z.infer<typeof CreatorInput>;
 export const Creator = CreatorInput.extend({ id: z.string().uuid(), createdAt: z.string() });
 export type Creator = z.infer<typeof Creator>;
 
+// How a hit moves, beat by beat (shorti_recipe kind "edit"): what its hits share and what is free to change.
+export const RecipeEdit = z.object({
+  videoId: z.string(),
+  lengthMs: z.number().optional(),
+  bpm: z.number().optional(),
+  hookFacts: z.array(z.string()).default([]), // measured facts about the opening, e.g. "The scene changes at 0.4 s"
+  cues: z.array(z.object({ cue: z.string(), do: z.string(), share: z.string().default("") })).default([]),
+  makeItYours: z.array(z.string()).default([]), // what the take may change
+  free: z.array(z.string()).default([]), // parts its hits vary freely
+});
+export type RecipeEdit = z.infer<typeof RecipeEdit>;
+
+// Where the phone stood in a hit (shorti_format part "scene"): one row per camera setup.
+export const CameraSetup = z.object({
+  tMs: z.number(),
+  mount: z.string().default(""),
+  move: z.string().default(""),
+  height: z.string().default(""),
+  distM: z.number().optional(),
+  tiltDeg: z.number().optional(),
+});
+export type CameraSetup = z.infer<typeof CameraSetup>;
+
+// A format found by words or a product (shorti_find).
+export const FindMatch = z.object({
+  formatId: z.string(),
+  title: z.string(),
+  idea: z.string().default(""),
+  videos: z.number().optional(),
+  exampleUrl: z.string().url().optional(),
+});
+export type FindMatch = z.infer<typeof FindMatch>;
+
 // ── The person's taste ───────────────────────────────────────────────────────
 export const KeepPart = z.enum(["hook", "beat", "look", "sound"]);
 export const TastePick = z.object({

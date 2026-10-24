@@ -1,7 +1,7 @@
 {
   "field": "beauty",
-  "asOf": "2026-10-23T22:16:18Z",
-  "recordedAt": "2026-10-24T01:58:03.630Z",
+  "asOf": "2026-10-24T00:28:58Z",
+  "recordedAt": "2026-10-24T04:00:57.169Z",
   "cards": [
     {
       "videoId": "vid_instagram_DelxnyBTeSp",
@@ -31,7 +31,7 @@
       "formatKind": "sound",
       "views": 4424849,
       "viewsAsOf": "2026-10-24",
-      "posterUrl": "https://shorti.ai/public/media?video=vid_instagram_DewznmhMPWW&r=poster_720.jpg&v=0726a34481622439",
+      "posterUrl": "https://shorti.ai/public/media?video=vid_instagram_DewznmhMPWW&r=poster_720.jpg&v=56900e069cac3825",
       "hook": "Tracing a skull eye socket over a spoon held to the eye",
       "whatHappens": "Using everyday items like a spoon, tinfoil, and a fork, she completes six Halloween makeup looks from a skull to a clown.",
       "lengthS": 22.7,
@@ -53,20 +53,20 @@
       "page": "https://shorti.ai/en/v/instagram_DelJA2OMPSD"
     },
     {
-      "videoId": "vid_tiktok_7697448995152596255",
-      "url": "https://www.tiktok.com/@nataliireynoldss/video/7697448995152596255",
+      "videoId": "vid_tiktok_7698354136579951905",
+      "url": "https://www.tiktok.com/@haircarewitharii/video/7698354136579951905",
       "platform": "tiktok",
-      "by": "@nataliireynoldss",
-      "formatId": "fam_cur-6cedd3c94ec9",
-      "formatTitle": "A hand gesture at the camera cuts to a full makeup look",
+      "by": "@haircarewitharii",
+      "formatId": "fam_cur-80ca955b9370",
+      "formatTitle": "Hair condition changes shown from behind with on-screen captions",
       "formatKind": "format",
-      "views": 2400000,
-      "viewsAsOf": "2026-10-24",
-      "posterUrl": "https://shorti.ai/public/media?video=vid_tiktok_7697448995152596255&r=poster_720.jpg&v=6be66e85f3086923",
-      "hook": "brushing teal paint down her face",
-      "whatHappens": "She paints a teal stripe down the center of her face, then transforms into an otherworldly alien creature on the beat drop.",
-      "lengthS": 17.2,
-      "page": "https://shorti.ai/en/v/tiktok_7697448995152596255"
+      "views": 8100000,
+      "viewsAsOf": "2026-10-23",
+      "posterUrl": "https://shorti.ai/public/media?video=vid_tiktok_7698354136579951905&r=poster_720.jpg&v=c7e80b8a1af7d95c",
+      "hook": "She shows her wet hair from behind.",
+      "whatHappens": "From soaking wet to completely dry, a woman shows the drying stages of her long hair from behind.",
+      "lengthS": 8.4,
+      "page": "https://shorti.ai/en/v/tiktok_7698354136579951905"
     },
     {
       "videoId": "vid_instagram_DevulLUs4LU",
@@ -85,20 +85,20 @@
       "page": "https://shorti.ai/en/v/instagram_DevulLUs4LU"
     },
     {
-      "videoId": "vid_tiktok_7698354136579951905",
-      "url": "https://www.tiktok.com/@haircarewitharii/video/7698354136579951905",
+      "videoId": "vid_tiktok_7697448995152596255",
+      "url": "https://www.tiktok.com/@nataliireynoldss/video/7697448995152596255",
       "platform": "tiktok",
-      "by": "@haircarewitharii",
-      "formatId": "fam_cur-80ca955b9370",
-      "formatTitle": "Hair condition changes shown from behind with on-screen captions",
+      "by": "@nataliireynoldss",
+      "formatId": "fam_cur-6cedd3c94ec9",
+      "formatTitle": "A hand gesture at the camera cuts to a full makeup look",
       "formatKind": "format",
-      "views": 8100000,
-      "viewsAsOf": "2026-10-23",
-      "posterUrl": "https://shorti.ai/public/media?video=vid_tiktok_7698354136579951905&r=poster_720.jpg&v=c7e80b8a1af7d95c",
-      "hook": "She shows her wet hair from behind.",
-      "whatHappens": "From soaking wet to completely dry, a woman shows the drying stages of her long hair from behind.",
-      "lengthS": 8.4,
-      "page": "https://shorti.ai/en/v/tiktok_7698354136579951905"
+      "views": 2400000,
+      "viewsAsOf": "2026-10-24",
+      "posterUrl": "https://shorti.ai/public/media?video=vid_tiktok_7697448995152596255&r=poster_720.jpg&v=6be66e85f3086923",
+      "hook": "brushing teal paint down her face",
+      "whatHappens": "She paints a teal stripe down the center of her face, then transforms into an otherworldly alien creature on the beat drop.",
+      "lengthS": 17.2,
+      "page": "https://shorti.ai/en/v/tiktok_7697448995152596255"
     },
     {
       "videoId": "tiktok_7693273932794793247",
@@ -279,32 +279,42 @@
         "hair mist"
       ]
     },
-    "vid_tiktok_7697448995152596255": {
-      "videoId": "vid_tiktok_7697448995152596255",
-      "hook": "brushing teal paint down her face",
-      "turn": "transforming into an alien look",
-      "whatHappens": "She paints a teal stripe down the center of her face, then transforms into an otherworldly alien creature on the beat drop.",
-      "beats": [],
+    "vid_tiktok_7698354136579951905": {
+      "videoId": "vid_tiktok_7698354136579951905",
+      "hook": "She shows her wet hair from behind.",
+      "turn": "She shows her fully dried and voluminous hair.",
+      "whatHappens": "From soaking wet to completely dry, a woman shows the drying stages of her long hair from behind.",
+      "beats": [
+        {
+          "at": "0:00–0:02",
+          "do": "She runs her hands down her wet hair from behind."
+        },
+        {
+          "at": "0:01–0:04",
+          "do": "She combs through her half-dried hair with both hands."
+        },
+        {
+          "at": "0:03–0:06",
+          "do": "She runs her fingers down her mostly dried hair."
+        },
+        {
+          "at": "0:05–0:08",
+          "do": "She sweeps through her fully dried hair to tidy it up."
+        }
+      ],
       "checklist": [
-        "Lock the phone on a tripod with normal room light and stand dead-centre in a plain hoodie.",
-        "Lip-sync to the track while painting one continuous mint stripe from forehead to neck.",
-        "Dip your head down with eyes closed right before the chorus lyric begins.",
-        "Start in the exact same spot with your head dipped and lift it on the chorus beat to match the cut."
+        "Sit with your back to the camera in a plain dark shirt in front of a bright wall.",
+        "Fix the phone at shoulder height so your head and upper back fill the center of the frame.",
+        "Film four clips from soaking wet to fully dry while repeating the exact same two-handed hair shake."
       ],
       "needs": [
         "Solo",
         "At home",
         "Phone on a stand",
-        "Special props",
+        "No props",
         "Cut editing"
       ],
-      "props": [
-        "flat makeup brush",
-        "mint face paint",
-        "pointed prosthetic ears",
-        "forehead prosthetic ridges",
-        "braided shell headpiece"
-      ]
+      "props": []
     },
     "vid_instagram_DewznmhMPWW": {
       "videoId": "vid_instagram_DewznmhMPWW",
@@ -355,70 +365,6 @@
         "iced drink cup",
         "lavalier microphone"
       ]
-    },
-    "vid_instagram_DevulLUs4LU": {
-      "videoId": "vid_instagram_DevulLUs4LU",
-      "hook": "Sitting deadpan in a nasal strip before getting a haircut and shave",
-      "turn": "Slap transition reveals comical makeup first, then embroidered wedding outfits",
-      "whatHappens": "Getting ready for Mr Faisu's wedding with a haircut and shave, he fakes out with heavy makeup before a second slap reveals embroidered formalwear.",
-      "beats": [],
-      "checklist": [
-        "Shoot a deadpan front before shot in a casual tee and nasal strip.",
-        "Record quick multi-angle clips of the haircut and shave in the closet.",
-        "Match a cheek slap to a head turn revealing comical makeup first.",
-        "Use a second cheek slap to reveal the formal outfit, then pan to the mirror for a two-shot."
-      ],
-      "needs": [
-        "Two people",
-        "At home",
-        "Someone films you",
-        "Special props",
-        "Cut editing"
-      ],
-      "props": [
-        "nasal strip",
-        "barber cape",
-        "scissors",
-        "shaving foam",
-        "straight razor"
-      ]
-    },
-    "vid_tiktok_7698354136579951905": {
-      "videoId": "vid_tiktok_7698354136579951905",
-      "hook": "She shows her wet hair from behind.",
-      "turn": "She shows her fully dried and voluminous hair.",
-      "whatHappens": "From soaking wet to completely dry, a woman shows the drying stages of her long hair from behind.",
-      "beats": [
-        {
-          "at": "0:00–0:02",
-          "do": "She runs her hands down her wet hair from behind."
-        },
-        {
-          "at": "0:01–0:04",
-          "do": "She combs through her half-dried hair with both hands."
-        },
-        {
-          "at": "0:03–0:06",
-          "do": "She runs her fingers down her mostly dried hair."
-        },
-        {
-          "at": "0:05–0:08",
-          "do": "She sweeps through her fully dried hair to tidy it up."
-        }
-      ],
-      "checklist": [
-        "Sit with your back to the camera in a plain dark shirt in front of a bright wall.",
-        "Fix the phone at shoulder height so your head and upper back fill the center of the frame.",
-        "Film four clips from soaking wet to fully dry while repeating the exact same two-handed hair shake."
-      ],
-      "needs": [
-        "Solo",
-        "At home",
-        "Phone on a stand",
-        "No props",
-        "Cut editing"
-      ],
-      "props": []
     },
     "instagram_DeH0691PXJZ": {
       "videoId": "instagram_DeH0691PXJZ",
@@ -523,6 +469,60 @@
         "gel sheet mask"
       ]
     },
+    "vid_instagram_DevulLUs4LU": {
+      "videoId": "vid_instagram_DevulLUs4LU",
+      "hook": "Sitting deadpan in a nasal strip before getting a haircut and shave",
+      "turn": "Slap transition reveals comical makeup first, then embroidered wedding outfits",
+      "whatHappens": "Getting ready for Mr Faisu's wedding with a haircut and shave, he fakes out with heavy makeup before a second slap reveals embroidered formalwear.",
+      "beats": [],
+      "checklist": [
+        "Shoot a deadpan front before shot in a casual tee and nasal strip.",
+        "Record quick multi-angle clips of the haircut and shave in the closet.",
+        "Match a cheek slap to a head turn revealing comical makeup first.",
+        "Use a second cheek slap to reveal the formal outfit, then pan to the mirror for a two-shot."
+      ],
+      "needs": [
+        "Two people",
+        "At home",
+        "Someone films you",
+        "Special props",
+        "Cut editing"
+      ],
+      "props": [
+        "nasal strip",
+        "barber cape",
+        "scissors",
+        "shaving foam",
+        "straight razor"
+      ]
+    },
+    "vid_tiktok_7697448995152596255": {
+      "videoId": "vid_tiktok_7697448995152596255",
+      "hook": "brushing teal paint down her face",
+      "turn": "transforming into an alien look",
+      "whatHappens": "She paints a teal stripe down the center of her face, then transforms into an otherworldly alien creature on the beat drop.",
+      "beats": [],
+      "checklist": [
+        "Lock the phone on a tripod with normal room light and stand dead-centre in a plain hoodie.",
+        "Lip-sync to the track while painting one continuous mint stripe from forehead to neck.",
+        "Dip your head down with eyes closed right before the chorus lyric begins.",
+        "Start in the exact same spot with your head dipped and lift it on the chorus beat to match the cut."
+      ],
+      "needs": [
+        "Solo",
+        "At home",
+        "Phone on a stand",
+        "Special props",
+        "Cut editing"
+      ],
+      "props": [
+        "flat makeup brush",
+        "mint face paint",
+        "pointed prosthetic ears",
+        "forehead prosthetic ridges",
+        "braided shell headpiece"
+      ]
+    },
     "tiktok_7692266572118854919": {
       "videoId": "tiktok_7692266572118854919",
       "hook": "",
@@ -549,58 +549,6 @@
         "powder puff",
         "tissue box",
         "eyelash curler"
-      ]
-    },
-    "tiktok_7693410367648566580": {
-      "videoId": "tiktok_7693410367648566580",
-      "hook": "She introduces top Xiaohongshu makeup products.",
-      "turn": "She reveals the finished look and recommended products.",
-      "whatHappens": "A creator gets a makeup look done by a friend and introduces the five beauty products used to achieve it.",
-      "beats": [
-        {
-          "at": "0:00–0:12",
-          "do": "She gets her makeup done by a friend and holds up recommended products."
-        },
-        {
-          "at": "0:12–0:22",
-          "do": "She compares the before and after effects of the highlighter applied under her eyes."
-        },
-        {
-          "at": "0:21–0:31",
-          "do": "She holds up a hit-pan contour palette and explains."
-        },
-        {
-          "at": "0:30–0:44",
-          "do": "She gets highlighter applied and shows a split-tip eyebrow pencil."
-        },
-        {
-          "at": "0:43–1:01",
-          "do": "She fills in her eyebrows and applies a juicy nude-toned lip color."
-        },
-        {
-          "at": "1:00–1:14",
-          "do": "She shows the lipstick details and shows off the finished makeup look."
-        }
-      ],
-      "checklist": [
-        "Put the main recommendation topic at the top of the frame in the first second.",
-        "Label both sides of the face after application to show an instant before-and-after.",
-        "Place an open palm behind fine tips to help the camera maintain sharp autofocus.",
-        "Move in for macro close-ups on lips and highlighter to accentuate texture and glow."
-      ],
-      "needs": [
-        "Two people",
-        "At home",
-        "Mixed set-ups",
-        "Household props",
-        "Cut editing"
-      ],
-      "props": [
-        "highlighter",
-        "contour palette",
-        "eyebrow pencil",
-        "lipstick",
-        "makeup puff"
       ]
     },
     "tiktok_7693260333217058079": {
@@ -654,6 +602,58 @@
         "makeup brushes",
         "compacts",
         "powder puff"
+      ]
+    },
+    "tiktok_7693410367648566580": {
+      "videoId": "tiktok_7693410367648566580",
+      "hook": "She introduces top Xiaohongshu makeup products.",
+      "turn": "She reveals the finished look and recommended products.",
+      "whatHappens": "A creator gets a makeup look done by a friend and introduces the five beauty products used to achieve it.",
+      "beats": [
+        {
+          "at": "0:00–0:12",
+          "do": "She gets her makeup done by a friend and holds up recommended products."
+        },
+        {
+          "at": "0:12–0:22",
+          "do": "She compares the before and after effects of the highlighter applied under her eyes."
+        },
+        {
+          "at": "0:21–0:31",
+          "do": "She holds up a hit-pan contour palette and explains."
+        },
+        {
+          "at": "0:30–0:44",
+          "do": "She gets highlighter applied and shows a split-tip eyebrow pencil."
+        },
+        {
+          "at": "0:43–1:01",
+          "do": "She fills in her eyebrows and applies a juicy nude-toned lip color."
+        },
+        {
+          "at": "1:00–1:14",
+          "do": "She shows the lipstick details and shows off the finished makeup look."
+        }
+      ],
+      "checklist": [
+        "Put the main recommendation topic at the top of the frame in the first second.",
+        "Label both sides of the face after application to show an instant before-and-after.",
+        "Place an open palm behind fine tips to help the camera maintain sharp autofocus.",
+        "Move in for macro close-ups on lips and highlighter to accentuate texture and glow."
+      ],
+      "needs": [
+        "Two people",
+        "At home",
+        "Mixed set-ups",
+        "Household props",
+        "Cut editing"
+      ],
+      "props": [
+        "highlighter",
+        "contour palette",
+        "eyebrow pencil",
+        "lipstick",
+        "makeup puff"
       ]
     },
     "tiktok_7693480550589287732": {
